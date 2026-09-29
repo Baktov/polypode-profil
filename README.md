@@ -62,8 +62,11 @@ passer par le presse-papiers :
   dans la **discussion** et valider, la cabine d'essayage s'ouvre avec la tenue (à enregistrer
   ou appliquer ensuite chez le transmogrificateur).
 
-La chaîne capturée remplace le texte de l'éditeur ; le nom est proposé s'il est vide. Il reste à
-**Enregistrer**.
+Chaque capture ouvre un **nouveau profil** (le profil ouvert n'est jamais écrasé), nommé
+d'après la disposition, la configuration de talents ou l'ensemble personnalisé ; l'apparence
+actuelle est nommée « Apparence actuelle (date heure) ». Vous pouvez donc garder plusieurs
+tenues, dispositions ou configurations côte à côte. Talents et apparence actuelle sont rangés
+sous le personnage joué. Il reste à **Enregistrer** (le nom peut être modifié avant).
 
 ### Réutiliser une chaîne
 

@@ -224,21 +224,22 @@ local function SelectAll()
 end
 
 -- Chaîne capturée en jeu : remplace le texte ; le nom proposé n'est pris que si le nom est vide.
-local function ApplyCapture(text, name)
-	textBox:SetText(text)
-	if Trim(nameBox:GetText()) == "" and name then
-		nameBox:SetText(name)
-		nameBox:SetCursorPosition(0)
-	end
-	UpdateEditorHeader()
-	Notify("Chaîne capturée : « Enregistrer » pour la garder.")
+-- Chaîne capturée en jeu : toujours un nouveau profil (jamais le profil ouvert, qui serait écrasé
+-- à l'enregistrement), du genre en cours, nommé name, rangé sous char (défaut : le personnage de
+-- l'éditeur) ; confirmation si l'éditeur a une modification non enregistrée.
+local function ApplyCapture(text, name, char)
+	local kind, target = editKind, char or editChar
+	ConfirmDiscard(function()
+		Load(nil, { name = name, kind = kind, text = text }, target)
+		Notify("Chaîne capturée : « Enregistrer » pour la garder.")
+	end)
 end
 
 local function Capture(button)
 	if editKind == "talents" then
 		local text, nameOrReason = ns.ExportTalents()
 		if text then
-			ApplyCapture(text, nameOrReason)
+			ApplyCapture(text, nameOrReason, P.GetCharKey()) -- talents du personnage joué
 		else
 			Notify(nameOrReason)
 		end
@@ -252,7 +253,8 @@ local function Capture(button)
 			root:CreateButton("Apparence actuelle", function()
 				ns.ExportCurrentAppearance(function(text, reason)
 					if text then
-						ApplyCapture(text, "Transmogrification — " .. CharName(P.GetCharKey()))
+						-- Tenue du personnage joué, datée : plusieurs captures restent distinctes.
+						ApplyCapture(text, "Apparence actuelle (" .. FormatDate(GetServerTime()) .. ")", P.GetCharKey())
 					else
 						Notify(reason)
 					end
@@ -265,7 +267,7 @@ local function Capture(button)
 					root:CreateButton(set.name, function()
 						local text, reason = ns.ExportCustomSet(set.id)
 						if text then
-							ApplyCapture(text, "Transmogrification — " .. set.name)
+							ApplyCapture(text, set.name)
 						else
 							Notify(reason)
 						end
@@ -486,7 +488,8 @@ local function BuildEditor()
 		"Relève la chaîne en jeu : une disposition du mode Édition (menu), les talents de la configuration "
 			.. "active (la fenêtre des talents doit avoir été ouverte une fois), ou une tenue (apparence actuelle "
 			.. "ou ensemble personnalisé : chaîne « /customset », à coller dans la discussion pour l'essayer). "
-			.. "Remplace le texte de l'éditeur.")
+			.. "Chaque capture ouvre un nouveau profil, nommé d'après la disposition, les talents ou l'ensemble "
+			.. "(« Apparence actuelle » datée) : le profil ouvert n'est jamais écrasé.")
 
 	kindButton = CreateButton(editor, "", 120, function(self)
 		ShowKindMenu(self)

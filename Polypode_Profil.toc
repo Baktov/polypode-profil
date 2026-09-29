@@ -2,7 +2,7 @@
 ## Title: Polypode Profil
 ## Notes: Profils pour Polypode : sauvegarde des chaînes d'export du mode Édition, des talents, de la transmogrification et des addons (EllesmereUI, ElvUI, Baganator, MySlots...).
 ## Author: Baktov
-## Version: 1.2.0
+## Version: 1.2.1
 ## Dependencies: Polypode
 ## SavedVariables: PolypodeProfilDB
 ## Category: Polypode
