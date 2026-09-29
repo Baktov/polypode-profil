@@ -264,6 +264,20 @@ local function Capture(button)
 	end
 end
 
+-- Changer de genre réinitialise l'éditeur : nouveau profil vide (nom et chaîne effacés) de ce
+-- genre, pour le même personnage ; le profil ouvert n'est pas modifié (confirmation si l'éditeur
+-- a une modification non enregistrée).
+local function ChangeKind(kind)
+	if kind == editKind then
+		return
+	end
+	local char = editChar
+	ConfirmDiscard(function()
+		editKind = kind
+		Load(nil, nil, char)
+	end)
+end
+
 local function ShowKindMenu(button)
 	if not (MenuUtil and MenuUtil.CreateContextMenu) then
 		return
@@ -274,7 +288,7 @@ local function ShowKindMenu(button)
 			root:CreateRadio(kind.label, function()
 				return editKind == kind.key
 			end, function()
-				SetKind(kind.key)
+				ChangeKind(kind.key)
 			end)
 		end
 	end)

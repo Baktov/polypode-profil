@@ -36,7 +36,9 @@ Le bouton **Profils** (barre de titre de la fenêtre Polypode) ou `/poly profil`
 - **À droite**, l'éditeur : nom, genre (bouton-menu), **personnage** (bouton-menu : les
   personnages de votre roster, connectés en tête ; par défaut le personnage joué) et la chaîne
   elle-même, dans une zone qui défile. Changer le personnage range le profil ailleurs dans la
-  liste.
+  liste. **Changer le genre réinitialise l'éditeur** : nom et chaîne sont effacés pour un
+  nouveau profil de ce genre (même personnage) ; le profil qui était ouvert n'est pas modifié
+  (confirmation demandée s'il avait des modifications non enregistrées).
 
 ### Enregistrer une chaîne
 
