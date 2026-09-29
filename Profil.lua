@@ -11,7 +11,8 @@ local P = Polypode -- dépendance obligatoire (## Dependencies: Polypode), charg
 -- les talents peuvent être capturés directement (API de Blizzard).
 --
 -- Sauvegarde (fichier de compte, commune à tous les personnages) :
---   PolypodeProfilDB.profiles[id] = { name, kind, text, author = clé du personnage, updated =
+--   PolypodeProfilDB.profiles[id] = { name, kind, text, char = clé du personnage auquel le profil
+--   est rangé (par défaut celui qui l'a créé ; la liste les regroupe par personnage), updated =
 --   version, removed = true (pierre tombale : suppression propagée aux autres clients) }.
 --   id = heure serveur + hasard, en hexadécimal ; version = heure serveur du dernier changement,
 --   strictement croissante (la plus récente l'emporte).
@@ -20,7 +21,7 @@ local P = Polypode -- dépendance obligatoire (## Dependencies: Polypode), charg
 --   PROFV:token:id=version,id=version,... — versions de tous les profils, à chaque rencontre
 --     (P.RegisterPeerCallback), fragmentée ;
 --   PROFREQ:token:id,id,... — demande des profils plus récents que les siens ;
---   PROF:token:id:N:version:fragments:genre:A|R:auteur:nom — en-tête d'un profil (nom en
+--   PROF:token:id:N:version:fragments:genre:A|R:personnage:nom — en-tête d'un profil (nom en
 --     dernier), suivi de PROF:token:id:+:version:n°:morceau pour chaque fragment du texte ;
 --     envoyé en réponse à PROFREQ et aux clients connectés à chaque changement. Le profil n'est
 --     appliqué qu'une fois tous les fragments reçus, et seulement s'il est plus récent.
@@ -120,8 +121,9 @@ local function NewID()
 	return id
 end
 
--- Crée (id nil) ou met à jour un profil ; renvoie son id, ou nil et la raison.
-function ns.Save(id, name, kind, text)
+-- Crée (id nil) ou met à jour un profil, rangé sous le personnage char (défaut : le personnage
+-- joué) ; renvoie son id, ou nil et la raison.
+function ns.Save(id, name, kind, text, char)
 	if not store then
 		return nil, "Données non chargées."
 	end
@@ -135,10 +137,11 @@ function ns.Save(id, name, kind, text)
 	local profile = id and store[id]
 	if not profile or profile.removed then
 		id = id or NewID()
-		profile = { author = P.GetCharKey() }
+		profile = {}
 		store[id] = profile
 	end
 	profile.removed = nil
+	profile.char = char or profile.char or P.GetCharKey()
 	profile.name, profile.kind, profile.text = name, ns.NormalizeKind(kind), text
 	profile.updated = NextVersion(profile.updated)
 	SendProfile(id)
@@ -253,7 +256,7 @@ function SendProfile(id, target)
 	local budget = maxLength - #string.format("PROF:%s:%s:+:%d:99999:", token, id, version)
 	local count = math.ceil(#text / budget)
 	local header = string.format("PROF:%s:%s:N:%d:%d:%s:%s:%s:", token, id, version, count,
-		profile.kind or ns.DEFAULT_KIND, profile.removed and "R" or "A", profile.author or "")
+		profile.kind or ns.DEFAULT_KIND, profile.removed and "R" or "A", profile.char or "")
 	-- Nom tronqué s'il ne tient pas, sans couper un caractère encodé (%XX).
 	local name = Encode(profile.name or ""):sub(1, maxLength - #header):gsub("%%%x?$", "")
 	P.WhisperOnline(header .. name, target)
@@ -339,7 +342,7 @@ local function Commit(id, received)
 			name = received.name,
 			kind = received.kind,
 			text = Decode(table.concat(received.parts)),
-			author = received.author ~= "" and received.author or nil,
+			char = received.char ~= "" and received.char or nil,
 			updated = received.version,
 		}
 	end
@@ -357,7 +360,7 @@ local function OnProfile(rest)
 		return
 	end
 	if flag == "N" then
-		local count, kind, state, author, name = strsplit(":", remainder or "", 5)
+		local count, kind, state, char, name = strsplit(":", remainder or "", 5)
 		count = tonumber(count)
 		local profile = store[id]
 		if not count or (profile and tonumber(profile.updated) or 0) >= version then
@@ -365,7 +368,7 @@ local function OnProfile(rest)
 			return -- déjà à jour
 		end
 		pending[id] = { version = version, count = count, got = 0, parts = {}, kind = kind,
-			removed = state == "R", author = author or "", name = Decode(name or "") }
+			removed = state == "R", char = char or "", name = Decode(name or "") }
 		if count == 0 then
 			Commit(id, pending[id])
 		end
@@ -403,6 +406,11 @@ events:SetScript("OnEvent", function(_, event, name)
 		PolypodeProfilDB = PolypodeProfilDB or {}
 		PolypodeProfilDB.profiles = PolypodeProfilDB.profiles or {}
 		store = PolypodeProfilDB.profiles
+		for _, profile in pairs(store) do
+			if profile.author then -- 1.0.0 : l'auteur devient le personnage du profil
+				profile.char, profile.author = profile.char or profile.author, nil
+			end
+		end
 		events:UnregisterEvent("ADDON_LOADED")
 	end
 end)

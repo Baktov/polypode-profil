@@ -1,13 +1,16 @@
--- Polypode Profil: UI — fenêtre « Profils » : liste par genre, éditeur, capture, copie
+-- Polypode Profil: UI — fenêtre « Profils » : liste par personnage, éditeur, capture, copie
 
 local _, ns = ...
 local P = Polypode
 
 -- Fenêtre PolypodeProfilFrame (bouton « Profils » de la fenêtre Polypode, /poly profil) :
---   * à gauche, les profils rangés par genre (Mode Édition, Talents, EllesmereUI...) ; clic gauche
---     = ouvrir dans l'éditeur, clic droit = menu (dupliquer, supprimer) ; détail au survol ;
---   * à droite, l'éditeur : nom, genre (menu), chaîne d'export (zone défilante, Ctrl+V pour
---     coller) ; « Capturer » relève la chaîne en jeu (mode Édition, talents) ; « Tout
+--   * à gauche, les profils rangés sous leur personnage, affiché comme dans « Personnages
+--     disponibles » de Polypode (couleur de classe, classe, niveau, « (vous) », connectés en tête,
+--     déconnectés estompés) ; en-tête de personnage : clic gauche = replier / déplier, clic droit
+--     = nouveau profil pour lui ; profil (genre puis nom) : clic gauche = ouvrir dans l'éditeur,
+--     clic droit = menu (dupliquer, supprimer) ; détail au survol ;
+--   * à droite, l'éditeur : nom, genre (menu), personnage (menu du roster), chaîne d'export
+--     (zone défilante, Ctrl+V pour coller) ; « Capturer » relève la chaîne en jeu (mode Édition, talents) ; « Tout
 --     sélectionner » prépare la copie (Ctrl+C) vers la fenêtre d'import de l'addon.
 -- Une modification non enregistrée est signalée dans l'en-tête de l'éditeur ; changer de profil
 -- la fait confirmer. Un profil modifié par un autre client est rechargé s'il n'est pas en cours
@@ -17,15 +20,23 @@ local MIN_WIDTH, MIN_HEIGHT = 700, 340
 local DEFAULT_WIDTH, DEFAULT_HEIGHT = 820, 480
 local LIST_RATIO = 0.36 -- part de la largeur donnée à la liste
 
-local frame, listPanel, editor, nameBox, kindButton, captureButton, textBox, deleteButton
+local frame, listPanel, editor, nameBox, kindButton, captureButton, charButton, textBox, deleteButton
 local selectedID -- profil ouvert dans l'éditeur (nil = nouveau)
 local editKind = ns.DEFAULT_KIND
+local editChar -- personnage sous lequel le profil en cours d'édition est rangé
 local loaded = { name = "", kind = ns.DEFAULT_KIND, text = "" } -- état chargé, pour détecter une modification
 
 local function WindowSettings()
 	PolypodeProfilDB = PolypodeProfilDB or {}
 	PolypodeProfilDB.window = PolypodeProfilDB.window or {}
 	return PolypodeProfilDB.window
+end
+
+-- Personnages repliés dans la liste : { [clé] = true }.
+local function Collapsed()
+	PolypodeProfilDB = PolypodeProfilDB or {}
+	PolypodeProfilDB.collapsed = PolypodeProfilDB.collapsed or {}
+	return PolypodeProfilDB.collapsed
 end
 
 local function Gray(text)
@@ -46,11 +57,27 @@ local function FormatDate(version)
 	return version and date("%d/%m/%Y %H:%M", version) or "?"
 end
 
-local function AuthorName(key)
+local function CharName(key)
 	if not key or key == "" then
 		return "?"
 	end
 	return P.GetDisplayName and P.GetDisplayName(key) or key
+end
+
+-- Personnage affiché comme dans « Personnages disponibles » (P.FormatCharacter de Polypode).
+local function FormatChar(key)
+	if P.FormatCharacter then
+		return P.FormatCharacter({ key = key })
+	end
+	return CharName(key)
+end
+
+-- Même règle « connecté » que « Personnages disponibles » (P.IsCharacterConnected, Polypode 0.51.2).
+local function IsConnected(key)
+	if P.IsCharacterConnected then
+		return P.IsCharacterConnected(key)
+	end
+	return key == P.GetCharKey() or (P.IsCharacterOnline and P.IsCharacterOnline(key)) or false
 end
 
 -- ÉDITEUR ------------------------------------------------------------------------------------
@@ -63,10 +90,11 @@ local function IsDirty()
 	if not editor then
 		return false
 	end
-	return Trim(nameBox:GetText()) ~= loaded.name or editKind ~= loaded.kind or Trim(EditorText()) ~= loaded.text
+	return Trim(nameBox:GetText()) ~= loaded.name or editKind ~= loaded.kind or editChar ~= loaded.char
+		or Trim(EditorText()) ~= loaded.text
 end
 
--- En-tête de l'éditeur : profil ouvert, auteur, date, taille, modification en cours.
+-- En-tête de l'éditeur : profil ouvert, date, taille, modification en cours.
 local function UpdateEditorHeader()
 	if not editor then
 		return
@@ -74,7 +102,7 @@ local function UpdateEditorHeader()
 	local profile = selectedID and ns.Get(selectedID)
 	local header
 	if profile then
-		header = profile.name .. Gray("  · " .. AuthorName(profile.author) .. ", " .. FormatDate(profile.updated))
+		header = profile.name .. Gray("  · " .. FormatDate(profile.updated))
 	else
 		header = "Nouveau profil"
 	end
@@ -96,8 +124,15 @@ local function SetKind(kind)
 	UpdateEditorHeader()
 end
 
--- Ouvre un profil dans l'éditeur (id nil = nouveau, prérempli par copy s'il est fourni).
-local function Load(id, copy)
+local function SetChar(key)
+	editChar = key or P.GetCharKey()
+	charButton:SetText(FormatChar(editChar))
+	UpdateEditorHeader()
+end
+
+-- Ouvre un profil dans l'éditeur (id nil = nouveau, prérempli par copy s'il est fourni, rangé
+-- sous le personnage char, par défaut le personnage joué).
+local function Load(id, copy, char)
 	local profile = id and ns.Get(id)
 	selectedID = profile and id or nil
 	local source = profile or copy or {}
@@ -105,10 +140,12 @@ local function Load(id, copy)
 	nameBox:SetCursorPosition(0)
 	textBox:SetText(source.text or "")
 	SetKind(source.kind or editKind) -- nouveau profil : le genre précédent reste proposé
+	SetChar(source.char or char)
 	if profile then
 		loaded.name, loaded.kind, loaded.text = Trim(profile.name), ns.NormalizeKind(profile.kind), Trim(profile.text)
+		loaded.char = editChar
 	else
-		loaded.name, loaded.kind, loaded.text = "", editKind, ""
+		loaded.name, loaded.kind, loaded.text, loaded.char = "", editKind, "", editChar
 	end
 	UpdateEditorHeader()
 	if ns.Refresh then
@@ -162,7 +199,7 @@ local function Select(id)
 end
 
 local function SaveEditor()
-	local id, reason = ns.Save(selectedID, nameBox:GetText(), editKind, EditorText())
+	local id, reason = ns.Save(selectedID, nameBox:GetText(), editKind, EditorText(), editChar)
 	if not id then
 		Notify(reason)
 		return
@@ -243,19 +280,51 @@ local function ShowKindMenu(button)
 	end)
 end
 
+-- Personnage du profil : menu des personnages du roster (connectés en tête), plus le personnage
+-- actuel du profil s'il n'y est plus.
+local function ShowCharMenu(button)
+	if not (MenuUtil and MenuUtil.CreateContextMenu and P.SortedKeyItems and P.GetRoster) then
+		return
+	end
+	local set = P.GetRoster()
+	if editChar then
+		set[editChar] = set[editChar] or true
+	end
+	MenuUtil.CreateContextMenu(button, function(_, root)
+		root:CreateTitle("Personnage du profil")
+		for _, item in ipairs(P.SortedKeyItems(set, IsConnected)) do
+			root:CreateRadio(FormatChar(item.key), function()
+				return editChar == item.key
+			end, function()
+				SetChar(item.key)
+			end)
+		end
+	end)
+end
+
 -- LISTE --------------------------------------------------------------------------------------
 
+-- Un en-tête par personnage (le personnage joué et ceux qui ont des profils ; connectés en tête,
+-- puis ordre alphabétique, comme « Personnages disponibles »), suivi de ses profils (genre puis
+-- nom, ordre de ns.GetProfiles) s'il n'est pas replié.
 local function BuildItems()
-	local items, currentKind, header = {}, nil, nil
+	local byChar = { [P.GetCharKey()] = {} }
 	for _, entry in ipairs(ns.GetProfiles()) do
-		local kind = ns.NormalizeKind(entry.profile.kind)
-		if kind ~= currentKind then
-			currentKind = kind
-			header = { header = true, kind = kind, count = 0 }
-			items[#items + 1] = header
+		local key = entry.profile.char or "?"
+		byChar[key] = byChar[key] or {}
+		table.insert(byChar[key], entry)
+	end
+	local collapsed = Collapsed()
+	local items = {}
+	for _, item in ipairs(P.SortedKeyItems(byChar, IsConnected)) do
+		local key = item.key
+		items[#items + 1] = { header = true, key = key, online = item.first, count = #byChar[key],
+			collapsed = collapsed[key] or false }
+		if not collapsed[key] then
+			for _, entry in ipairs(byChar[key]) do
+				items[#items + 1] = entry
+			end
 		end
-		header.count = header.count + 1
-		items[#items + 1] = entry
 	end
 	return items
 end
@@ -269,7 +338,8 @@ local function ShowRowMenu(id)
 		root:CreateTitle(profile.name)
 		root:CreateButton("Dupliquer", function()
 			ConfirmDiscard(function()
-				Load(nil, { name = profile.name .. " (copie)", kind = profile.kind, text = profile.text })
+				Load(nil, { name = profile.name .. " (copie)", kind = profile.kind, text = profile.text,
+					char = profile.char })
 			end)
 		end)
 		root:CreateButton("Supprimer", function()
@@ -278,15 +348,47 @@ local function ShowRowMenu(id)
 	end)
 end
 
+-- Nouveau profil rangé sous ce personnage (déplié pour le voir apparaître).
+local function NewForChar(key)
+	ConfirmDiscard(function()
+		Collapsed()[key] = nil
+		Load(nil, nil, key)
+	end)
+end
+
+local function ShowCharRowMenu(key)
+	if not (MenuUtil and MenuUtil.CreateContextMenu) then
+		return
+	end
+	MenuUtil.CreateContextMenu(frame, function(_, root)
+		root:CreateTitle(CharName(key))
+		root:CreateButton("Nouveau profil pour ce personnage", function()
+			NewForChar(key)
+		end)
+	end)
+end
+
 local function RowTooltip(data)
 	if data.header then
-		return nil
+		-- Mêmes indications que « Personnages disponibles » (P.CharacterTooltip : nom, équipes).
+		local hints = {
+			data.online and "|cff40ff40Connecté|r" or "|cff999999Déconnecté (ou pas vu cette session)|r",
+			data.count .. " profil(s)",
+			"Clic gauche : " .. (data.collapsed and "déplier" or "replier"),
+			"Clic droit : nouveau profil pour ce personnage",
+		}
+		if P.CharacterTooltip and P.GetCharacter and P.GetCharacter(data.key) then
+			return P.CharacterTooltip(data.key, hints)
+		end
+		table.insert(hints, 1, CharName(data.key))
+		return hints
 	end
 	local profile = data.profile
 	return {
 		profile.name,
 		"Genre : " .. ns.KindLabel(profile.kind),
-		"Par " .. AuthorName(profile.author) .. ", le " .. FormatDate(profile.updated),
+		"Personnage : " .. CharName(profile.char),
+		"Enregistré le " .. FormatDate(profile.updated),
 		#(profile.text or "") .. " caractères",
 		" ",
 		Gray("Clic gauche : ouvrir dans l'éditeur"),
@@ -358,6 +460,18 @@ local function BuildEditor()
 		P.SkinEditBox(nameBox)
 	end
 
+	-- Ligne du personnage : « Personnage » [menu du roster]
+	local charLabel = editor:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+	charLabel:SetPoint("TOPLEFT", nameLabel, "BOTTOMLEFT", 0, -16)
+	charLabel:SetText("Personnage")
+
+	charButton = CreateButton(editor, "", 200, function(self)
+		ShowCharMenu(self)
+	end)
+	charButton:SetPoint("LEFT", charLabel, "RIGHT", 12, 0)
+	charButton:SetPoint("RIGHT", -10, 0)
+	SetTooltip(charButton, "Personnage", "Personnage sous lequel le profil est rangé dans la liste.")
+
 	-- Boutons du bas.
 	local newButton = CreateButton(editor, "Nouveau", 80, function()
 		ConfirmDiscard(function()
@@ -387,7 +501,7 @@ local function BuildEditor()
 
 	-- Zone de texte défilante (Ctrl+V pour coller une chaîne).
 	local textPanel = P.CreatePanel(editor, "")
-	textPanel:SetPoint("TOPLEFT", 8, -60)
+	textPanel:SetPoint("TOPLEFT", 8, -88)
 	textPanel:SetPoint("BOTTOMRIGHT", -8, 40)
 
 	textBox = CreateFrame("Frame", nil, textPanel, "ScrollingEditBoxTemplate")
@@ -457,13 +571,20 @@ local function Build()
 	listPanel:SetPoint("BOTTOMLEFT", 12, 12)
 	P.CreateScrollList(listPanel, function(data)
 		if data.header then
-			return "|cffffd100" .. ns.KindLabel(data.kind) .. "|r" .. Gray("  (" .. data.count .. ")")
+			-- Personnage comme dans « Personnages disponibles », précédé du repli, suivi du nombre.
+			return "|cffffd200" .. (data.collapsed and "+" or "-") .. "|r " .. FormatChar(data.key)
+				.. Gray(" (" .. data.count .. ")")
 		end
-		return "   " .. data.profile.name
+		return "      " .. Gray(ns.KindLabel(data.profile.kind) .. " · ") .. data.profile.name
 	end, nil, {
 		onClick = function(data, button)
 			if data.header then
-				return
+				if button == "RightButton" then
+					ShowCharRowMenu(data.key)
+				else
+					Collapsed()[data.key] = not data.collapsed or nil
+					ns.Refresh()
+				end
 			elseif button == "RightButton" then
 				ShowRowMenu(data.id)
 			else
@@ -474,6 +595,10 @@ local function Build()
 			return data.id ~= nil and data.id == selectedID
 		end,
 		tooltip = RowTooltip,
+		-- Personnages déconnectés estompés, comme dans « Personnages disponibles ».
+		decorate = function(row, data)
+			row:SetAlpha((data.header and not data.online) and 0.55 or 1)
+		end,
 	})
 	listPanel.emptyText:SetText("Aucun profil enregistré.")
 

@@ -24,11 +24,19 @@ Désactivé, Polypode fonctionne normalement, sans bouton « Profils » ni comma
 
 Le bouton **Profils** (barre de titre de la fenêtre Polypode) ou `/poly profil` ouvre la fenêtre.
 
-- **À gauche**, les profils enregistrés, rangés par genre (Mode Édition, Talents, EllesmereUI,
-  ElvUI, Baganator, MySlots, Autre). Clic gauche : ouvrir dans l'éditeur ; clic droit :
-  dupliquer ou supprimer ; au survol : genre, auteur, date et taille.
-- **À droite**, l'éditeur : nom, genre (bouton-menu) et la chaîne elle-même, dans une zone qui
-  défile.
+- **À gauche**, les profils rangés **sous leur personnage**, affiché comme dans « Personnages
+  disponibles » de Polypode : nom en couleur de classe, classe, niveau, « (vous) », connectés en
+  tête, déconnectés estompés, et la même infobulle (connecté ou non, équipes). Votre personnage
+  actuel apparaît toujours, même sans profil.
+  - En-tête de personnage : clic gauche = replier / déplier ses profils (état gardé) ; clic
+    droit = nouveau profil pour ce personnage.
+  - Profil (genre puis nom, par ex. « Talents · Arcane raid ») : clic gauche = ouvrir dans
+    l'éditeur ; clic droit = dupliquer ou supprimer ; au survol : genre, personnage, date et
+    taille.
+- **À droite**, l'éditeur : nom, genre (bouton-menu), **personnage** (bouton-menu : les
+  personnages de votre roster, connectés en tête ; par défaut le personnage joué) et la chaîne
+  elle-même, dans une zone qui défile. Changer le personnage range le profil ailleurs dans la
+  liste.
 
 ### Enregistrer une chaîne
 
