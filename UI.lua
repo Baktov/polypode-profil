@@ -431,16 +431,67 @@ local function RowTooltip(data)
 		return hints
 	end
 	local profile = data.profile
-	return {
+	local lines = {
 		profile.name,
 		"Genre : " .. ns.KindLabel(profile.kind),
 		"Personnage : " .. CharName(profile.char),
 		"Enregistré le " .. FormatDate(profile.updated),
 		#(profile.text or "") .. " caractères",
 		" ",
-		Gray("Clic gauche : ouvrir dans l'éditeur"),
-		Gray("Clic droit : dupliquer, supprimer"),
 	}
+	if ns.NormalizeKind(profile.kind) == "transmog" then
+		lines[#lines + 1] = Gray("Icône : essayer la tenue (cabine d'essayage)")
+	end
+	lines[#lines + 1] = Gray("Clic gauche : ouvrir dans l'éditeur")
+	lines[#lines + 1] = Gray("Clic droit : dupliquer, supprimer")
+	return lines
+end
+
+-- ICÔNE « ESSAYER » des profils de transmogrification (devant leur nom) : ouvre la cabine
+-- d'essayage sur la tenue (ns.TryOnTransmog). Atlas des jets de butin « transmogrification »,
+-- icône d'objet si l'atlas n'existe pas (WoW Forever).
+local TRY_ON_ATLAS = "lootroll-toast-icon-transmog"
+local TRY_ON_FALLBACK = "Interface\\Icons\\INV_Chest_Cloth_17"
+local TRY_ON_SIZE = 16
+
+local function HasAtlas(name)
+	return C_Texture and C_Texture.GetAtlasInfo and C_Texture.GetAtlasInfo(name) ~= nil
+end
+
+local function TryOnButton(row)
+	if row.tryOnButton then
+		return row.tryOnButton
+	end
+	local button = CreateFrame("Button", nil, row)
+	button:SetSize(TRY_ON_SIZE, TRY_ON_SIZE)
+	button:SetPoint("LEFT", 14, 0)
+	button:SetFrameLevel(row:GetFrameLevel() + 2)
+	if HasAtlas(TRY_ON_ATLAS .. "-up") then
+		button:SetNormalAtlas(TRY_ON_ATLAS .. "-up")
+		button:SetHighlightAtlas(TRY_ON_ATLAS .. "-highlight")
+		button:SetPushedAtlas(TRY_ON_ATLAS .. "-down")
+	else
+		button:SetNormalTexture(TRY_ON_FALLBACK)
+		button:SetHighlightTexture(TRY_ON_FALLBACK, "ADD")
+	end
+	-- Lignes recyclées : l'icône agit sur la donnée courante de la ligne.
+	button:SetScript("OnClick", function(self)
+		local data = self:GetParent().data
+		local ok, reason = ns.TryOnTransmog(data and data.profile and data.profile.text)
+		if not ok then
+			Notify(reason)
+		end
+	end)
+	button:SetScript("OnEnter", function(self)
+		GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+		GameTooltip:AddLine("Essayer la tenue")
+		GameTooltip:AddLine("Ouvre la cabine d'essayage sur cette tenue (comme la chaîne collée dans la discussion).",
+			1, 1, 1, true)
+		GameTooltip:Show()
+	end)
+	button:SetScript("OnLeave", GameTooltip_Hide)
+	row.tryOnButton = button
+	return button
 end
 
 -- CONSTRUCTION -------------------------------------------------------------------------------
@@ -625,7 +676,7 @@ local function Build()
 			return "|cffffd200" .. (data.collapsed and "+" or "-") .. "|r " .. FormatChar(data.key)
 				.. Gray(" (" .. data.count .. ")")
 		end
-		return "      " .. Gray(ns.KindLabel(data.profile.kind) .. " · ") .. data.profile.name
+		return Gray(ns.KindLabel(data.profile.kind) .. " · ") .. data.profile.name -- décalé par decorate
 	end, nil, {
 		onClick = function(data, button)
 			if data.header then
@@ -646,8 +697,17 @@ local function Build()
 		end,
 		tooltip = RowTooltip,
 		-- Personnages déconnectés estompés, comme dans « Personnages disponibles ».
+		-- Profils en retrait sous leur personnage (place de l'icône « essayer » des profils de
+		-- transmogrification) ; lignes recyclées : retrait et icône recalculés à chaque affichage.
 		decorate = function(row, data)
 			row:SetAlpha((data.header and not data.online) and 0.55 or 1)
+			row.text:SetPoint("LEFT", data.header and 4 or (14 + TRY_ON_SIZE + 4), 0)
+			local isTransmog = not data.header and ns.NormalizeKind(data.profile.kind) == "transmog"
+			if isTransmog then
+				TryOnButton(row):Show()
+			elseif row.tryOnButton then
+				row.tryOnButton:Hide()
+			end
 		end,
 	})
 	listPanel.emptyText:SetText("Aucun profil enregistré.")

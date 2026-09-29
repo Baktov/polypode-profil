@@ -226,7 +226,7 @@ end
 -- TRANSMOGRIFICATION : chaîne « /customset v1 ... » de Blizzard (« Copier dans le presse-papiers »
 -- de la cabine d'essayage) ; collée dans la discussion, elle ouvre la cabine d'essayage avec la
 -- tenue. Format recopié de TransmogUtil.CreateCustomSetSlashCommand (Blizzard_TransmogShared,
--- chargé à la demande : jamais chargé d'ici, pour ne pas le souiller) : 17 valeurs, dans l'ordre
+-- dépendance de Blizzard_FrameXML sur Retail ; recopié pour ne pas en dépendre) : 17 valeurs, dans l'ordre
 -- de TRANSMOG_SLOT_ORDER, apparence de chaque emplacement, plus l'apparence secondaire (épaules,
 -- main droite) et l'illusion (mains droite et gauche).
 local TRANSMOG_SLOT_ORDER = {
@@ -280,6 +280,28 @@ function ns.ExportCustomSet(id)
 		return text
 	end
 	return nil, "Export de l'ensemble impossible."
+end
+
+-- Ouvre la cabine d'essayage sur une chaîne « /customset v1 ... », comme la commande tapée dans la
+-- discussion (SlashCommandsOverrides.lua de Blizzard : ParseCustomSetSlashCommand puis
+-- DressUpItemTransmogInfoList avec le détail de l'ensemble). Hors combat seulement. Renvoie true,
+-- ou nil et la raison.
+function ns.TryOnTransmog(text)
+	local args = tostring(text or ""):match("^%s*/customset%s+(.-)%s*$")
+	if not args then
+		return nil, "Ce profil n'est pas une chaîne « /customset »."
+	elseif InCombatLockdown() then
+		return nil, "Impossible en combat."
+	elseif not (TransmogUtil and TransmogUtil.ParseCustomSetSlashCommand and DressUpItemTransmogInfoList) then
+		return nil, "Cabine d'essayage indisponible sur ce client."
+	end
+	local ok, list = pcall(TransmogUtil.ParseCustomSetSlashCommand, args)
+	if not ok or not list then
+		return nil, "Chaîne de transmogrification invalide."
+	end
+	local showCustomSetDetails = true
+	DressUpItemTransmogInfoList(list, showCustomSetDetails)
+	return true
 end
 
 -- Apparence portée par le personnage joué, lue sur un modèle de cabine d'essayage invisible
