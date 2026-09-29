@@ -48,13 +48,19 @@ Le bouton **Profils** (barre de titre de la fenêtre Polypode) ou `/poly profil`
    et choisir le genre.
 3. **Enregistrer**.
 
-**Capturer** (genres « Mode Édition » et « Talents ») relève la chaîne directement en jeu, sans
+**Capturer** (genres « Mode Édition », « Talents » et « Transmogrification ») relève la chaîne directement en jeu, sans
 passer par le presse-papiers :
 
 - Mode Édition : un menu liste vos dispositions (la disposition active est signalée) ;
 - Talents : la configuration de talents active. La fenêtre des talents (N) doit avoir été
   ouverte au moins une fois dans la session (l'addon ne la charge pas lui-même, pour ne pas
   risquer de bloquer ensuite l'application des talents).
+
+- Transmogrification : un menu propose **l'apparence actuelle** du personnage joué et chacun de
+  vos **ensembles personnalisés**. La chaîne est celle de Blizzard (`/customset v1 ...`, comme
+  « Copier dans le presse-papiers » de la cabine d'essayage) : pour s'en resservir, la coller
+  dans la **discussion** et valider, la cabine d'essayage s'ouvre avec la tenue (à enregistrer
+  ou appliquer ensuite chez le transmogrificateur).
 
 La chaîne capturée remplace le texte de l'éditeur ; le nom est proposé s'il est vide. Il reste à
 **Enregistrer**.

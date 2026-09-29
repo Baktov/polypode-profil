@@ -242,6 +242,37 @@ local function Capture(button)
 		else
 			Notify(nameOrReason)
 		end
+	elseif editKind == "transmog" then
+		if not (MenuUtil and MenuUtil.CreateContextMenu) then
+			return
+		end
+		local sets = ns.GetCustomSets()
+		MenuUtil.CreateContextMenu(button, function(_, root)
+			root:CreateTitle("Tenue à capturer")
+			root:CreateButton("Apparence actuelle", function()
+				ns.ExportCurrentAppearance(function(text, reason)
+					if text then
+						ApplyCapture(text, "Transmogrification — " .. CharName(P.GetCharKey()))
+					else
+						Notify(reason)
+					end
+				end)
+			end)
+			if #sets > 0 then
+				root:CreateDivider()
+				root:CreateTitle("Ensembles personnalisés")
+				for _, set in ipairs(sets) do
+					root:CreateButton(set.name, function()
+						local text, reason = ns.ExportCustomSet(set.id)
+						if text then
+							ApplyCapture(text, "Transmogrification — " .. set.name)
+						else
+							Notify(reason)
+						end
+					end)
+				end
+			end
+		end)
 	elseif editKind == "editmode" then
 		local layouts = ns.GetEditModeLayouts()
 		if #layouts == 0 or not (MenuUtil and MenuUtil.CreateContextMenu) then
@@ -452,8 +483,10 @@ local function BuildEditor()
 	end)
 	captureButton:SetPoint("TOPRIGHT", -10, -29)
 	SetTooltip(captureButton, "Capturer",
-		"Relève la chaîne en jeu : une disposition du mode Édition (menu), ou les talents de la configuration "
-			.. "active (la fenêtre des talents doit avoir été ouverte une fois). Remplace le texte de l'éditeur.")
+		"Relève la chaîne en jeu : une disposition du mode Édition (menu), les talents de la configuration "
+			.. "active (la fenêtre des talents doit avoir été ouverte une fois), ou une tenue (apparence actuelle "
+			.. "ou ensemble personnalisé : chaîne « /customset », à coller dans la discussion pour l'essayer). "
+			.. "Remplace le texte de l'éditeur.")
 
 	kindButton = CreateButton(editor, "", 120, function(self)
 		ShowKindMenu(self)

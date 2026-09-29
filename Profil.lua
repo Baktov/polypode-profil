@@ -32,6 +32,7 @@ local P = Polypode -- dépendance obligatoire (## Dependencies: Polypode), charg
 ns.KINDS = {
 	{ key = "editmode", label = "Mode Édition", capture = true },
 	{ key = "talents", label = "Talents", capture = true },
+	{ key = "transmog", label = "Transmogrification", capture = true },
 	{ key = "ellesmereui", label = "EllesmereUI" },
 	{ key = "elvui", label = "ElvUI" },
 	{ key = "baganator", label = "Baganator" },
@@ -220,6 +221,105 @@ function ns.ExportTalents()
 		end
 	end
 	return text, name
+end
+
+-- TRANSMOGRIFICATION : chaîne « /customset v1 ... » de Blizzard (« Copier dans le presse-papiers »
+-- de la cabine d'essayage) ; collée dans la discussion, elle ouvre la cabine d'essayage avec la
+-- tenue. Format recopié de TransmogUtil.CreateCustomSetSlashCommand (Blizzard_TransmogShared,
+-- chargé à la demande : jamais chargé d'ici, pour ne pas le souiller) : 17 valeurs, dans l'ordre
+-- de TRANSMOG_SLOT_ORDER, apparence de chaque emplacement, plus l'apparence secondaire (épaules,
+-- main droite) et l'illusion (mains droite et gauche).
+local TRANSMOG_SLOT_ORDER = {
+	INVSLOT_HEAD, INVSLOT_SHOULDER, INVSLOT_BACK, INVSLOT_CHEST, INVSLOT_BODY, INVSLOT_TABARD,
+	INVSLOT_WRIST, INVSLOT_HAND, INVSLOT_WAIST, INVSLOT_LEGS, INVSLOT_FEET, INVSLOT_MAINHAND, INVSLOT_OFFHAND,
+}
+
+local function CustomSetSlashCommand(list)
+	if type(list) ~= "table" then
+		return nil
+	end
+	local values, any = {}, false
+	for _, slot in ipairs(TRANSMOG_SLOT_ORDER) do
+		local info = list[slot] or {}
+		local appearance = tonumber(info.appearanceID) or 0
+		any = any or appearance > 0
+		values[#values + 1] = appearance
+		if slot == INVSLOT_SHOULDER or slot == INVSLOT_MAINHAND then
+			values[#values + 1] = tonumber(info.secondaryAppearanceID) or 0
+		end
+		if slot == INVSLOT_MAINHAND or slot == INVSLOT_OFFHAND then
+			values[#values + 1] = tonumber(info.illusionID) or 0
+		end
+	end
+	return any and ("/customset v1 " .. table.concat(values, ",")) or nil
+end
+
+-- Ensembles personnalisés enregistrés : { { id, name }, ... }, triés par nom.
+function ns.GetCustomSets()
+	local list = {}
+	if not (C_TransmogCollection and C_TransmogCollection.GetCustomSets and C_TransmogCollection.GetCustomSetInfo) then
+		return list
+	end
+	local ok, ids = pcall(C_TransmogCollection.GetCustomSets)
+	for _, id in ipairs(ok and ids or {}) do
+		local name = C_TransmogCollection.GetCustomSetInfo(id)
+		list[#list + 1] = { id = id, name = name or ("Ensemble " .. id) }
+	end
+	table.sort(list, function(a, b)
+		return a.name:lower() < b.name:lower()
+	end)
+	return list
+end
+
+-- Chaîne d'un ensemble personnalisé.
+function ns.ExportCustomSet(id)
+	local getList = C_TransmogCollection and C_TransmogCollection.GetCustomSetItemTransmogInfoList
+	local ok, list = pcall(getList, id)
+	local text = ok and CustomSetSlashCommand(list)
+	if text then
+		return text
+	end
+	return nil, "Export de l'ensemble impossible."
+end
+
+-- Apparence portée par le personnage joué, lue sur un modèle de cabine d'essayage invisible
+-- (comme la cabine d'essayage de Blizzard). Le modèle se charge de façon asynchrone : callback(texte)
+-- ou callback(nil, raison) est appelé dès que la liste est lisible, au plus tard après 2 s.
+local appearanceModel
+
+function ns.ExportCurrentAppearance(callback)
+	if not appearanceModel then
+		local ok, model = pcall(CreateFrame, "DressUpModel", nil, UIParent)
+		if not ok or not model or not model.GetItemTransmogInfoList then
+			callback(nil, "Transmogrification indisponible sur ce client.")
+			return
+		end
+		model:SetSize(1, 1)
+		model:SetPoint("TOPLEFT", UIParent, "TOPLEFT", -10, 10) -- hors écran
+		model:SetAlpha(0)
+		model:Hide()
+		appearanceModel = model
+	end
+	local model = appearanceModel
+	model:Show()
+	model:SetUnit("player")
+	local tries = 0
+	local function Try()
+		tries = tries + 1
+		local ok, list = pcall(model.GetItemTransmogInfoList, model)
+		local text = ok and CustomSetSlashCommand(list)
+		if text or tries >= 20 then
+			model:Hide()
+			if text then
+				callback(text)
+			else
+				callback(nil, "Apparence du personnage illisible pour l'instant, réessayez.")
+			end
+			return
+		end
+		C_Timer.After(0.1, Try)
+	end
+	Try()
 end
 
 -- SYNCHRO ------------------------------------------------------------------------------------
