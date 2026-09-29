@@ -580,7 +580,7 @@ local function Build()
 	closeBtn:SetPoint("TOPRIGHT", -4, -4)
 	frame.CloseButton = closeBtn
 
-	listPanel = P.CreatePanel(frame, "")
+	listPanel = P.CreatePanel(frame, "Personnages")
 	listPanel:SetPoint("TOPLEFT", 12, -36)
 	listPanel:SetPoint("BOTTOMLEFT", 12, 12)
 	P.CreateScrollList(listPanel, function(data)
@@ -665,15 +665,7 @@ function ns.Refresh()
 			return
 		end
 	end
-	local items = BuildItems()
-	local count = 0
-	for _, item in ipairs(items) do
-		if not item.header then
-			count = count + 1
-		end
-	end
-	listPanel.header:SetText(count .. " profil(s)")
-	P.SetListData(listPanel, items)
+	P.SetListData(listPanel, BuildItems())
 	UpdateEditorHeader()
 end
 
