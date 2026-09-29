@@ -1,0 +1,11 @@
+## Interface: 120000, 16001
+## Title: Polypode Profil
+## Notes: Profils pour Polypode : sauvegarde des chaînes d'export du mode Édition, des talents et des addons (EllesmereUI, ElvUI, Baganator, MySlots...).
+## Author: Baktov
+## Version: 1.0.0
+## Dependencies: Polypode
+## SavedVariables: PolypodeProfilDB
+## Category: Polypode
+
+Profil.lua
+UI.lua
