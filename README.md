@@ -40,6 +40,9 @@ Le bouton **Profils** (barre de titre de la fenêtre Polypode) ou `/poly profil`
   - Profil d'**ensemble d'équipement** : une petite icône devant son nom **ajoute l'ensemble
     aux ensembles d'équipement** du personnage joué (voir plus bas) ; l'infobulle du profil
     indique sa spécialisation et son nombre de pièces.
+  - Profils d'**options de WoW**, de **raccourcis clavier** et de **fenêtres de discussion** :
+    une petite icône devant leur nom les **applique** au personnage joué, après confirmation
+    (ils remplacent la configuration actuelle) ; un compte rendu s'affiche.
 - **À droite**, l'éditeur : nom, genre (bouton-menu), **personnage** (bouton-menu : les
   personnages de votre roster, connectés en tête ; par défaut le personnage joué) et la chaîne
   elle-même, dans une zone qui défile. Changer le personnage range le profil ailleurs dans la
@@ -55,7 +58,7 @@ Le bouton **Profils** (barre de titre de la fenêtre Polypode) ou `/poly profil`
    et choisir le genre.
 3. **Enregistrer**.
 
-**Capturer** (genres « Mode Édition », « Talents », « Transmogrification », « Titre » et « Ensemble d'équipement ») relève la chaîne directement en jeu, sans
+**Capturer** (genres « Mode Édition », « Talents », « Transmogrification », « Titre », « Ensemble d'équipement », « Options de WoW », « Raccourcis clavier » et « Fenêtres de discussion ») relève la chaîne directement en jeu, sans
 passer par le presse-papiers :
 
 - Mode Édition : un menu liste vos dispositions (la disposition active est signalée) ;
@@ -74,6 +77,18 @@ passer par le presse-papiers :
   exacte (enchantement, gemmes, améliorations), les emplacements ignorés et la spécialisation.
   Blizzard n'a pas de chaîne d'export pour les ensembles : le texte est propre à Polypode Profil
   (il n'est pas à coller dans la discussion).
+- Options de WoW : un menu propose chaque catégorie du panneau Options (Graphismes, Audio,
+  Interface, Combat...) ou toutes. Seuls les réglages qui sont des variables du jeu (CVars) sont
+  gardés ; les réglages calculés et ceux des addons sont écartés. Graphismes et audio sont
+  propres à chaque PC : c'est là que le profil sert le plus.
+- Raccourcis clavier : tous les raccourcis du jeu de raccourcis actif (compte ou personnage).
+  Appliqués, ils **remplacent** les raccourcis actuels (les touches liées autrement sont
+  libérées) ; les commandes d'un addon absent sont comptées « inconnues ».
+- Fenêtres de discussion : fenêtres ouvertes (nom, police, couleur, transparence, verrouillage,
+  ancrage, position si détachée), types de messages et canaux de chacune, couleurs des types
+  de messages et réglages de la discussion (style, chuchotements, horodatage...). Appliqué, le
+  profil ferme les fenêtres en trop et ouvre les manquantes ; la fenêtre principale reste placée
+  par le mode Édition. Un **/reload** est conseillé ensuite.
 - Titre : le titre porté par le personnage joué, en chaîne Blizzard `/settitle Nom` (collée
   dans la discussion, elle change de titre ; sans nom, elle le retire). Attention, la commande
   de Blizzard prend le premier titre connu qui *commence* par ce nom ; l'icône de la liste

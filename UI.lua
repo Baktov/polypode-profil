@@ -280,6 +280,40 @@ local function Capture(button)
 				end
 			end
 		end)
+	elseif editKind == "options" then
+		local categories = ns.GetOptionCategories()
+		if #categories == 0 or not (MenuUtil and MenuUtil.CreateContextMenu) then
+			Notify("Aucun réglage lisible (ouvrez une fois le panneau Options, puis recommencez).")
+			return
+		end
+		local function CaptureOptions(categoryName)
+			local text, nameOrReason = ns.ExportOptions(categoryName)
+			if text then
+				ApplyCapture(text, nameOrReason)
+			else
+				Notify(nameOrReason)
+			end
+		end
+		MenuUtil.CreateContextMenu(button, function(_, root)
+			root:CreateTitle("Catégorie d'options à capturer")
+			root:CreateButton("Toutes les catégories", function()
+				CaptureOptions(nil)
+			end)
+			root:CreateDivider()
+			for _, category in ipairs(categories) do
+				root:CreateButton(category.name .. Gray(" (" .. category.count .. ")"), function()
+					CaptureOptions(category.name)
+				end)
+			end
+		end)
+	elseif editKind == "bindings" or editKind == "chat" then
+		local export = editKind == "bindings" and ns.ExportBindings or ns.ExportChat
+		local text, nameOrReason = export()
+		if text then
+			ApplyCapture(text, nameOrReason)
+		else
+			Notify(nameOrReason)
+		end
 	elseif editKind == "equipset" then
 		local sets = ns.GetEquipmentSets()
 		if #sets == 0 or not (MenuUtil and MenuUtil.CreateContextMenu) then
@@ -449,7 +483,11 @@ end
 -- ICÔNE D'ACTION devant certains profils (genre → action sur la chaîne du profil) :
 --   transmogrification : ouvrir la cabine d'essayage sur la tenue (ns.TryOnTransmog) ; atlas
 --     des jets de butin « transmogrification », icône d'objet si l'atlas manque (WoW Forever) ;
---   titre : porter le titre (ns.ApplyTitle).
+--   titre : porter le titre (ns.ApplyTitle) ;
+--   ensemble d'équipement : le créer chez le personnage joué (ns.CreateEquipmentSet) ;
+--   options, raccourcis, discussion : les appliquer (confirmation d'abord : ils remplacent la
+--     configuration actuelle).
+-- run(profil) renvoie ok, message (compte rendu affiché, sinon done) ou nil, raison.
 local ACTION_SIZE = 16
 local ROW_ACTIONS = {
 	transmog = {
@@ -484,6 +522,78 @@ local ROW_ACTIONS = {
 			return ns.ApplyTitle(profile.text)
 		end,
 	},
+	options = {
+		texture = "Interface\\Icons\\INV_Misc_Gear_01",
+		title = "Appliquer ces options",
+		tooltip = "Applique ces réglages du panneau Options de WoW (hors combat). Les réglages verrouillés ou "
+			.. "inconnus sont ignorés ; certains réglages graphiques demandent de relancer le jeu.",
+		hint = "appliquer ces options de WoW",
+		confirm = "Les options de WoW de ce profil vont remplacer les vôtres.",
+		run = function(profile)
+			return ns.ApplyOptions(profile.text)
+		end,
+	},
+	bindings = {
+		texture = "Interface\\Icons\\INV_Misc_Key_03",
+		title = "Appliquer ces raccourcis",
+		tooltip = "Le jeu de raccourcis actif (compte ou personnage) devient celui du profil : les touches liées "
+			.. "autrement sont libérées. Hors combat.",
+		hint = "appliquer ces raccourcis clavier",
+		confirm = "Vos raccourcis clavier actuels vont être remplacés par ceux de ce profil.",
+		run = function(profile)
+			return ns.ApplyBindings(profile.text)
+		end,
+	},
+	chat = {
+		texture = "Interface\\Icons\\INV_Letter_15",
+		title = "Appliquer ce paramétrage",
+		tooltip = "Fenêtres de discussion (ouvertes, fermées, nom, police, couleur, types de messages, canaux, "
+			.. "position), couleurs des messages et réglages de la discussion. Hors combat ; /reload conseillé ensuite.",
+		hint = "appliquer ce paramétrage de discussion",
+		confirm = "Vos fenêtres de discussion vont être remplacées par celles de ce profil.",
+		run = function(profile)
+			return ns.ApplyChat(profile.text)
+		end,
+	},
+}
+
+-- Lignes de détail de l'infobulle d'un profil, par genre.
+local KIND_DETAILS = {
+	equipset = function(text)
+		return ns.EquipmentSetDetails(text)
+	end,
+	options = function(text)
+		return ns.OptionsDetails(text)
+	end,
+	bindings = function(text)
+		return ns.BindingsDetails(text)
+	end,
+	chat = function(text)
+		return ns.ChatDetails(text)
+	end,
+}
+
+local function RunAction(action, profile)
+	local ok, message = action.run(profile)
+	if ok then
+		if message or action.done then
+			Notify(message or action.done)
+		end
+	else
+		Notify(message)
+	end
+end
+
+StaticPopupDialogs["POLYPODE_PROFIL_APPLY"] = {
+	text = "%s\n\nAppliquer le profil « %s » ?",
+	button1 = YES,
+	button2 = NO,
+	OnAccept = function(_, data)
+		RunAction(data.action, data.profile)
+	end,
+	timeout = 0,
+	whileDead = true,
+	hideOnEscape = true,
 }
 
 local function RowTooltip(data)
@@ -509,10 +619,9 @@ local function RowTooltip(data)
 		"Enregistré le " .. FormatDate(profile.updated),
 		#(profile.text or "") .. " caractères",
 	}
-	if ns.NormalizeKind(profile.kind) == "equipset" then
-		for _, line in ipairs(ns.EquipmentSetDetails(profile.text) or {}) do
-			lines[#lines + 1] = line
-		end
+	local details = KIND_DETAILS[ns.NormalizeKind(profile.kind)]
+	for _, line in ipairs(details and details(profile.text) or {}) do
+		lines[#lines + 1] = line
 	end
 	lines[#lines + 1] = " "
 	local action = ROW_ACTIONS[ns.NormalizeKind(profile.kind)]
@@ -559,13 +668,11 @@ local function ActionButton(row)
 		if not (self.action and data and data.profile) then
 			return
 		end
-		local ok, reason = self.action.run(data.profile)
-		if ok then
-			if self.action.done then
-				Notify(self.action.done)
-			end
+		if self.action.confirm then
+			StaticPopup_Show("POLYPODE_PROFIL_APPLY", self.action.confirm, data.profile.name,
+				{ action = self.action, profile = data.profile })
 		else
-			Notify(reason)
+			RunAction(self.action, data.profile)
 		end
 	end)
 	button:SetScript("OnEnter", function(self)
@@ -627,7 +734,7 @@ local function BuildEditor()
 		"Relève la chaîne en jeu : une disposition du mode Édition (menu), les talents de la configuration "
 			.. "active (la fenêtre des talents doit avoir été ouverte une fois), ou une tenue (apparence actuelle "
 			.. "ou ensemble personnalisé : chaîne « /customset », à coller dans la discussion pour l'essayer), "
-			.. "le titre porté (chaîne « /settitle »), ou un ensemble d'équipement (menu, avec sa spécialisation). "
+			.. "le titre porté (chaîne « /settitle »), un ensemble d'équipement (menu, avec sa spécialisation), les options de WoW (menu par catégorie), les raccourcis clavier ou les fenêtres de discussion. "
 			.. "Chaque capture ouvre un nouveau profil, nommé d'après la disposition, les talents, le titre ou l'ensemble "
 			.. "(« Apparence actuelle » datée) : le profil ouvert n'est jamais écrasé.")
 

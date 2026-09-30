@@ -36,6 +36,9 @@ ns.KINDS = {
 	{ key = "transmog", label = "Transmogrification", short = "Transmo", capture = true },
 	{ key = "title", label = "Titre", capture = true },
 	{ key = "equipset", label = "Ensemble d'équipement", short = "Ensemble", capture = true }, -- Equipement.lua
+	{ key = "options", label = "Options de WoW", capture = true }, -- Options.lua
+	{ key = "bindings", label = "Raccourcis clavier", short = "Raccourcis", capture = true }, -- Options.lua
+	{ key = "chat", label = "Fenêtres de discussion", short = "Discussion", capture = true }, -- Discussion.lua
 	{ key = "ellesmereui", label = "EllesmereUI" },
 	{ key = "elvui", label = "ElvUI" },
 	{ key = "baganator", label = "Baganator" },
