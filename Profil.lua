@@ -603,6 +603,38 @@ local function OnProfile(rest)
 	end
 end
 
+-- Personnage supprimé dans Polypode (Maj + clic dans « Personnages disponibles ») : les profils
+-- rangés sous lui sont supprimés (pierres tombales propagées par la synchro de Profil ; rien à
+-- faire quand la suppression vient d'un autre client, qui les propage lui-même). Polypode 0.53.0.
+if P.RegisterCharacterData then
+	local function ProfilesOf(key)
+		local ids = {}
+		for _, entry in ipairs(ns.GetProfiles()) do
+			if entry.profile.char == key then
+				ids[#ids + 1] = entry.id
+			end
+		end
+		return ids
+	end
+	P.RegisterCharacterData({
+		name = "Polypode Profil",
+		describe = function(key)
+			local count = #ProfilesOf(key)
+			if count > 0 then
+				return count .. " profil(s) rangé(s) sous ce personnage"
+			end
+		end,
+		remove = function(key, fromSync)
+			if fromSync then
+				return
+			end
+			for _, id in ipairs(ProfilesOf(key)) do
+				ns.Delete(id)
+			end
+		end,
+	})
+end
+
 if P.RegisterMessageHandler then
 	P.RegisterMessageHandler("PROF", OnProfile)
 	P.RegisterMessageHandler("PROFV", OnVersions)
