@@ -830,6 +830,9 @@ local function CreateChoice(parent, width, generator)
 		dropdown:SetupMenu(function(_, root)
 			generator(root)
 		end)
+		if P.SkinDropdown then -- Polypode 0.51.3 : skin EllesmereUI / ElvUI
+			P.SkinDropdown(dropdown, width)
+		end
 		return dropdown
 	end
 	local button = CreateButton(parent, "", width, function(self)
