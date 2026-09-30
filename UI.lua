@@ -117,13 +117,28 @@ local function UpdateEditorHeader()
 	deleteButton:SetEnabled(profile ~= nil)
 end
 
+-- Texte d'une liste déroulante (liste Blizzard : OverrideText, le texte ne suit pas la sélection ;
+-- bouton de repli : SetText) et place disponible pour lui (sans la flèche).
+local function SetChoiceText(choice, text)
+	if choice.OverrideText then
+		choice:OverrideText(text)
+	else
+		choice:SetText(text)
+	end
+end
+
+local function ChoiceTextFits(choice)
+	local label = choice.Text or (choice.GetFontString and choice:GetFontString())
+	local margin = choice.OverrideText and 34 or 16
+	return not label or label:GetStringWidth() <= choice:GetWidth() - margin
+end
+
 local function SetKind(kind)
 	editKind = ns.NormalizeKind(kind)
-	-- Libellé court (« Ensemble », « Simple AM »...) si le libellé complet ne tient pas dans le bouton.
-	kindButton:SetText(ns.KindLabel(editKind))
-	local label = kindButton:GetFontString()
-	if label and label:GetStringWidth() > kindButton:GetWidth() - 16 then
-		kindButton:SetText(ns.KindShortLabel(editKind))
+	-- Libellé court (« Ensemble », « Simple AM »...) si le libellé complet ne tient pas.
+	SetChoiceText(kindButton, ns.KindLabel(editKind))
+	if not ChoiceTextFits(kindButton) then
+		SetChoiceText(kindButton, ns.KindShortLabel(editKind))
 	end
 	captureButton:SetShown(ns.CanCapture(editKind))
 	UpdateEditorHeader()
@@ -131,7 +146,7 @@ end
 
 local function SetChar(key)
 	editChar = key or P.GetCharKey()
-	charButton:SetText(FormatChar(editChar))
+	SetChoiceText(charButton, FormatChar(editChar))
 	UpdateEditorHeader()
 end
 
@@ -409,43 +424,38 @@ local function ChangeKind(kind)
 	end)
 end
 
-local function ShowKindMenu(button)
-	if not (MenuUtil and MenuUtil.CreateContextMenu) then
-		return
+-- Contenu de la liste déroulante des genres.
+local function KindMenu(root)
+	root:CreateTitle("Genre du profil")
+	for _, kind in ipairs(ns.KINDS) do
+		root:CreateRadio(kind.label, function()
+			return editKind == kind.key
+		end, function()
+			ChangeKind(kind.key)
+		end)
 	end
-	MenuUtil.CreateContextMenu(button, function(_, root)
-		root:CreateTitle("Genre du profil")
-		for _, kind in ipairs(ns.KINDS) do
-			root:CreateRadio(kind.label, function()
-				return editKind == kind.key
-			end, function()
-				ChangeKind(kind.key)
-			end)
-		end
-	end)
 end
 
 -- Personnage du profil : menu des personnages du roster (connectés en tête), plus le personnage
 -- actuel du profil s'il n'y est plus.
-local function ShowCharMenu(button)
-	if not (MenuUtil and MenuUtil.CreateContextMenu and P.SortedKeyItems and P.GetRoster) then
+local function CharMenu(root)
+	if not (P.SortedKeyItems and P.GetRoster) then
 		return
 	end
 	local set = P.GetRoster()
 	if editChar then
 		set[editChar] = set[editChar] or true
 	end
-	MenuUtil.CreateContextMenu(button, function(_, root)
-		root:CreateTitle("Personnage du profil")
-		for _, item in ipairs(P.SortedKeyItems(set, IsConnected)) do
-			root:CreateRadio(FormatChar(item.key), function()
-				return editChar == item.key
-			end, function()
-				SetChar(item.key)
-			end)
-		end
-	end)
+	root:CreateTitle("Personnage du profil")
+	for _, item in ipairs(P.SortedKeyItems(set, IsConnected)) do
+		root:CreateRadio(FormatChar(item.key), function()
+			return editChar == item.key
+		end, function()
+			SetChar(item.key)
+		end)
+	end
 end
+
 
 -- LISTE --------------------------------------------------------------------------------------
 
@@ -795,18 +805,44 @@ local function CreateButton(parent, text, width, onClick)
 	return button
 end
 
+-- Infobulle ajoutée au survol (HookScript : garde le survol propre aux listes déroulantes).
 local function SetTooltip(widget, title, text)
-	widget:SetScript("OnEnter", function(self)
+	widget:HookScript("OnEnter", function(self)
 		GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
 		GameTooltip:AddLine(title)
 		GameTooltip:AddLine(text, 1, 1, 1, true)
 		GameTooltip:Show()
 	end)
-	widget:SetScript("OnLeave", GameTooltip_Hide)
+	widget:HookScript("OnLeave", GameTooltip_Hide)
 end
 
 local function LayoutPanels()
 	listPanel:SetWidth(math.max(200, frame:GetWidth() * LIST_RATIO))
+end
+
+-- Liste déroulante Blizzard (WowStyle1DropdownTemplate : cadre et flèche qui signalent un choix),
+-- menu construit à chaque ouverture par generator(root) ; à défaut (client sans ce modèle), bouton
+-- qui ouvre le même menu, avec une flèche « v » à droite.
+local function CreateChoice(parent, width, generator)
+	local ok, dropdown = pcall(CreateFrame, "DropdownButton", nil, parent, "WowStyle1DropdownTemplate")
+	if ok and dropdown and dropdown.SetupMenu and dropdown.OverrideText then
+		dropdown:SetSize(width, 24)
+		dropdown:SetupMenu(function(_, root)
+			generator(root)
+		end)
+		return dropdown
+	end
+	local button = CreateButton(parent, "", width, function(self)
+		if MenuUtil and MenuUtil.CreateContextMenu then
+			MenuUtil.CreateContextMenu(self, function(_, root)
+				generator(root)
+			end)
+		end
+	end)
+	local arrow = button:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+	arrow:SetPoint("RIGHT", -6, 0)
+	arrow:SetText("v")
+	return button
 end
 
 local function BuildEditor()
@@ -831,9 +867,7 @@ local function BuildEditor()
 			.. "Chaque capture ouvre un nouveau profil, nommé d'après la disposition, les talents, le titre ou l'ensemble "
 			.. "(« Apparence actuelle » datée) : le profil ouvert n'est jamais écrasé.")
 
-	kindButton = CreateButton(editor, "", 120, function(self)
-		ShowKindMenu(self)
-	end)
+	kindButton = CreateChoice(editor, 130, KindMenu)
 	kindButton:SetPoint("RIGHT", captureButton, "LEFT", -6, 0)
 	SetTooltip(kindButton, "Genre", "Mode Édition, talents ou addon d'où vient la chaîne (range la liste).")
 
@@ -855,9 +889,7 @@ local function BuildEditor()
 	charLabel:SetPoint("TOPLEFT", nameLabel, "BOTTOMLEFT", 0, -16)
 	charLabel:SetText("Personnage")
 
-	charButton = CreateButton(editor, "", 200, function(self)
-		ShowCharMenu(self)
-	end)
+	charButton = CreateChoice(editor, 200, CharMenu)
 	charButton:SetPoint("LEFT", charLabel, "RIGHT", 12, 0)
 	charButton:SetPoint("RIGHT", -10, 0)
 	SetTooltip(charButton, "Personnage", "Personnage sous lequel le profil est rangé dans la liste.")

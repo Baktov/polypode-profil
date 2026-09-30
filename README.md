@@ -48,7 +48,7 @@ Le bouton **Profils** (barre de titre de la fenêtre Polypode) ou `/poly profil`
   - Profils d'**options de WoW**, de **raccourcis clavier** et de **fenêtres de discussion** :
     une petite icône devant leur nom les **applique** au personnage joué, après confirmation
     (ils remplacent la configuration actuelle) ; un compte rendu s'affiche.
-- **À droite**, l'éditeur : nom, genre (bouton-menu), **personnage** (bouton-menu : les
+- **À droite**, l'éditeur : nom, genre (liste déroulante), **personnage** (liste déroulante : les
   personnages de votre roster, connectés en tête ; par défaut le personnage joué) et la chaîne
   elle-même, dans une zone qui défile. Changer le personnage range le profil ailleurs dans la
   liste. **Changer le genre réinitialise l'éditeur** : nom et chaîne sont effacés pour un
