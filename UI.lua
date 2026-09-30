@@ -720,6 +720,8 @@ local function RowTooltip(data)
 		"Genre : " .. ns.KindLabel(profile.kind),
 		"Personnage : " .. CharName(profile.char),
 		"Enregistré le " .. FormatDate(profile.updated),
+		-- Saison et version du jeu au moment de la sauvegarde (inconnues avant la 1.9.0).
+		"Enregistré sous : " .. (ns.GameContextText(profile) or Gray("inconnu (sauvegarde plus ancienne)")),
 		#(profile.text or "") .. " caractères",
 	}
 	local details = KIND_DETAILS[ns.NormalizeKind(profile.kind)]

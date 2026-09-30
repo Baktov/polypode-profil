@@ -94,6 +94,35 @@ local function Changed()
 	end
 end
 
+-- Contexte de jeu d'une sauvegarde : saison (« Midnight, saison 2 », comme Polypode Suivi :
+-- C_SeasonInfo + C_DelvesUI) et version du client (« 12.1.0 », GetBuildInfo). nil si inconnu.
+local function GameContext()
+	local build = GetBuildInfo and GetBuildInfo()
+	local okExpansion, expansion = pcall(function()
+		return C_SeasonInfo and C_SeasonInfo.GetCurrentDisplaySeasonExpansion
+			and C_SeasonInfo.GetCurrentDisplaySeasonExpansion()
+	end)
+	local okNumber, number = pcall(function()
+		return C_DelvesUI and C_DelvesUI.GetCurrentDelvesSeasonNumber and C_DelvesUI.GetCurrentDelvesSeasonNumber()
+	end)
+	local season
+	if okExpansion and expansion then
+		local name = _G["EXPANSION_NAME" .. expansion] or ("Extension " .. expansion)
+		number = okNumber and tonumber(number) or nil
+		season = (number and number > 0) and (name .. ", saison " .. number) or (name .. ", hors saison")
+	end
+	return season, build
+end
+
+-- Texte « saison (version) » d'un profil pour l'infobulle, ou nil (sauvegarde antérieure à 1.9.0).
+function ns.GameContextText(profile)
+	if not (profile.season or profile.build) then
+		return nil
+	end
+	local text = profile.season or "saison inconnue"
+	return profile.build and (text .. " (" .. profile.build .. ")") or text
+end
+
 -- BIBLIOTHÈQUE -------------------------------------------------------------------------------
 
 -- Profil actif, ou nil (supprimé ou inconnu).
@@ -158,6 +187,7 @@ function ns.Save(id, name, kind, text, char)
 	profile.removed = nil
 	profile.char = char or profile.char or P.GetCharKey()
 	profile.name, profile.kind, profile.text = name, ns.NormalizeKind(kind), text
+	profile.season, profile.build = GameContext() -- saison et version du jeu de cette sauvegarde
 	profile.updated = NextVersion(profile.updated)
 	SendProfile(id)
 	Changed()
@@ -443,6 +473,12 @@ function SendProfile(id, target)
 		P.WhisperOnline(string.format("PROF:%s:%s:+:%d:%d:%s", token, id, version, index,
 			text:sub((index - 1) * budget + 1, index * budget)), target)
 	end
+	-- Saison et version du jeu : message à part (un champ de plus dans PROF serait mal lu par les
+	-- versions précédentes, qui ignorent ce type).
+	if not profile.removed and (profile.season or profile.build) then
+		P.WhisperOnline(string.format("PROFINFO:%s:%s:%d:%s:%s", token, id, version,
+			((profile.build or ""):gsub(":", "")), Encode(profile.season or "")), target)
+	end
 end
 
 -- Envoie une liste « a,b,c » fragmentée : prefix .. morceau, sans couper un élément.
@@ -571,6 +607,18 @@ if P.RegisterMessageHandler then
 	P.RegisterMessageHandler("PROF", OnProfile)
 	P.RegisterMessageHandler("PROFV", OnVersions)
 	P.RegisterMessageHandler("PROFREQ", OnRequest)
+	-- PROFINFO:token:id:version:build:saison — contexte de jeu d'un profil, appliqué seulement
+	-- à la version du profil qu'on détient (il suit les fragments PROF dans la file d'envoi).
+	P.RegisterMessageHandler("PROFINFO", function(rest)
+		local id, version, build, season = strsplit(":", rest or "", 4)
+		local profile = store and id and store[id]
+		if profile and not profile.removed and tonumber(profile.updated) == tonumber(version) then
+			profile.build = build ~= "" and build or nil
+			season = Decode(season or "")
+			profile.season = season ~= "" and season or nil
+			Changed()
+		end
+	end)
 	P.RegisterPeerCallback(function(sender)
 		SendVersions(sender)
 	end)

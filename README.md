@@ -31,8 +31,9 @@ Le bouton **Profils** (barre de titre de la fenêtre Polypode) ou `/poly profil`
   - En-tête de personnage : clic gauche = replier / déplier ses profils (état gardé) ; clic
     droit = nouveau profil pour ce personnage.
   - Profil (genre puis nom, par ex. « Talents · Arcane raid ») : clic gauche = ouvrir dans
-    l'éditeur ; clic droit = dupliquer ou supprimer ; au survol : genre, personnage, date et
-    taille.
+    l'éditeur ; clic droit = dupliquer ou supprimer ; au survol : genre, personnage, date,
+    **saison et version du jeu** de la sauvegarde (par exemple « Midnight, saison 2 (12.1.0) » ;
+    « inconnu » pour les sauvegardes antérieures à la 1.9.0) et taille.
   - Profil de **transmogrification** : une petite icône devant son nom **ouvre la cabine
     d'essayage** sur la tenue (comme la chaîne collée dans la discussion ; hors combat).
   - Profil de **titre** : une petite icône devant son nom fait **porter ce titre** au
