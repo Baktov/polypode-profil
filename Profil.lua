@@ -34,6 +34,7 @@ ns.KINDS = {
 	{ key = "talents", label = "Talents", capture = true },
 	{ key = "transmog", label = "Transmogrification", capture = true },
 	{ key = "title", label = "Titre", capture = true },
+	{ key = "equipset", label = "Ensemble d'équipement", capture = true }, -- Equipement.lua
 	{ key = "ellesmereui", label = "EllesmereUI" },
 	{ key = "elvui", label = "ElvUI" },
 	{ key = "baganator", label = "Baganator" },

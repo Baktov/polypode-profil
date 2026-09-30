@@ -37,6 +37,9 @@ Le bouton **Profils** (barre de titre de la fenêtre Polypode) ou `/poly profil`
     d'essayage** sur la tenue (comme la chaîne collée dans la discussion ; hors combat).
   - Profil de **titre** : une petite icône devant son nom fait **porter ce titre** au
     personnage joué (s'il le connaît ; « Aucun titre » retire le titre).
+  - Profil d'**ensemble d'équipement** : une petite icône devant son nom **ajoute l'ensemble
+    aux ensembles d'équipement** du personnage joué (voir plus bas) ; l'infobulle du profil
+    indique sa spécialisation et son nombre de pièces.
 - **À droite**, l'éditeur : nom, genre (bouton-menu), **personnage** (bouton-menu : les
   personnages de votre roster, connectés en tête ; par défaut le personnage joué) et la chaîne
   elle-même, dans une zone qui défile. Changer le personnage range le profil ailleurs dans la
@@ -52,7 +55,7 @@ Le bouton **Profils** (barre de titre de la fenêtre Polypode) ou `/poly profil`
    et choisir le genre.
 3. **Enregistrer**.
 
-**Capturer** (genres « Mode Édition », « Talents », « Transmogrification » et « Titre ») relève la chaîne directement en jeu, sans
+**Capturer** (genres « Mode Édition », « Talents », « Transmogrification », « Titre » et « Ensemble d'équipement ») relève la chaîne directement en jeu, sans
 passer par le presse-papiers :
 
 - Mode Édition : un menu liste vos dispositions (la disposition active est signalée) ;
@@ -66,6 +69,11 @@ passer par le presse-papiers :
   dans la **discussion** et valider, la cabine d'essayage s'ouvre avec la tenue (à enregistrer
   ou appliquer ensuite chez le transmogrificateur).
 
+- Ensemble d'équipement : un menu liste les ensembles du gestionnaire d'équipement du
+  personnage joué (avec leur spécialisation). Le profil garde, pour chaque emplacement, la pièce
+  exacte (enchantement, gemmes, améliorations), les emplacements ignorés et la spécialisation.
+  Blizzard n'a pas de chaîne d'export pour les ensembles : le texte est propre à Polypode Profil
+  (il n'est pas à coller dans la discussion).
 - Titre : le titre porté par le personnage joué, en chaîne Blizzard `/settitle Nom` (collée
   dans la discussion, elle change de titre ; sans nom, elle le retire). Attention, la commande
   de Blizzard prend le premier titre connu qui *commence* par ce nom ; l'icône de la liste
@@ -88,6 +96,23 @@ Une modification non enregistrée est signalée « (non enregistré) » dans l'e
 ouvrir un autre profil ou en créer un nouveau demande alors confirmation.
 
 ---
+
+### Recréer un ensemble d'équipement
+
+L'icône devant un profil d'ensemble le crée chez le **personnage joué**, sous le **nom du
+profil**. WoW n'enregistre un ensemble qu'à partir de ce que le personnage **porte** ; l'addon :
+
+1. vérifie (hors combat) que chaque pièce est dans les sacs ou déjà équipée, qu'aucun ensemble
+   ne porte déjà ce nom et que le maximum d'ensembles n'est pas atteint — sinon rien ne bouge ;
+2. équipe les pièces une à une (la pièce exacte si elle existe, sinon le même objet, par exemple
+   amélioré depuis) ;
+3. crée l'ensemble (mêmes emplacements ignorés, même icône) et lui associe la spécialisation
+   (s'il s'agit de la même classe) ;
+4. **remet la tenue portée avant**.
+
+Limites : les pièces en banque ne sont pas prises ; les emplacements que l'ensemble laissait
+**vides** sont ignorés par l'ensemble recréé ; un échange d'arme à deux mains / arme + main
+gauche peut empêcher de remettre exactement la tenue d'avant (un message le signale).
 
 ## Partage entre personnages et clients
 

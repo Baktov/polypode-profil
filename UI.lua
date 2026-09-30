@@ -275,6 +275,25 @@ local function Capture(button)
 				end
 			end
 		end)
+	elseif editKind == "equipset" then
+		local sets = ns.GetEquipmentSets()
+		if #sets == 0 or not (MenuUtil and MenuUtil.CreateContextMenu) then
+			Notify("Aucun ensemble d'équipement chez ce personnage.")
+			return
+		end
+		MenuUtil.CreateContextMenu(button, function(_, root)
+			root:CreateTitle("Ensemble à capturer")
+			for _, set in ipairs(sets) do
+				root:CreateButton(set.name .. (set.spec and Gray(" (" .. set.spec .. ")") or ""), function()
+					local text, nameOrReason = ns.ExportEquipmentSet(set.id)
+					if text then
+						ApplyCapture(text, nameOrReason, P.GetCharKey()) -- ensemble du personnage joué
+					else
+						Notify(nameOrReason)
+					end
+				end)
+			end
+		end)
 	elseif editKind == "title" then
 		local text, nameOrReason = ns.ExportTitle()
 		if text then
@@ -434,8 +453,20 @@ local ROW_ACTIONS = {
 		title = "Essayer la tenue",
 		tooltip = "Ouvre la cabine d'essayage sur cette tenue (comme la chaîne collée dans la discussion). Hors combat.",
 		hint = "essayer la tenue (cabine d'essayage)",
-		run = function(text)
-			return ns.TryOnTransmog(text)
+		run = function(profile)
+			return ns.TryOnTransmog(profile.text)
+		end,
+	},
+	equipset = {
+		texture = "Interface\\Icons\\INV_Helmet_03",
+		title = "Ajouter aux ensembles d'équipement",
+		tooltip = "Crée cet ensemble (nom du profil) chez le personnage joué, avec sa spécialisation. WoW "
+			.. "n'enregistre que ce qui est porté : les pièces (sacs ou équipées) sont équipées une à une, "
+			.. "l'ensemble est créé, puis la tenue d'avant est remise. Hors combat.",
+		hint = "ajouter aux ensembles d'équipement du personnage joué",
+		done = "Création de l'ensemble…",
+		run = function(profile)
+			return ns.CreateEquipmentSet(profile.text, profile.name, Notify)
 		end,
 	},
 	title = {
@@ -444,8 +475,8 @@ local ROW_ACTIONS = {
 		tooltip = "Le personnage joué porte ce titre (s'il le connaît) ; « Aucun titre » retire le titre.",
 		hint = "porter ce titre",
 		done = "Titre changé.",
-		run = function(text)
-			return ns.ApplyTitle(text)
+		run = function(profile)
+			return ns.ApplyTitle(profile.text)
 		end,
 	},
 }
@@ -472,8 +503,13 @@ local function RowTooltip(data)
 		"Personnage : " .. CharName(profile.char),
 		"Enregistré le " .. FormatDate(profile.updated),
 		#(profile.text or "") .. " caractères",
-		" ",
 	}
+	if ns.NormalizeKind(profile.kind) == "equipset" then
+		for _, line in ipairs(ns.EquipmentSetDetails(profile.text) or {}) do
+			lines[#lines + 1] = line
+		end
+	end
+	lines[#lines + 1] = " "
 	local action = ROW_ACTIONS[ns.NormalizeKind(profile.kind)]
 	if action then
 		lines[#lines + 1] = Gray("Icône : " .. action.hint)
@@ -518,7 +554,7 @@ local function ActionButton(row)
 		if not (self.action and data and data.profile) then
 			return
 		end
-		local ok, reason = self.action.run(data.profile.text)
+		local ok, reason = self.action.run(data.profile)
 		if ok then
 			if self.action.done then
 				Notify(self.action.done)
@@ -586,7 +622,7 @@ local function BuildEditor()
 		"Relève la chaîne en jeu : une disposition du mode Édition (menu), les talents de la configuration "
 			.. "active (la fenêtre des talents doit avoir été ouverte une fois), ou une tenue (apparence actuelle "
 			.. "ou ensemble personnalisé : chaîne « /customset », à coller dans la discussion pour l'essayer), "
-			.. "ou le titre porté (chaîne « /settitle »). "
+			.. "le titre porté (chaîne « /settitle »), ou un ensemble d'équipement (menu, avec sa spécialisation). "
 			.. "Chaque capture ouvre un nouveau profil, nommé d'après la disposition, les talents, le titre ou l'ensemble "
 			.. "(« Apparence actuelle » datée) : le profil ouvert n'est jamais écrasé.")
 
