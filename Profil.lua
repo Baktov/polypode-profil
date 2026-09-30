@@ -33,6 +33,7 @@ ns.KINDS = {
 	{ key = "editmode", label = "Mode Édition", capture = true },
 	{ key = "talents", label = "Talents", capture = true },
 	{ key = "transmog", label = "Transmogrification", capture = true },
+	{ key = "title", label = "Titre", capture = true },
 	{ key = "ellesmereui", label = "EllesmereUI" },
 	{ key = "elvui", label = "ElvUI" },
 	{ key = "baganator", label = "Baganator" },
@@ -302,6 +303,49 @@ function ns.TryOnTransmog(text)
 	local showCustomSetDetails = true
 	DressUpItemTransmogInfoList(list, showCustomSetDetails)
 	return true
+end
+
+-- TITRE : chaîne « /settitle Nom » (commande de Blizzard, sans nom = aucun titre), collable dans
+-- la discussion. La commande de Blizzard prend le premier titre connu qui COMMENCE par le nom ;
+-- ns.ApplyTitle cherche le nom exact.
+local function TitleName(id)
+	local name = GetTitleName and GetTitleName(id)
+	return name and strtrim(name) or nil
+end
+
+-- Titre porté par le personnage joué : chaîne et nom proposé.
+function ns.ExportTitle()
+	if not (GetCurrentTitle and GetTitleName) then
+		return nil, "Titres indisponibles sur ce client."
+	end
+	local id = GetCurrentTitle()
+	local name = id and id > 0 and (not IsTitleKnown or IsTitleKnown(id)) and TitleName(id)
+	if name and name ~= "" then
+		return "/settitle " .. name, name
+	end
+	return "/settitle", "Aucun titre"
+end
+
+-- Porte le titre d'une chaîne « /settitle Nom » (nom exact, parmi les titres connus du
+-- personnage joué) ; sans nom, retire le titre. Renvoie true, ou nil et la raison.
+function ns.ApplyTitle(text)
+	local wanted = tostring(text or ""):match("^%s*/settitle%s*(.-)%s*$")
+	if not wanted then
+		return nil, "Ce profil n'est pas une chaîne « /settitle »."
+	elseif not (SetCurrentTitle and GetNumTitles and IsTitleKnown) then
+		return nil, "Titres indisponibles sur ce client."
+	elseif wanted == "" then
+		SetCurrentTitle(-1)
+		return true
+	end
+	wanted = wanted:lower()
+	for id = 1, GetNumTitles() do
+		if IsTitleKnown(id) and (TitleName(id) or ""):lower() == wanted then
+			SetCurrentTitle(id)
+			return true
+		end
+	end
+	return nil, "Titre inconnu de ce personnage."
 end
 
 -- Apparence portée par le personnage joué, lue sur un modèle de cabine d'essayage invisible

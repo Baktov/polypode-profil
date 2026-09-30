@@ -275,6 +275,13 @@ local function Capture(button)
 				end
 			end
 		end)
+	elseif editKind == "title" then
+		local text, nameOrReason = ns.ExportTitle()
+		if text then
+			ApplyCapture(text, nameOrReason, P.GetCharKey()) -- titre du personnage joué
+		else
+			Notify(nameOrReason)
+		end
 	elseif editKind == "editmode" then
 		local layouts = ns.GetEditModeLayouts()
 		if #layouts == 0 or not (MenuUtil and MenuUtil.CreateContextMenu) then
@@ -415,6 +422,34 @@ local function ShowCharRowMenu(key)
 	end)
 end
 
+-- ICÔNE D'ACTION devant certains profils (genre → action sur la chaîne du profil) :
+--   transmogrification : ouvrir la cabine d'essayage sur la tenue (ns.TryOnTransmog) ; atlas
+--     des jets de butin « transmogrification », icône d'objet si l'atlas manque (WoW Forever) ;
+--   titre : porter le titre (ns.ApplyTitle).
+local ACTION_SIZE = 16
+local ROW_ACTIONS = {
+	transmog = {
+		atlas = "lootroll-toast-icon-transmog",
+		texture = "Interface\\Icons\\INV_Chest_Cloth_17",
+		title = "Essayer la tenue",
+		tooltip = "Ouvre la cabine d'essayage sur cette tenue (comme la chaîne collée dans la discussion). Hors combat.",
+		hint = "essayer la tenue (cabine d'essayage)",
+		run = function(text)
+			return ns.TryOnTransmog(text)
+		end,
+	},
+	title = {
+		texture = "Interface\\Icons\\INV_Scroll_03",
+		title = "Porter ce titre",
+		tooltip = "Le personnage joué porte ce titre (s'il le connaît) ; « Aucun titre » retire le titre.",
+		hint = "porter ce titre",
+		done = "Titre changé.",
+		run = function(text)
+			return ns.ApplyTitle(text)
+		end,
+	},
+}
+
 local function RowTooltip(data)
 	if data.header then
 		-- Mêmes indications que « Personnages disponibles » (P.CharacterTooltip : nom, équipes).
@@ -439,58 +474,70 @@ local function RowTooltip(data)
 		#(profile.text or "") .. " caractères",
 		" ",
 	}
-	if ns.NormalizeKind(profile.kind) == "transmog" then
-		lines[#lines + 1] = Gray("Icône : essayer la tenue (cabine d'essayage)")
+	local action = ROW_ACTIONS[ns.NormalizeKind(profile.kind)]
+	if action then
+		lines[#lines + 1] = Gray("Icône : " .. action.hint)
 	end
 	lines[#lines + 1] = Gray("Clic gauche : ouvrir dans l'éditeur")
 	lines[#lines + 1] = Gray("Clic droit : dupliquer, supprimer")
 	return lines
 end
 
--- ICÔNE « ESSAYER » des profils de transmogrification (devant leur nom) : ouvre la cabine
--- d'essayage sur la tenue (ns.TryOnTransmog). Atlas des jets de butin « transmogrification »,
--- icône d'objet si l'atlas n'existe pas (WoW Forever).
-local TRY_ON_ATLAS = "lootroll-toast-icon-transmog"
-local TRY_ON_FALLBACK = "Interface\\Icons\\INV_Chest_Cloth_17"
-local TRY_ON_SIZE = 16
-
 local function HasAtlas(name)
 	return C_Texture and C_Texture.GetAtlasInfo and C_Texture.GetAtlasInfo(name) ~= nil
 end
 
-local function TryOnButton(row)
-	if row.tryOnButton then
-		return row.tryOnButton
+-- Habille l'icône selon l'action (atlas avec états survol / appui, sinon texture de repli).
+local function SetActionIcon(button, action)
+	if button.action == action then
+		return
+	end
+	button.action = action
+	if action.atlas and HasAtlas(action.atlas .. "-up") then
+		button:SetNormalAtlas(action.atlas .. "-up")
+		button:SetHighlightAtlas(action.atlas .. "-highlight")
+		button:SetPushedAtlas(action.atlas .. "-down")
+	else
+		button:SetNormalTexture(action.texture)
+		button:SetHighlightTexture(action.texture, "ADD")
+		button:SetPushedTexture(action.texture)
+	end
+end
+
+local function ActionButton(row)
+	if row.actionButton then
+		return row.actionButton
 	end
 	local button = CreateFrame("Button", nil, row)
-	button:SetSize(TRY_ON_SIZE, TRY_ON_SIZE)
+	button:SetSize(ACTION_SIZE, ACTION_SIZE)
 	button:SetPoint("LEFT", 14, 0)
 	button:SetFrameLevel(row:GetFrameLevel() + 2)
-	if HasAtlas(TRY_ON_ATLAS .. "-up") then
-		button:SetNormalAtlas(TRY_ON_ATLAS .. "-up")
-		button:SetHighlightAtlas(TRY_ON_ATLAS .. "-highlight")
-		button:SetPushedAtlas(TRY_ON_ATLAS .. "-down")
-	else
-		button:SetNormalTexture(TRY_ON_FALLBACK)
-		button:SetHighlightTexture(TRY_ON_FALLBACK, "ADD")
-	end
 	-- Lignes recyclées : l'icône agit sur la donnée courante de la ligne.
 	button:SetScript("OnClick", function(self)
 		local data = self:GetParent().data
-		local ok, reason = ns.TryOnTransmog(data and data.profile and data.profile.text)
-		if not ok then
+		if not (self.action and data and data.profile) then
+			return
+		end
+		local ok, reason = self.action.run(data.profile.text)
+		if ok then
+			if self.action.done then
+				Notify(self.action.done)
+			end
+		else
 			Notify(reason)
 		end
 	end)
 	button:SetScript("OnEnter", function(self)
+		if not self.action then
+			return
+		end
 		GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-		GameTooltip:AddLine("Essayer la tenue")
-		GameTooltip:AddLine("Ouvre la cabine d'essayage sur cette tenue (comme la chaîne collée dans la discussion).",
-			1, 1, 1, true)
+		GameTooltip:AddLine(self.action.title)
+		GameTooltip:AddLine(self.action.tooltip, 1, 1, 1, true)
 		GameTooltip:Show()
 	end)
 	button:SetScript("OnLeave", GameTooltip_Hide)
-	row.tryOnButton = button
+	row.actionButton = button
 	return button
 end
 
@@ -538,8 +585,9 @@ local function BuildEditor()
 	SetTooltip(captureButton, "Capturer",
 		"Relève la chaîne en jeu : une disposition du mode Édition (menu), les talents de la configuration "
 			.. "active (la fenêtre des talents doit avoir été ouverte une fois), ou une tenue (apparence actuelle "
-			.. "ou ensemble personnalisé : chaîne « /customset », à coller dans la discussion pour l'essayer). "
-			.. "Chaque capture ouvre un nouveau profil, nommé d'après la disposition, les talents ou l'ensemble "
+			.. "ou ensemble personnalisé : chaîne « /customset », à coller dans la discussion pour l'essayer), "
+			.. "ou le titre porté (chaîne « /settitle »). "
+			.. "Chaque capture ouvre un nouveau profil, nommé d'après la disposition, les talents, le titre ou l'ensemble "
 			.. "(« Apparence actuelle » datée) : le profil ouvert n'est jamais écrasé.")
 
 	kindButton = CreateButton(editor, "", 120, function(self)
@@ -701,12 +749,14 @@ local function Build()
 		-- transmogrification) ; lignes recyclées : retrait et icône recalculés à chaque affichage.
 		decorate = function(row, data)
 			row:SetAlpha((data.header and not data.online) and 0.55 or 1)
-			row.text:SetPoint("LEFT", data.header and 4 or (14 + TRY_ON_SIZE + 4), 0)
-			local isTransmog = not data.header and ns.NormalizeKind(data.profile.kind) == "transmog"
-			if isTransmog then
-				TryOnButton(row):Show()
-			elseif row.tryOnButton then
-				row.tryOnButton:Hide()
+			row.text:SetPoint("LEFT", data.header and 4 or (14 + ACTION_SIZE + 4), 0)
+			local action = not data.header and ROW_ACTIONS[ns.NormalizeKind(data.profile.kind)]
+			if action then
+				local button = ActionButton(row)
+				SetActionIcon(button, action)
+				button:Show()
+			elseif row.actionButton then
+				row.actionButton:Hide()
 			end
 		end,
 	})
