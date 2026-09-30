@@ -785,13 +785,17 @@ local function RowTooltip(data)
 		return hints
 	end
 	local profile = data.profile
+	-- Intitulés en bleu clair, pour distinguer d'un coup d'œil l'intitulé de sa valeur.
+	local function Label(text)
+		return "|cff66ccff" .. text .. "|r "
+	end
 	local lines = {
 		profile.name,
-		"Genre : " .. ns.KindLabel(profile.kind),
-		"Personnage : " .. CharName(profile.char),
-		"Enregistré le " .. FormatDate(profile.updated),
+		Label("Genre :") .. ns.KindLabel(profile.kind),
+		Label("Personnage :") .. CharName(profile.char),
+		Label("Enregistré le") .. FormatDate(profile.updated),
 		-- Saison et version du jeu au moment de la sauvegarde (inconnues avant la 1.9.0).
-		"Enregistré sous : " .. (ns.GameContextText(profile) or Gray("inconnu (sauvegarde plus ancienne)")),
+		Label("Enregistré sous :") .. (ns.GameContextText(profile) or Gray("inconnu (sauvegarde plus ancienne)")),
 		#(profile.text or "") .. " caractères",
 	}
 	local details = KIND_DETAILS[ns.NormalizeKind(profile.kind)]
