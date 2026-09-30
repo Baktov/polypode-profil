@@ -58,6 +58,13 @@ Le bouton **Profils** (barre de titre de la fenêtre Polypode) ou `/poly profil`
   nouveau profil de ce genre (même personnage) ; le profil qui était ouvert n'est pas modifié
   (confirmation demandée s'il avait des modifications non enregistrées).
 
+### Supprimer tous les profils d'une saison
+
+Le bouton **Supprimer une saison** (à droite de « Supprimer », en bas de l'éditeur) liste les
+saisons pendant lesquelles vos profils ont été enregistrés (avec leur nombre, « Saison inconnue »
+pour les sauvegardes antérieures à la 1.9.0). En choisir une supprime, après confirmation, tous
+les profils de cette saison, sur tous vos clients.
+
 ### Enregistrer une chaîne
 
 1. Dans l'addon (ou le mode Édition, ou les talents), utiliser son bouton **Exporter** et copier

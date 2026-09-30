@@ -16,8 +16,8 @@ local P = Polypode
 -- la fait confirmer. Un profil modifié par un autre client est rechargé s'il n'est pas en cours
 -- d'édition.
 
-local MIN_WIDTH, MIN_HEIGHT = 700, 340
-local DEFAULT_WIDTH, DEFAULT_HEIGHT = 820, 480
+local MIN_WIDTH, MIN_HEIGHT = 860, 340 -- largeur : rangée de boutons du bas de l'éditeur
+local DEFAULT_WIDTH, DEFAULT_HEIGHT = 900, 480
 local LIST_RATIO = 0.36 -- part de la largeur donnée à la liste
 
 local frame, listPanel, editor, nameBox, kindButton, captureButton, charButton, textBox, deleteButton
@@ -194,6 +194,65 @@ StaticPopupDialogs["POLYPODE_PROFIL_DISCARD"] = {
 	whileDead = true,
 	hideOnEscape = true,
 }
+
+-- SUPPRESSION PAR SAISON : profils regroupés par la saison de leur sauvegarde (profile.season ;
+-- clé "" = saison inconnue, sauvegardes antérieures à la 1.9.0).
+local UNKNOWN_SEASON = ""
+
+local function SeasonLabel(season)
+	return season == UNKNOWN_SEASON and "Saison inconnue (sauvegardes anciennes)" or season
+end
+
+-- { { season, ids = { ... } }, ... } triées par nom de saison, inconnue en dernier.
+local function ProfilesBySeason()
+	local bySeason, list = {}, {}
+	for _, entry in ipairs(ns.GetProfiles()) do
+		local season = entry.profile.season or UNKNOWN_SEASON
+		if not bySeason[season] then
+			bySeason[season] = { season = season, ids = {} }
+			list[#list + 1] = bySeason[season]
+		end
+		table.insert(bySeason[season].ids, entry.id)
+	end
+	table.sort(list, function(a, b)
+		if (a.season == UNKNOWN_SEASON) ~= (b.season == UNKNOWN_SEASON) then
+			return b.season == UNKNOWN_SEASON
+		end
+		return a.season < b.season
+	end)
+	return list
+end
+
+StaticPopupDialogs["POLYPODE_PROFIL_DELETE_SEASON"] = {
+	text = "Supprimer les %s profil(s) enregistrés pendant « %s » ?\n(sur tous vos clients)",
+	button1 = DELETE or "Supprimer",
+	button2 = CANCEL,
+	OnAccept = function(_, group)
+		for _, id in ipairs(group.ids) do
+			ns.Delete(id)
+		end
+		Notify(#group.ids .. " profil(s) supprimé(s) : " .. SeasonLabel(group.season) .. ".")
+	end,
+	timeout = 0,
+	whileDead = true,
+	hideOnEscape = true,
+}
+
+local function ShowSeasonDeleteMenu(button)
+	local groups = ProfilesBySeason()
+	if #groups == 0 or not (MenuUtil and MenuUtil.CreateContextMenu) then
+		Notify("Aucun profil enregistré.")
+		return
+	end
+	MenuUtil.CreateContextMenu(button, function(_, root)
+		root:CreateTitle("Supprimer tous les profils de la saison")
+		for _, group in ipairs(groups) do
+			root:CreateButton(SeasonLabel(group.season) .. Gray(" (" .. #group.ids .. ")"), function()
+				StaticPopup_Show("POLYPODE_PROFIL_DELETE_SEASON", #group.ids, SeasonLabel(group.season), group)
+			end)
+		end
+	end)
+end
 
 StaticPopupDialogs["POLYPODE_PROFIL_DELETE"] = {
 	text = "Supprimer le profil « %s » ?\n(sur tous vos clients)",
@@ -930,6 +989,14 @@ local function BuildEditor()
 		end
 	end)
 	deleteButton:SetPoint("LEFT", saveButton, "RIGHT", 6, 0)
+
+	local seasonButton = CreateButton(editor, "Supprimer une saison", 140, function(self)
+		ShowSeasonDeleteMenu(self)
+	end)
+	seasonButton:SetPoint("LEFT", deleteButton, "RIGHT", 6, 0)
+	SetTooltip(seasonButton, "Supprimer une saison",
+		"Liste les saisons de vos profils enregistrés ; en choisir une supprime (après confirmation) tous "
+			.. "les profils enregistrés pendant cette saison, sur tous vos clients.")
 
 	local selectButton = CreateButton(editor, "Tout sélectionner", 120, SelectAll)
 	selectButton:SetPoint("BOTTOMRIGHT", -10, 10)
