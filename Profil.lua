@@ -34,7 +34,8 @@ ns.KINDS = {
 	{ key = "talents", label = "Talents", capture = true },
 	{ key = "transmog", label = "Transmogrification", capture = true },
 	{ key = "title", label = "Titre", capture = true },
-	{ key = "equipset", label = "Ensemble d'équipement", capture = true }, -- Equipement.lua
+	-- short : libellé du bouton de genre quand le bouton « Capturer » le raccourcit.
+	{ key = "equipset", label = "Ensemble d'équipement", short = "Ensemble", capture = true }, -- Equipement.lua
 	{ key = "ellesmereui", label = "EllesmereUI" },
 	{ key = "elvui", label = "ElvUI" },
 	{ key = "baganator", label = "Baganator" },
@@ -55,6 +56,12 @@ end
 
 function ns.KindLabel(kind)
 	return ns.KINDS[KIND_INDEX[ns.NormalizeKind(kind)]].label
+end
+
+-- Libellé court (bouton de genre à côté de « Capturer »), sinon le libellé.
+function ns.KindShortLabel(kind)
+	local entry = ns.KINDS[KIND_INDEX[ns.NormalizeKind(kind)]]
+	return entry.short or entry.label
 end
 
 function ns.KindOrder(kind)

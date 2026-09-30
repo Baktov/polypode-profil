@@ -119,8 +119,10 @@ end
 
 local function SetKind(kind)
 	editKind = ns.NormalizeKind(kind)
-	kindButton:SetText(ns.KindLabel(editKind))
-	captureButton:SetShown(ns.CanCapture(editKind))
+	local canCapture = ns.CanCapture(editKind)
+	-- Avec « Capturer » à côté, libellé court (« Ensemble ») pour tenir dans le bouton.
+	kindButton:SetText(canCapture and ns.KindShortLabel(editKind) or ns.KindLabel(editKind))
+	captureButton:SetShown(canCapture)
 	UpdateEditorHeader()
 end
 
