@@ -119,10 +119,13 @@ end
 
 local function SetKind(kind)
 	editKind = ns.NormalizeKind(kind)
-	local canCapture = ns.CanCapture(editKind)
-	-- Avec « Capturer » à côté, libellé court (« Ensemble ») pour tenir dans le bouton.
-	kindButton:SetText(canCapture and ns.KindShortLabel(editKind) or ns.KindLabel(editKind))
-	captureButton:SetShown(canCapture)
+	-- Libellé court (« Ensemble », « Simple AM »...) si le libellé complet ne tient pas dans le bouton.
+	kindButton:SetText(ns.KindLabel(editKind))
+	local label = kindButton:GetFontString()
+	if label and label:GetStringWidth() > kindButton:GetWidth() - 16 then
+		kindButton:SetText(ns.KindShortLabel(editKind))
+	end
+	captureButton:SetShown(ns.CanCapture(editKind))
 	UpdateEditorHeader()
 end
 
@@ -880,7 +883,7 @@ if P.AddTitleButton then
 		tooltip = {
 			"Profils",
 			"Chaînes d'export du mode Édition, des talents et des addons (EllesmereUI, ElvUI, Baganator, "
-				.. "MySlots...), gardées pour tous vos personnages.",
+				.. "MySlots, Simple Addon Manager...), gardées pour tous vos personnages.",
 		},
 		onCreate = function(button)
 			P.ui.profilButton = button

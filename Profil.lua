@@ -32,14 +32,15 @@ local P = Polypode -- dépendance obligatoire (## Dependencies: Polypode), charg
 ns.KINDS = {
 	{ key = "editmode", label = "Mode Édition", capture = true },
 	{ key = "talents", label = "Talents", capture = true },
-	{ key = "transmog", label = "Transmogrification", capture = true },
+	-- short : libellé du bouton de genre quand le libellé complet n'y tient pas.
+	{ key = "transmog", label = "Transmogrification", short = "Transmo", capture = true },
 	{ key = "title", label = "Titre", capture = true },
-	-- short : libellé du bouton de genre quand le bouton « Capturer » le raccourcit.
 	{ key = "equipset", label = "Ensemble d'équipement", short = "Ensemble", capture = true }, -- Equipement.lua
 	{ key = "ellesmereui", label = "EllesmereUI" },
 	{ key = "elvui", label = "ElvUI" },
 	{ key = "baganator", label = "Baganator" },
 	{ key = "myslots", label = "MySlots" },
+	{ key = "simpleaddonmanager", label = "Simple Addon Manager", short = "Simple AM" },
 	{ key = "other", label = "Autre" },
 }
 ns.DEFAULT_KIND = "other"
@@ -58,7 +59,7 @@ function ns.KindLabel(kind)
 	return ns.KINDS[KIND_INDEX[ns.NormalizeKind(kind)]].label
 end
 
--- Libellé court (bouton de genre à côté de « Capturer »), sinon le libellé.
+-- Libellé court (bouton de genre, quand le libellé complet n'y tient pas), sinon le libellé.
 function ns.KindShortLabel(kind)
 	local entry = ns.KINDS[KIND_INDEX[ns.NormalizeKind(kind)]]
 	return entry.short or entry.label

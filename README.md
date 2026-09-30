@@ -2,7 +2,7 @@
 
 Fenêtre **« Profils »** de [Polypode](https://github.com/Baktov/polypode), sous forme d'addon
 séparé : une bibliothèque de **chaînes d'export** — disposition du **mode Édition** de WoW,
-**talents**, profils d'addons (**EllesmereUI**, **ElvUI**, **Baganator**, **MySlots**...) —
+**talents**, profils d'addons (**EllesmereUI**, **ElvUI**, **Baganator**, **MySlots**, **Simple Addon Manager**...) —
 gardées une fois pour toutes et disponibles sur tous vos personnages, pour configurer
 rapidement un nouveau personnage ou une nouvelle fenêtre.
 
