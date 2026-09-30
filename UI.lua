@@ -21,6 +21,7 @@ local DEFAULT_WIDTH, DEFAULT_HEIGHT = 820, 480
 local LIST_RATIO = 0.36 -- part de la largeur donnée à la liste
 
 local frame, listPanel, editor, nameBox, kindButton, captureButton, charButton, textBox, deleteButton
+local collapseAllButton -- « Tout replier » / « Tout déplier » du cadre Personnages
 local selectedID -- profil ouvert dans l'éditeur (nil = nouveau)
 local editKind = ns.DEFAULT_KIND
 local editChar -- personnage sous lequel le profil en cours d'édition est rangé
@@ -482,6 +483,16 @@ local function BuildItems()
 		end
 	end
 	return items
+end
+
+-- Vrai si tous les personnages de la liste sont repliés (bouton « Tout déplier »).
+local function AllCollapsed()
+	for _, item in ipairs(BuildItems()) do
+		if item.header and not item.collapsed then
+			return false
+		end
+	end
+	return true
 end
 
 local function ShowRowMenu(id)
@@ -996,6 +1007,26 @@ local function Build()
 	listPanel = P.CreatePanel(frame, "Personnages")
 	listPanel:SetPoint("TOPLEFT", 12, -36)
 	listPanel:SetPoint("BOTTOMLEFT", 12, 12)
+
+	-- « Tout replier » / « Tout déplier », à droite du titre du cadre : condense la liste.
+	collapseAllButton = CreateButton(listPanel, "Tout replier", 90, function()
+		local collapsed = Collapsed()
+		if AllCollapsed() then
+			wipe(collapsed)
+		else
+			for _, item in ipairs(BuildItems()) do
+				if item.header then
+					collapsed[item.key] = true
+				end
+			end
+		end
+		ns.Refresh()
+	end)
+	collapseAllButton:SetHeight(18)
+	collapseAllButton:SetPoint("TOPRIGHT", -6, -4)
+	listPanel.header:SetPoint("RIGHT", collapseAllButton, "LEFT", -6, 0)
+	SetTooltip(collapseAllButton, "Tout replier / déplier",
+		"Replie tous les personnages pour ne voir que leurs noms, ou les déplie tous.")
 	P.CreateScrollList(listPanel, function(data)
 		if data.header then
 			-- Personnage comme dans « Personnages disponibles », précédé du repli, suivi du nombre.
@@ -1090,6 +1121,7 @@ function ns.Refresh()
 		end
 	end
 	P.SetListData(listPanel, BuildItems())
+	collapseAllButton:SetText(AllCollapsed() and "Tout déplier" or "Tout replier")
 	UpdateEditorHeader()
 end
 

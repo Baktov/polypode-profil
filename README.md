@@ -30,6 +30,8 @@ Le bouton **Profils** (barre de titre de la fenêtre Polypode) ou `/poly profil`
   actuel apparaît toujours, même sans profil.
   - En-tête de personnage : clic gauche = replier / déplier ses profils (état gardé) ; clic
     droit = nouveau profil pour ce personnage.
+  - Bouton **Tout replier** (à droite du titre « Personnages ») : replie tous les personnages
+    pour ne voir que leurs noms ; il devient **Tout déplier** quand tout est replié.
   - Profil (genre puis nom, par ex. « Talents · Arcane raid ») : clic gauche = ouvrir dans
     l'éditeur ; clic droit = dupliquer ou supprimer ; au survol : genre, personnage, date,
     **saison et version du jeu** de la sauvegarde (par exemple « Midnight, saison 2 (12.1.0) » ;
