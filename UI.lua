@@ -306,8 +306,41 @@ local function Capture(button)
 				end)
 			end
 		end)
-	elseif editKind == "bindings" or editKind == "chat" then
-		local export = editKind == "bindings" and ns.ExportBindings or ns.ExportChat
+	elseif editKind == "simpleaddonmanager" then
+		local names = ns.GetSAMProfiles()
+		if #names == 0 or not (MenuUtil and MenuUtil.CreateContextMenu) then
+			Notify(ns.HasSimpleAddonManager() and "Aucun profil dans Simple Addon Manager."
+				or "Simple Addon Manager n'est pas chargé.")
+			return
+		end
+		MenuUtil.CreateContextMenu(button, function(_, root)
+			root:CreateTitle("Profil de Simple Addon Manager")
+			-- Tous : enregistrés directement, un profil Polypode chacun (sans passer par l'éditeur).
+			root:CreateButton("Tous les profils (enregistrés chacun)", function()
+				local saved = 0
+				for _, name in ipairs(names) do
+					local text = ns.ExportSAMProfile(name)
+					if text and ns.Save(nil, name, "simpleaddonmanager", text, P.GetCharKey()) then
+						saved = saved + 1
+					end
+				end
+				Notify(saved .. " profil(s) de Simple Addon Manager enregistré(s).")
+			end)
+			root:CreateDivider()
+			for _, name in ipairs(names) do
+				root:CreateButton(name, function()
+					local text, reason = ns.ExportSAMProfile(name)
+					if text then
+						ApplyCapture(text, name)
+					else
+						Notify(reason)
+					end
+				end)
+			end
+		end)
+	elseif editKind == "bindings" or editKind == "chat" or editKind == "addons" then
+		local export = editKind == "bindings" and ns.ExportBindings or editKind == "chat" and ns.ExportChat
+			or ns.ExportAddons
 		local text, nameOrReason = export()
 		if text then
 			ApplyCapture(text, nameOrReason)
@@ -489,6 +522,7 @@ end
 --     configuration actuelle).
 -- run(profil) renvoie ok, message (compte rendu affiché, sinon done) ou nil, raison.
 local ACTION_SIZE = 16
+local ShowReload -- boîte de rechargement, définie après ROW_ACTIONS
 local ROW_ACTIONS = {
 	transmog = {
 		atlas = "lootroll-toast-icon-transmog",
@@ -555,7 +589,58 @@ local ROW_ACTIONS = {
 			return ns.ApplyChat(profile.text)
 		end,
 	},
+	addons = {
+		texture = "Interface\\Icons\\INV_Misc_Gear_08",
+		title = "Appliquer cette liste d'addons",
+		tooltip = "Active / désactive les addons de la liste pour le personnage joué (les autres ne changent pas ; "
+			.. "Polypode et Polypode Profil restent activés), puis propose de recharger l'interface.",
+		hint = "appliquer cette liste d'addons (rechargement ensuite)",
+		confirm = "Les addons du personnage joué vont être activés / désactivés comme dans ce profil.",
+		run = function(profile)
+			local ok, message, needsReload = ns.ApplyAddons(profile.text)
+			if ok and needsReload then
+				return ok, message, function()
+					ShowReload(message)
+				end
+			end
+			return ok, message
+		end,
+	},
+	simpleaddonmanager = {
+		texture = 133742, -- icône de Simple Addon Manager
+		title = "Importer dans Simple Addon Manager",
+		tooltip = "Importe ce profil dans Simple Addon Manager (le profil du même nom y est remplacé), puis "
+			.. "propose sa boîte « charger le profil et recharger ». Simple Addon Manager doit être chargé.",
+		hint = "importer dans Simple Addon Manager",
+		confirm = "Ce profil va être importé dans Simple Addon Manager (le profil du même nom y sera remplacé).",
+		run = function(profile)
+			return ns.ImportSAMProfile(profile.text)
+		end,
+	},
 }
+
+-- Rechargement proposé (Entrée ou clic sur « Recharger ») ; sur WoW Forever, où l'addon ne peut
+-- pas recharger, un message demande de taper /reload.
+StaticPopupDialogs["POLYPODE_PROFIL_RELOAD"] = {
+	text = "%s\n\nRecharger l'interface maintenant pour appliquer ?",
+	button1 = RELOADUI or "Recharger",
+	button2 = "Plus tard",
+	OnAccept = function()
+		ns.Reload()
+	end,
+	enterClicksFirstButton = true,
+	timeout = 0,
+	whileDead = true,
+	hideOnEscape = true,
+}
+
+function ShowReload(message)
+	if ns.CanReload() then
+		StaticPopup_Show("POLYPODE_PROFIL_RELOAD", message)
+	else
+		Notify(message .. " Tapez /reload pour appliquer.")
+	end
+end
 
 -- Lignes de détail de l'infobulle d'un profil, par genre.
 local KIND_DETAILS = {
@@ -571,13 +656,21 @@ local KIND_DETAILS = {
 	chat = function(text)
 		return ns.ChatDetails(text)
 	end,
+	addons = function(text)
+		return ns.AddonsDetails(text)
+	end,
 }
 
+-- run(profil) renvoie ok, message et éventuellement une suite (boîte de rechargement...),
+-- lancée après l'affichage du message ; ou nil et la raison.
 local function RunAction(action, profile)
-	local ok, message = action.run(profile)
+	local ok, message, followUp = action.run(profile)
 	if ok then
 		if message or action.done then
 			Notify(message or action.done)
+		end
+		if followUp then
+			followUp()
 		end
 	else
 		Notify(message)

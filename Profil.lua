@@ -39,11 +39,12 @@ ns.KINDS = {
 	{ key = "options", label = "Options de WoW", capture = true }, -- Options.lua
 	{ key = "bindings", label = "Raccourcis clavier", short = "Raccourcis", capture = true }, -- Options.lua
 	{ key = "chat", label = "Fenêtres de discussion", short = "Discussion", capture = true }, -- Discussion.lua
+	{ key = "addons", label = "Liste des addons", short = "Addons", capture = true }, -- Addons.lua
 	{ key = "ellesmereui", label = "EllesmereUI" },
 	{ key = "elvui", label = "ElvUI" },
 	{ key = "baganator", label = "Baganator" },
 	{ key = "myslots", label = "MySlots" },
-	{ key = "simpleaddonmanager", label = "Simple Addon Manager", short = "Simple AM" },
+	{ key = "simpleaddonmanager", label = "Simple Addon Manager", short = "Simple AM", capture = true }, -- Addons.lua
 	{ key = "other", label = "Autre" },
 }
 ns.DEFAULT_KIND = "other"

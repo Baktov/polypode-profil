@@ -40,6 +40,11 @@ Le bouton **Profils** (barre de titre de la fenêtre Polypode) ou `/poly profil`
   - Profil d'**ensemble d'équipement** : une petite icône devant son nom **ajoute l'ensemble
     aux ensembles d'équipement** du personnage joué (voir plus bas) ; l'infobulle du profil
     indique sa spécialisation et son nombre de pièces.
+  - Profil de **liste des addons** : une petite icône l'**applique** au personnage joué (après
+    confirmation), puis propose de **recharger l'interface** (bouton « Recharger » ou touche
+    Entrée ; sur WoW Forever, taper /reload).
+  - Profil de **Simple Addon Manager** : une petite icône l'**importe** dans Simple Addon
+    Manager (après confirmation), puis ouvre sa propre boîte « charger le profil et recharger ».
   - Profils d'**options de WoW**, de **raccourcis clavier** et de **fenêtres de discussion** :
     une petite icône devant leur nom les **applique** au personnage joué, après confirmation
     (ils remplacent la configuration actuelle) ; un compte rendu s'affiche.
@@ -58,7 +63,7 @@ Le bouton **Profils** (barre de titre de la fenêtre Polypode) ou `/poly profil`
    et choisir le genre.
 3. **Enregistrer**.
 
-**Capturer** (genres « Mode Édition », « Talents », « Transmogrification », « Titre », « Ensemble d'équipement », « Options de WoW », « Raccourcis clavier » et « Fenêtres de discussion ») relève la chaîne directement en jeu, sans
+**Capturer** (genres « Mode Édition », « Talents », « Transmogrification », « Titre », « Ensemble d'équipement », « Options de WoW », « Raccourcis clavier », « Fenêtres de discussion », « Liste des addons » et « Simple Addon Manager ») relève la chaîne directement en jeu, sans
 passer par le presse-papiers :
 
 - Mode Édition : un menu liste vos dispositions (la disposition active est signalée) ;
@@ -89,6 +94,14 @@ passer par le presse-papiers :
   de messages et réglages de la discussion (style, chuchotements, horodatage...). Appliqué, le
   profil ferme les fenêtres en trop et ouvre les manquantes ; la fenêtre principale reste placée
   par le mode Édition. Un **/reload** est conseillé ensuite.
+- Liste des addons : chaque addon installé, activé (`+`) ou désactivé (`-`) pour le personnage
+  joué. Appliquée, elle active / désactive les addons de la liste pour le personnage joué ;
+  ceux qui ne sont pas dans la liste ne changent pas, ceux absents de ce PC sont comptés, et
+  Polypode et Polypode Profil ne sont jamais désactivés. Effet au rechargement.
+- Simple Addon Manager : un menu liste ses profils ; chacun est capturé par l'export de Simple
+  Addon Manager lui-même (la chaîne de son bouton « Exporter », profils dépendants compris).
+  « Tous les profils » les enregistre tous d'un coup, un profil Polypode chacun. Simple Addon
+  Manager doit être chargé.
 - Titre : le titre porté par le personnage joué, en chaîne Blizzard `/settitle Nom` (collée
   dans la discussion, elle change de titre ; sans nom, elle le retire). Attention, la commande
   de Blizzard prend le premier titre connu qui *commence* par ce nom ; l'icône de la liste
