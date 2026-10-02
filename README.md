@@ -40,6 +40,10 @@ Le bouton **Profils** (barre de titre de la fenêtre Polypode) ou `/poly profil`
     d'essayage** sur la tenue (comme la chaîne collée dans la discussion ; hors combat).
   - Profil de **titre** : une petite icône devant son nom fait **porter ce titre** au
     personnage joué (s'il le connaît ; « Aucun titre » retire le titre).
+  - Profil de **macro** : l'icône devant son nom est **celle de la macro** ; un clic l'**ajoute
+    aux macros** du personnage joué (générales ou propres au personnage, comme à la capture),
+    hors combat. Si une macro du même nom existe déjà, une confirmation est demandée puis son
+    icône et son texte sont remplacés. L'infobulle du profil montre l'icône, le type et le texte.
   - Profil d'**ensemble d'équipement** : une petite icône devant son nom **ajoute l'ensemble
     aux ensembles d'équipement** du personnage joué (voir plus bas) ; l'infobulle du profil
     indique sa spécialisation et son nombre de pièces.
@@ -73,7 +77,7 @@ les profils de cette saison, sur tous vos clients.
    et choisir le genre.
 3. **Enregistrer**.
 
-**Capturer** (genres « Mode Édition », « Talents », « Transmogrification », « Titre », « Ensemble d'équipement », « Options de WoW », « Raccourcis clavier », « Fenêtres de discussion », « Liste des addons » et « Simple Addon Manager ») relève la chaîne directement en jeu, sans
+**Capturer** (genres « Mode Édition », « Talents », « Transmogrification », « Titre », « Macro », « Ensemble d'équipement », « Options de WoW », « Raccourcis clavier », « Fenêtres de discussion », « Liste des addons » et « Simple Addon Manager ») relève la chaîne directement en jeu, sans
 passer par le presse-papiers :
 
 - Mode Édition : un menu liste vos dispositions (la disposition active est signalée) ;
@@ -116,6 +120,11 @@ passer par le presse-papiers :
   dans la discussion, elle change de titre ; sans nom, elle le retire). Attention, la commande
   de Blizzard prend le premier titre connu qui *commence* par ce nom ; l'icône de la liste
   cherche le nom exact.
+- Macro : menu de vos macros (générales, puis celles du personnage joué, avec leur icône) ; le
+  profil garde le nom, l'icône, le type et le texte de la macro :
+  `Polypode macro v1`, `nom=`, `icone=`, `type=generale|personnage`, `---`, puis le texte tel
+  quel (« | » et « % » écrits `%7C` et `%25`). Une macro propre au personnage est rangée sous
+  le personnage joué.
 
 Chaque capture ouvre un **nouveau profil** (le profil ouvert n'est jamais écrasé), nommé
 d'après la disposition, la configuration de talents ou l'ensemble personnalisé ; l'apparence

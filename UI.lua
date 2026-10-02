@@ -441,6 +441,37 @@ local function Capture(button)
 				end)
 			end
 		end)
+	elseif editKind == "macro" then
+		local macros = ns.GetMacros()
+		if #macros == 0 or not (MenuUtil and MenuUtil.CreateContextMenu) then
+			Notify("Aucune macro chez ce personnage.")
+			return
+		end
+		local function AddGroup(root, title, perCharacter)
+			local first = true
+			for _, macro in ipairs(macros) do
+				if macro.perCharacter == perCharacter then
+					if first then
+						root:CreateTitle(title)
+						first = false
+					end
+					local icon = macro.icon and ("|T" .. macro.icon .. ":16|t ") or ""
+					root:CreateButton(icon .. macro.name, function()
+						local text, nameOrReason = ns.ExportMacro(macro.index)
+						if text then
+							-- Macro propre au personnage : rangée sous le personnage joué.
+							ApplyCapture(text, nameOrReason, perCharacter and P.GetCharKey() or nil)
+						else
+							Notify(nameOrReason)
+						end
+					end)
+				end
+			end
+		end
+		MenuUtil.CreateContextMenu(button, function(_, root)
+			AddGroup(root, "Macros générales", false)
+			AddGroup(root, "Macros de " .. P.GetDisplayName(P.GetCharKey()), true)
+		end)
 	elseif editKind == "title" then
 		local text, nameOrReason = ns.ExportTitle()
 		if text then
@@ -636,6 +667,23 @@ local ROW_ACTIONS = {
 			return ns.ApplyTitle(profile.text)
 		end,
 	},
+	macro = {
+		texture = 134400, -- repli : point d'interrogation ; sinon l'icône de la macro (iconFor)
+		iconFor = function(profile)
+			return ns.MacroIcon(profile.text)
+		end,
+		title = "Ajouter aux macros",
+		tooltip = "Crée cette macro (nom, icône, texte) chez le personnage joué, dans les macros générales "
+			.. "ou propres au personnage selon le profil ; une macro du même nom est mise à jour. Hors combat.",
+		hint = "ajouter aux macros du personnage joué",
+		-- Confirmation seulement si une macro du même nom serait remplacée.
+		confirm = function(profile)
+			return ns.MacroExists(profile.text) and "Une macro de ce nom existe déjà : elle va être remplacée." or nil
+		end,
+		run = function(profile)
+			return ns.AddMacro(profile.text)
+		end,
+	},
 	options = {
 		texture = "Interface\\Icons\\INV_Misc_Gear_01",
 		title = "Appliquer ces options",
@@ -724,6 +772,9 @@ end
 
 -- Lignes de détail de l'infobulle d'un profil, par genre.
 local KIND_DETAILS = {
+	macro = function(text)
+		return ns.MacroDetails(text)
+	end,
 	equipset = function(text)
 		return ns.EquipmentSetDetails(text)
 	end,
@@ -816,20 +867,22 @@ local function HasAtlas(name)
 	return C_Texture and C_Texture.GetAtlasInfo and C_Texture.GetAtlasInfo(name) ~= nil
 end
 
--- Habille l'icône selon l'action (atlas avec états survol / appui, sinon texture de repli).
-local function SetActionIcon(button, action)
-	if button.action == action then
+-- Habille l'icône selon l'action (atlas avec états survol / appui, sinon texture de repli) ;
+-- action.iconFor(profil) donne une icône propre au profil (macro : la sienne).
+local function SetActionIcon(button, action, profile)
+	local texture = action.iconFor and action.iconFor(profile) or action.texture
+	if button.action == action and button.actionTexture == texture then
 		return
 	end
-	button.action = action
-	if action.atlas and HasAtlas(action.atlas .. "-up") then
+	button.action, button.actionTexture = action, texture
+	if not action.iconFor and action.atlas and HasAtlas(action.atlas .. "-up") then
 		button:SetNormalAtlas(action.atlas .. "-up")
 		button:SetHighlightAtlas(action.atlas .. "-highlight")
 		button:SetPushedAtlas(action.atlas .. "-down")
 	else
-		button:SetNormalTexture(action.texture)
-		button:SetHighlightTexture(action.texture, "ADD")
-		button:SetPushedTexture(action.texture)
+		button:SetNormalTexture(texture)
+		button:SetHighlightTexture(texture, "ADD")
+		button:SetPushedTexture(texture)
 	end
 end
 
@@ -847,8 +900,12 @@ local function ActionButton(row)
 		if not (self.action and data and data.profile) then
 			return
 		end
-		if self.action.confirm then
-			StaticPopup_Show("POLYPODE_PROFIL_APPLY", self.action.confirm, data.profile.name,
+		local confirm = self.action.confirm
+		if type(confirm) == "function" then
+			confirm = confirm(data.profile)
+		end
+		if confirm then
+			StaticPopup_Show("POLYPODE_PROFIL_APPLY", confirm, data.profile.name,
 				{ action = self.action, profile = data.profile })
 		else
 			RunAction(self.action, data.profile)
@@ -1133,7 +1190,7 @@ local function Build()
 			local action = not data.header and ROW_ACTIONS[ns.NormalizeKind(data.profile.kind)]
 			if action then
 				local button = ActionButton(row)
-				SetActionIcon(button, action)
+				SetActionIcon(button, action, data.profile)
 				button:Show()
 			elseif row.actionButton then
 				row.actionButton:Hide()

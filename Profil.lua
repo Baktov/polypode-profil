@@ -35,6 +35,7 @@ ns.KINDS = {
 	-- short : libellé du bouton de genre quand le libellé complet n'y tient pas.
 	{ key = "transmog", label = "Transmogrification", short = "Transmo", capture = true },
 	{ key = "title", label = "Titre", capture = true },
+	{ key = "macro", label = "Macro", capture = true }, -- Macro.lua
 	{ key = "equipset", label = "Ensemble d'équipement", short = "Ensemble", capture = true }, -- Equipement.lua
 	{ key = "options", label = "Options de WoW", capture = true }, -- Options.lua
 	{ key = "bindings", label = "Raccourcis clavier", short = "Raccourcis", capture = true }, -- Options.lua
