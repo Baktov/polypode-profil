@@ -183,3 +183,29 @@ Cet addon n'a pas d'options.
 - Import direct (sans Ctrl+V) dans les addons qui l'exposent par une API, et dans le mode
   Édition.
 - Recherche dans la liste, si elle devient longue.
+
+---
+
+## Version
+
+`1.11.0` : genre « Macro » : capture d'une macro (nom, icône, texte) et icône d'ajout aux macros.
+`1.10.2` : profils supprimés avec leur personnage.
+`1.10.1` : infobulle d'un profil : intitulés en bleu clair.
+`1.10.0` : bouton « Supprimer une saison ».
+`1.9.1` : bouton « Tout replier / Tout déplier » du cadre Personnages.
+`1.9.0` : saison et version du jeu de chaque sauvegarde, dans l'infobulle.
+`1.8.2` : listes déroulantes genre / personnage habillées par le skin.
+`1.8.1` : genre et personnage en listes déroulantes Blizzard.
+`1.8.0` : liste des addons et profils de Simple Addon Manager.
+`1.7.0` : genres options de WoW, raccourcis clavier et fenêtres de discussion.
+`1.6.0` : genre « Simple Addon Manager » ; libellé court dès que le genre ne tient pas.
+`1.5.1` : bouton de genre : « Ensemble » quand « Capturer » est affiché.
+`1.5.0` : genre « Ensemble d'équipement » : capture avec spécialisation et recréation.
+`1.4.0` : genre « Titre » : capture et icône pour porter le titre.
+`1.3.0` : icône « essayer » devant les profils de transmogrification.
+`1.2.1` : chaque capture ouvre un nouveau profil nommé.
+`1.2.0` : genre « Transmogrification » avec capture.
+`1.1.2` : plus de compteur de profils en haut de la liste.
+`1.1.1` : changer de genre réinitialise l'éditeur.
+`1.1.0` : profils rangés sous leur personnage.
+`1.0.0` : première version : bibliothèque de chaînes d'export.
