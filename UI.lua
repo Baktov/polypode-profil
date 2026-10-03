@@ -3,6 +3,16 @@
 local _, ns = ...
 local P = Polypode
 
+-- Infobulles : notions de clic en bleu (règle commune, P.ShowTooltip de Polypode 0.59.1), sinon
+-- affichage simple.
+local function ShowTooltip()
+	if P.ShowTooltip then
+		P.ShowTooltip()
+	else
+		GameTooltip:Show()
+	end
+end
+
 -- Fenêtre PolypodeProfilFrame (bouton « Profils » de la fenêtre Polypode, /poly profil) :
 --   * à gauche, les profils rangés sous leur personnage, affiché comme dans « Personnages
 --     disponibles » de Polypode (couleur de classe, classe, niveau, « (vous) », connectés en tête,
@@ -918,7 +928,7 @@ local function ActionButton(row)
 		GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
 		GameTooltip:AddLine(self.action.title)
 		GameTooltip:AddLine(self.action.tooltip, 1, 1, 1, true)
-		GameTooltip:Show()
+		ShowTooltip()
 	end)
 	button:SetScript("OnLeave", GameTooltip_Hide)
 	row.actionButton = button
@@ -944,7 +954,7 @@ local function SetTooltip(widget, title, text)
 		GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
 		GameTooltip:AddLine(title)
 		GameTooltip:AddLine(text, 1, 1, 1, true)
-		GameTooltip:Show()
+		ShowTooltip()
 	end)
 	widget:HookScript("OnLeave", GameTooltip_Hide)
 end

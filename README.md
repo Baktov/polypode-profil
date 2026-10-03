@@ -188,6 +188,7 @@ Cet addon n'a pas d'options.
 
 ## Version
 
+`1.11.1` : notions de clic en bleu dans les infobulles (Polypode 0.60).
 `1.11.0` : genre « Macro » : capture d'une macro (nom, icône, texte) et icône d'ajout aux macros.
 `1.10.2` : profils supprimés avec leur personnage.
 `1.10.1` : infobulle d'un profil : intitulés en bleu clair.

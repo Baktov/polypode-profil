@@ -34,7 +34,7 @@ Ctrl+V dans la zone de texte.
 `P.WhisperOnline`, `P.MAX_MESSAGE_LENGTH`, `P.GetTeamToken`, `P.GetCharKey`, `P.GetDisplayName`,
 `P.GetRoster`, `P.GetCharacter`, `P.db.roster`, `P.SortedKeyItems`, `P.FormatCharacter`, `P.CharacterTooltip`,
 `P.IsCharacterConnected`, `P.IsCharacterOnline`,
-`P.CreatePanel`, `P.CreateScrollList`, `P.SetListData`, `P.SkinFrame`, `P.SkinPanel`,
+`P.CreatePanel`, `P.CreateScrollList`, `P.SetListData`, `P.SkinFrame`, `P.SkinPanel`, `P.ShowTooltip` / `P.ColorClicks` (si présentes, Polypode 0.60.0 : clics en bleu dans les infobulles) (toute infobulle par la locale `ShowTooltip`),
 `P.SkinButton`, `P.SkinEditBox`, `P.SkinScrollBar`, `P.SkinDropdown` (Polypode 0.51.3, testé avant usage). Toute évolution de ces fonctions dans
 Polypode doit rester compatible, ou ce fichier doit suivre.
 
