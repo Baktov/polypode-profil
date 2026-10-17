@@ -1308,7 +1308,7 @@ if P.AddTitleButton then
 		tooltip = {
 			"Profils",
 			"Chaînes d'export du mode Édition, des talents et des addons (EllesmereUI, ElvUI, Baganator, "
-				.. "Simple Addon Manager...), gardées pour tous vos personnages.",
+				.. "MySlots, Simple Addon Manager...), gardées pour tous vos personnages.",
 		},
 		onCreate = function(button)
 			P.ui.profilButton = button

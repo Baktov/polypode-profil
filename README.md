@@ -2,7 +2,7 @@
 
 Fenêtre **« Profils »** de [Polypode](https://github.com/Baktov/polypode), sous forme d'addon
 séparé : une bibliothèque de **chaînes d'export** — disposition du **mode Édition** de WoW,
-**talents**, profils d'addons (**EllesmereUI**, **ElvUI**, **Baganator**, **Simple Addon Manager**...), **barres d'action** —
+**talents**, profils d'addons (**EllesmereUI**, **ElvUI**, **Baganator**, **MySlots**, **Simple Addon Manager**...), **barres d'action** —
 gardées une fois pour toutes et disponibles sur tous vos personnages, pour configurer
 rapidement un nouveau personnage ou une nouvelle fenêtre.
 
@@ -169,8 +169,9 @@ gauche peut empêcher de remettre exactement la tenue d'avant (un message le sig
 
 ### Barres d'action
 
-Le genre **Barres d'action** remplace l'addon MySlot (l'ancien genre « MySlots » est retiré et
-ses profils supprimés). Le texte est propre à Polypode Profil (`Polypode barres v1`, une ligne
+Le genre **Barres d'action** applique les barres sans l'addon MySlot, mais en reprend moins
+(ni raccourcis, ni familier, ni click bindings, ni Cooldown Manager) : le genre **MySlots**
+reste là pour garder les chaînes de MySlot telles quelles. Le texte est propre à Polypode Profil (`Polypode barres v1`, une ligne
 par emplacement : `12=spell:133:Boule de feu`, `13=macro:Ma macro`, `14=item:6948:...`, puis
 une ligne `macro=` par macro posée). Sont gérés : sorts (sort de base, l'amélioration par un
 talent suit), objets, macros, menus de sorts (portails...), montures (dont la monture favorite
@@ -210,6 +211,7 @@ Cet addon n'a pas d'options.
 
 ## Version
 
+`2.1.1` : genre « MySlots » rétabli (ses profils ne sont plus supprimés) : « Barres d'action » en reprend moins que MySlot.
 `2.1.0` : genre « Barres d'action » (capture des barres 1 à 15 et de leurs macros, application par l'icône de la liste) ; genre « MySlots » retiré, ses profils supprimés.
 `2.0.0` : première version publique (release GitHub v2.0.0). Nécessite Polypode 2.0.0.
 `1.11.1` : notions de clic en bleu dans les infobulles (Polypode 0.60).
