@@ -2,7 +2,7 @@
 
 Fenêtre **« Profils »** de [Polypode](https://github.com/Baktov/polypode), sous forme d'addon
 séparé : une bibliothèque de **chaînes d'export** — disposition du **mode Édition** de WoW,
-**talents**, profils d'addons (**EllesmereUI**, **ElvUI**, **Baganator**, **MySlots**, **Simple Addon Manager**...) —
+**talents**, profils d'addons (**EllesmereUI**, **ElvUI**, **Baganator**, **Simple Addon Manager**...), **barres d'action** —
 gardées une fois pour toutes et disponibles sur tous vos personnages, pour configurer
 rapidement un nouveau personnage ou une nouvelle fenêtre.
 
@@ -44,6 +44,9 @@ Le bouton **Profils** (barre de titre de la fenêtre Polypode) ou `/poly profil`
     aux macros** du personnage joué (générales ou propres au personnage, comme à la capture),
     hors combat. Si une macro du même nom existe déjà, une confirmation est demandée puis son
     icône et son texte sont remplacés. L'infobulle du profil montre l'icône, le type et le texte.
+  - Profil de **barres d'action** : une petite icône les **applique** au personnage joué, après
+    confirmation (avertissement si le profil vient d'une autre classe) ; voir « Barres d'action »
+    plus bas.
   - Profil d'**ensemble d'équipement** : une petite icône devant son nom **ajoute l'ensemble
     aux ensembles d'équipement** du personnage joué (voir plus bas) ; l'infobulle du profil
     indique sa spécialisation et son nombre de pièces.
@@ -77,7 +80,7 @@ les profils de cette saison, sur tous vos clients.
    et choisir le genre.
 3. **Enregistrer**.
 
-**Capturer** (genres « Mode Édition », « Talents », « Transmogrification », « Titre », « Macro », « Ensemble d'équipement », « Options de WoW », « Raccourcis clavier », « Fenêtres de discussion », « Liste des addons » et « Simple Addon Manager ») relève la chaîne directement en jeu, sans
+**Capturer** (genres « Mode Édition », « Talents », « Transmogrification », « Titre », « Macro », « Ensemble d'équipement », « Barres d'action », « Options de WoW », « Raccourcis clavier », « Fenêtres de discussion », « Liste des addons » et « Simple Addon Manager ») relève la chaîne directement en jeu, sans
 passer par le presse-papiers :
 
 - Mode Édition : un menu liste vos dispositions (la disposition active est signalée) ;
@@ -120,6 +123,9 @@ passer par le presse-papiers :
   dans la discussion, elle change de titre ; sans nom, elle le retire). Attention, la commande
   de Blizzard prend le premier titre connu qui *commence* par ce nom ; l'icône de la liste
   cherche le nom exact.
+- Barres d'action : les 180 emplacements des barres 1 à 15 du personnage joué (barres de
+  forme / posture comprises) et le texte des macros qui y sont posées ; rangé sous le personnage
+  joué, nommé d'après la spécialisation.
 - Macro : menu de vos macros (générales, puis celles du personnage joué, avec leur icône) ; le
   profil garde le nom, l'icône, le type et le texte de la macro :
   `Polypode macro v1`, `nom=`, `icone=`, `type=generale|personnage`, `---`, puis le texte tel
@@ -161,6 +167,22 @@ Limites : les pièces en banque ne sont pas prises ; les emplacements que l'ense
 **vides** sont ignorés par l'ensemble recréé ; un échange d'arme à deux mains / arme + main
 gauche peut empêcher de remettre exactement la tenue d'avant (un message le signale).
 
+### Barres d'action
+
+Le genre **Barres d'action** remplace l'addon MySlot (l'ancien genre « MySlots » est retiré et
+ses profils supprimés). Le texte est propre à Polypode Profil (`Polypode barres v1`, une ligne
+par emplacement : `12=spell:133:Boule de feu`, `13=macro:Ma macro`, `14=item:6948:...`, puis
+une ligne `macro=` par macro posée). Sont gérés : sorts (sort de base, l'amélioration par un
+talent suit), objets, macros, menus de sorts (portails...), montures (dont la monture favorite
+aléatoire), mascottes, ensembles d'équipement et tenues de transmogrification.
+
+Appliqué (icône de la liste, hors combat), le profil **repose chaque action** sur son
+emplacement et **vide les autres**. Les macros sont retrouvées par leur nom, sinon créées
+d'après le profil (s'il reste de la place). Un sort non appris, un objet absent ou une monture
+non possédée laisse l'emplacement vide ; le compte rendu les compte et en cite quelques-uns.
+Ne sont pas repris : barre du familier, lancement de sorts au clic, gestionnaire de temps de
+recharge.
+
 ## Partage entre personnages et clients
 
 Les profils sont gardés dans le fichier de **compte** (`PolypodeProfilDB`) : communs à tous les
@@ -188,6 +210,7 @@ Cet addon n'a pas d'options.
 
 ## Version
 
+`2.1.0` : genre « Barres d'action » (capture des barres 1 à 15 et de leurs macros, application par l'icône de la liste) ; genre « MySlots » retiré, ses profils supprimés.
 `2.0.0` : première version publique (release GitHub v2.0.0). Nécessite Polypode 2.0.0.
 `1.11.1` : notions de clic en bleu dans les infobulles (Polypode 0.60).
 `1.11.0` : genre « Macro » : capture d'une macro (nom, icône, texte) et icône d'ajout aux macros.

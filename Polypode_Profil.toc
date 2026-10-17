@@ -1,8 +1,8 @@
 ## Interface: 120000, 16001
 ## Title: Polypode Profil
-## Notes: Profils pour Polypode : sauvegarde des chaînes d'export du mode Édition, des talents, de la transmogrification, du titre, des ensembles d'équipement, des macros, des options de WoW, des raccourcis, des fenêtres de discussion, de la liste des addons et des addons (EllesmereUI, ElvUI, Baganator, MySlots, Simple Addon Manager...).
+## Notes: Profils pour Polypode : sauvegarde des chaînes d'export du mode Édition, des talents, de la transmogrification, du titre, des ensembles d'équipement, des macros, des barres d'action, des options de WoW, des raccourcis, des fenêtres de discussion, de la liste des addons et des addons (EllesmereUI, ElvUI, Baganator, Simple Addon Manager...).
 ## Author: Baktov
-## Version: 2.0.0
+## Version: 2.1.0
 ## Dependencies: Polypode
 ## SavedVariables: PolypodeProfilDB
 ## Category: Polypode
@@ -13,4 +13,5 @@ Macro.lua
 Options.lua
 Discussion.lua
 Addons.lua
+Barres.lua
 UI.lua

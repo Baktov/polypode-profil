@@ -423,12 +423,13 @@ local function Capture(button)
 				end)
 			end
 		end)
-	elseif editKind == "bindings" or editKind == "chat" or editKind == "addons" then
+	elseif editKind == "bindings" or editKind == "chat" or editKind == "addons" or editKind == "actionbars" then
 		local export = editKind == "bindings" and ns.ExportBindings or editKind == "chat" and ns.ExportChat
-			or ns.ExportAddons
+			or editKind == "actionbars" and ns.ExportActionBars or ns.ExportAddons
 		local text, nameOrReason = export()
 		if text then
-			ApplyCapture(text, nameOrReason)
+			-- Barres d'action : celles du personnage joué.
+			ApplyCapture(text, nameOrReason, editKind == "actionbars" and P.GetCharKey() or nil)
 		else
 			Notify(nameOrReason)
 		end
@@ -694,6 +695,20 @@ local ROW_ACTIONS = {
 			return ns.AddMacro(profile.text)
 		end,
 	},
+	actionbars = {
+		texture = 132333, -- ability_warrior_battleshout
+		title = "Appliquer ces barres d'action",
+		tooltip = "Repose chaque action du profil (sorts, objets, macros, montures, mascottes, ensembles...) sur les "
+			.. "barres 1 à 15 du personnage joué et vide les autres emplacements. Les macros sont retrouvées par "
+			.. "leur nom, sinon créées. Un sort non appris ou un objet absent laisse l'emplacement vide. Hors combat.",
+		hint = "appliquer ces barres d'action au personnage joué",
+		confirm = function(profile)
+			return ns.ActionBarsConfirm(profile.text)
+		end,
+		run = function(profile)
+			return ns.ApplyActionBars(profile.text)
+		end,
+	},
 	options = {
 		texture = "Interface\\Icons\\INV_Misc_Gear_01",
 		title = "Appliquer ces options",
@@ -787,6 +802,9 @@ local KIND_DETAILS = {
 	end,
 	equipset = function(text)
 		return ns.EquipmentSetDetails(text)
+	end,
+	actionbars = function(text)
+		return ns.ActionBarsDetails(text)
 	end,
 	options = function(text)
 		return ns.OptionsDetails(text)
@@ -1009,7 +1027,7 @@ local function BuildEditor()
 		"Relève la chaîne en jeu : une disposition du mode Édition (menu), les talents de la configuration "
 			.. "active (la fenêtre des talents doit avoir été ouverte une fois), ou une tenue (apparence actuelle "
 			.. "ou ensemble personnalisé : chaîne « /customset », à coller dans la discussion pour l'essayer), "
-			.. "le titre porté (chaîne « /settitle »), un ensemble d'équipement (menu, avec sa spécialisation), les options de WoW (menu par catégorie), les raccourcis clavier ou les fenêtres de discussion. "
+			.. "le titre porté (chaîne « /settitle »), un ensemble d'équipement (menu, avec sa spécialisation), les barres d'action (et leurs macros), les options de WoW (menu par catégorie), les raccourcis clavier ou les fenêtres de discussion. "
 			.. "Chaque capture ouvre un nouveau profil, nommé d'après la disposition, les talents, le titre ou l'ensemble "
 			.. "(« Apparence actuelle » datée) : le profil ouvert n'est jamais écrasé.")
 
@@ -1290,7 +1308,7 @@ if P.AddTitleButton then
 		tooltip = {
 			"Profils",
 			"Chaînes d'export du mode Édition, des talents et des addons (EllesmereUI, ElvUI, Baganator, "
-				.. "MySlots, Simple Addon Manager...), gardées pour tous vos personnages.",
+				.. "Simple Addon Manager...), gardées pour tous vos personnages.",
 		},
 		onCreate = function(button)
 			P.ui.profilButton = button

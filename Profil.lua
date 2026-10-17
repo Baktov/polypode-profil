@@ -5,7 +5,7 @@ local P = Polypode -- dépendance obligatoire (## Dependencies: Polypode), charg
 
 -- Addon compagnon de Polypode : une bibliothèque de « profils », c'est-à-dire des chaînes
 -- d'export copiées depuis le mode Édition de WoW, la fenêtre des talents ou un addon (EllesmereUI,
--- ElvUI, Baganator, MySlots...), gardées pour être recollées plus tard sur n'importe quel
+-- ElvUI, Baganator...), gardées pour être recollées plus tard sur n'importe quel
 -- personnage. Un addon ne lit pas le presse-papiers : la chaîne est collée (Ctrl+V) dans la
 -- fenêtre, puis recopiée (Ctrl+C) dans la fenêtre d'import de l'addon. Seuls le mode Édition et
 -- les talents peuvent être capturés directement (API de Blizzard).
@@ -38,13 +38,13 @@ ns.KINDS = {
 	{ key = "macro", label = "Macro", capture = true }, -- Macro.lua
 	{ key = "equipset", label = "Ensemble d'équipement", short = "Ensemble", capture = true }, -- Equipement.lua
 	{ key = "options", label = "Options de WoW", capture = true }, -- Options.lua
+	{ key = "actionbars", label = "Barres d'action", short = "Barres", capture = true }, -- Barres.lua
 	{ key = "bindings", label = "Raccourcis clavier", short = "Raccourcis", capture = true }, -- Options.lua
 	{ key = "chat", label = "Fenêtres de discussion", short = "Discussion", capture = true }, -- Discussion.lua
 	{ key = "addons", label = "Liste des addons", short = "Addons", capture = true }, -- Addons.lua
 	{ key = "ellesmereui", label = "EllesmereUI" },
 	{ key = "elvui", label = "ElvUI" },
 	{ key = "baganator", label = "Baganator" },
-	{ key = "myslots", label = "MySlots" },
 	{ key = "simpleaddonmanager", label = "Simple Addon Manager", short = "Simple AM", capture = true }, -- Addons.lua
 	{ key = "other", label = "Autre" },
 }
@@ -669,6 +669,13 @@ events:SetScript("OnEvent", function(_, event, name)
 		for _, profile in pairs(store) do
 			if profile.author then -- 1.0.0 : l'auteur devient le personnage du profil
 				profile.char, profile.author = profile.char or profile.author, nil
+			end
+		end
+		-- 2.1.0 : genre MySlots retiré (remplacé par « Barres d'action ») ; ses profils sont
+		-- supprimés (pierres tombales, propagées aux autres clients par la synchro).
+		for id, profile in pairs(store) do
+			if profile.kind == "myslots" and not profile.removed then
+				store[id] = { removed = true, updated = NextVersion(profile.updated) }
 			end
 		end
 		events:UnregisterEvent("ADDON_LOADED")
