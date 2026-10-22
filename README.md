@@ -14,7 +14,7 @@ Désactivé, Polypode fonctionne normalement, sans bouton « Profils » ni comma
 
 1. Installer d'abord **Polypode** (dépendance obligatoire).
 2. Placer le dossier `Polypode_Profil` dans `World of Warcraft/_retail_/Interface/AddOns/`
-   (et, pour **WoW Forever**, dans `World of Warcraft/_classic_beta_/Interface/AddOns/`, par
+   (et, pour **WoW Forever**, dans `World of Warcraft/_forever_/Interface/AddOns/`, par
    exemple par une jonction `mklink /J`).
 3. Cocher « Polypode Profil » dans la liste des AddOns.
 
