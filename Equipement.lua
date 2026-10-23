@@ -1,6 +1,7 @@
 -- Polypode Profil: Equipement — ensembles d'équipement : capture (avec spécialisation) et recréation
 
 local _, ns = ...
+local L = ns.L
 
 -- Un ensemble d'équipement du gestionnaire de Blizzard, en texte (pas de chaîne d'export chez
 -- Blizzard ; pas de « | », que la zone de texte interpréterait) :
@@ -75,7 +76,7 @@ function ns.GetEquipmentSets()
 		local name = C_EquipmentSet.GetEquipmentSetInfo(id)
 		local specIndex = C_EquipmentSet.GetEquipmentSetAssignedSpec and C_EquipmentSet.GetEquipmentSetAssignedSpec(id)
 		local specName = select(2, SpecInfo(specIndex))
-		list[#list + 1] = { id = id, name = name or ("Ensemble " .. id), spec = specName }
+		list[#list + 1] = { id = id, name = name or L["Ensemble %s"]:format(id), spec = specName }
 	end
 	table.sort(list, function(a, b)
 		return a.name:lower() < b.name:lower()
@@ -99,11 +100,11 @@ end
 -- Texte d'un ensemble et nom proposé (son nom), ou nil et la raison.
 function ns.ExportEquipmentSet(id)
 	if not Available() then
-		return nil, "Ensembles d'équipement indisponibles."
+		return nil, L["Ensembles d'équipement indisponibles."]
 	end
 	local name, icon = C_EquipmentSet.GetEquipmentSetInfo(id)
 	if not name then
-		return nil, "Ensemble introuvable."
+		return nil, L["Ensemble introuvable."]
 	end
 	local itemIDs = C_EquipmentSet.GetItemIDs(id) or {}
 	local ignored = C_EquipmentSet.GetIgnoredSlots(id) or {}
@@ -169,8 +170,8 @@ function ns.EquipmentSetDetails(text)
 		return nil
 	end
 	return {
-		"Spécialisation : " .. (set.specName or "aucune"),
-		set.count .. " pièce(s)",
+		L["Spécialisation : %s"]:format(set.specName or L["aucune"]),
+		L["%d pièce(s)"]:format(set.count),
 	}
 end
 
@@ -307,13 +308,13 @@ local function EquipAll(set, modes, done)
 	local steps, waited = 0, 0
 	local function Step()
 		if InCombatLockdown() then
-			done(false, "Interrompu : combat.")
+			done(false, L["Interrompu : combat."])
 			return
 		end
 		if Busy() then
 			waited = waited + STEP_DELAY
 			if waited > STEP_TIMEOUT then
-				done(false, "Interrompu : objet verrouillé.")
+				done(false, L["Interrompu : objet verrouillé."])
 				return
 			end
 			C_Timer.After(STEP_DELAY, Step)
@@ -325,12 +326,12 @@ local function EquipAll(set, modes, done)
 			done(true)
 			return
 		elseif move.missing then
-			done(false, "Pièce introuvable (emplacement " .. move.slot .. ").")
+			done(false, L["Pièce introuvable (emplacement %s)."]:format(move.slot))
 			return
 		end
 		steps = steps + 1
 		if steps > MAX_STEPS or not DoMove(move) then
-			done(false, "Interrompu : impossible d'équiper une pièce (emplacement " .. move.slot .. ").")
+			done(false, L["Interrompu : impossible d'équiper une pièce (emplacement %s)."]:format(move.slot))
 			return
 		end
 		C_Timer.After(STEP_DELAY, Step)
@@ -369,25 +370,25 @@ function ns.CreateEquipmentSet(text, name, callback)
 	local set = Parse(text)
 	name = name and strtrim(name) or ""
 	if not set then
-		return nil, "Ce profil n'est pas un ensemble d'équipement."
+		return nil, L["Ce profil n'est pas un ensemble d'équipement."]
 	elseif not Available() then
-		return nil, "Ensembles d'équipement indisponibles."
+		return nil, L["Ensembles d'équipement indisponibles."]
 	elseif running then
-		return nil, "Création d'un ensemble déjà en cours."
+		return nil, L["Création d'un ensemble déjà en cours."]
 	elseif InCombatLockdown() then
-		return nil, "Impossible en combat."
+		return nil, L["Impossible en combat."]
 	elseif name == "" then
-		return nil, "Le profil n'a pas de nom."
+		return nil, L["Le profil n'a pas de nom."]
 	elseif C_EquipmentSet.GetEquipmentSetID(name) then
-		return nil, "Un ensemble « " .. name .. " » existe déjà chez ce personnage."
+		return nil, L["Un ensemble « %s » existe déjà chez ce personnage."]:format(name)
 	elseif (C_EquipmentSet.GetNumEquipmentSets() or 0) >= (MAX_EQUIPMENT_SETS_PER_PLAYER or 10) then
-		return nil, "Nombre maximal d'ensembles atteint."
+		return nil, L["Nombre maximal d'ensembles atteint."]
 	elseif set.count == 0 then
-		return nil, "L'ensemble ne contient aucune pièce."
+		return nil, L["L'ensemble ne contient aucune pièce."]
 	end
 	local modes, missing = PlanModes(set)
 	if #missing > 0 then
-		return nil, #missing .. " pièce(s) absente(s) des sacs et de l'équipement."
+		return nil, L["%d pièce(s) absente(s) des sacs et de l'équipement."]:format(#missing)
 	end
 
 	running = true
@@ -404,13 +405,13 @@ function ns.CreateEquipmentSet(text, name, callback)
 	-- Rééquipe ce que le personnage portait avant (les pièces encore présentes).
 	local function Restore(message)
 		EquipAll(before, beforeModes, function(ok)
-			Finish(ok and message or (message .. " (tenue précédente pas entièrement remise)"))
+			Finish(ok and message or (message .. " " .. L["(tenue précédente pas entièrement remise)"]))
 		end)
 	end
 
 	EquipAll(set, modes, function(ok, reason)
 		if not ok then
-			Restore("Ensemble non créé : " .. reason)
+			Restore(L["Ensemble non créé : %s"]:format(reason))
 			return
 		end
 		C_EquipmentSet.ClearIgnoredSlotsForSave()
@@ -428,16 +429,16 @@ function ns.CreateEquipmentSet(text, name, callback)
 				C_Timer.After(0.2, WaitCreated)
 				return
 			elseif not id then
-				Restore("Ensemble non créé (pas de réponse du jeu).")
+				Restore(L["Ensemble non créé (pas de réponse du jeu)."])
 				return
 			end
-			local message = "Ensemble « " .. name .. " » créé."
+			local message = L["Ensemble « %s » créé."]:format(name)
 			local specIndex = SpecIndexFor(set.specID)
 			if specIndex and C_EquipmentSet.AssignSpecToEquipmentSet then
 				C_EquipmentSet.AssignSpecToEquipmentSet(id, specIndex)
-				message = message .. " Spécialisation : " .. (set.specName or specIndex) .. "."
+				message = message .. " " .. L["Spécialisation : %s."]:format(set.specName or specIndex)
 			elseif set.specID then
-				message = message .. " Spécialisation non associée (autre classe)."
+				message = message .. " " .. L["Spécialisation non associée (autre classe)."]
 			end
 			Restore(message)
 		end

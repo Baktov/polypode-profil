@@ -1,12 +1,26 @@
 ## Interface: 120000, 16001
 ## Title: Polypode Profil
-## Notes: Profils pour Polypode : sauvegarde des chaînes d'export du mode Édition, des talents, de la transmogrification, du titre, des ensembles d'équipement, des macros, des barres d'action, des options de WoW, des raccourcis, des fenêtres de discussion, de la liste des addons et des addons (EllesmereUI, ElvUI, Baganator, MySlots, Simple Addon Manager...).
+## Title-enUS: Polypode Profiles
+## Title-enGB: Polypode Profiles
+## Title-deDE: Polypode Profile
+## Title-esES: Polypode Perfiles
+## Title-esMX: Polypode Perfiles
+## Title-itIT: Polypode Profili
+## Title-ptBR: Polypode Perfis
+## Notes: Profiles for Polypode: saves the export strings of Edit Mode, talents, transmogrification, title, equipment sets, macros, action bars, WoW options, key bindings, chat windows, the addon list and addons (EllesmereUI, ElvUI, Baganator, MySlots, Simple Addon Manager...).
+## Notes-frFR: Profils pour Polypode : sauvegarde des chaînes d'export du mode Édition, des talents, de la transmogrification, du titre, des ensembles d'équipement, des macros, des barres d'action, des options de WoW, des raccourcis, des fenêtres de discussion, de la liste des addons et des addons (EllesmereUI, ElvUI, Baganator, MySlots, Simple Addon Manager...).
 ## Author: Baktov
-## Version: 2.1.1
+## Version: 2.2.0
 ## Dependencies: Polypode
 ## SavedVariables: PolypodeProfilDB
 ## Category: Polypode
 
+Locale.lua
+Locales/enUS.lua
+Locales/deDE.lua
+Locales/esES.lua
+Locales/itIT.lua
+Locales/ptBR.lua
 Profil.lua
 Equipement.lua
 Macro.lua

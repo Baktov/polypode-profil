@@ -1,6 +1,7 @@
 -- Polypode Profil: Barres — barres d'action : capture des 180 emplacements (et des macros posées) et application
 
 local _, ns = ...
+local L = ns.L
 
 -- Les barres d'action du personnage joué, en texte (reprend le principe de l'addon MySlot, sans
 -- son format binaire) :
@@ -63,7 +64,7 @@ end
 
 local function MountName(id)
 	if id == RANDOM_MOUNT then
-		return "Monture favorite aléatoire"
+		return L["Monture favorite aléatoire"]
 	end
 	return C_MountJournal and C_MountJournal.GetMountInfoByID and (C_MountJournal.GetMountInfoByID(id))
 end
@@ -121,9 +122,9 @@ end
 -- Texte des barres d'action du personnage joué, et un nom proposé ; ou nil et la raison.
 function ns.ExportActionBars()
 	if not GetActionInfo then
-		return nil, "Barres d'action indisponibles."
+		return nil, L["Barres d'action indisponibles."]
 	elseif InCombatLockdown() then
-		return nil, "Impossible en combat."
+		return nil, L["Impossible en combat."]
 	end
 	ClearCursor()
 	local _, classToken = UnitClass("player")
@@ -150,7 +151,7 @@ function ns.ExportActionBars()
 		end
 	end
 	if count == 0 then
-		return nil, "Aucune action sur les barres de ce personnage."
+		return nil, L["Aucune action sur les barres de ce personnage."]
 	end
 	local maxAccount = MaxMacros()
 	table.sort(macroOrder)
@@ -161,7 +162,7 @@ function ns.ExportActionBars()
 				tostring(icon or 134400), Enc(name), Enc(body or ""))
 		end
 	end
-	return table.concat(lines, "\n"), spec and ("Barres d'action " .. spec) or "Barres d'action"
+	return table.concat(lines, "\n"), spec and L["Barres d'action %s"]:format(spec) or L["Barres d'action"]
 end
 
 -- LECTURE ------------------------------------------------------------------------------------
@@ -223,20 +224,20 @@ function ns.ActionBarsDetails(text)
 		macroCount = macroCount + 1
 	end
 	return {
-		data.count .. " action(s) sur " .. barCount .. " barre(s), " .. macroCount .. " macro(s)",
-		"Classe : " .. ClassName(data.class),
+		L["%d action(s) sur %d barre(s), %d macro(s)"]:format(data.count, barCount, macroCount),
+		L["Classe : %s"]:format(ClassName(data.class)),
 	}
 end
 
 -- Texte de confirmation avant application (classe différente signalée).
 function ns.ActionBarsConfirm(text)
-	local confirm = "Les barres d'action du personnage joué vont être remplacées par celles de ce profil "
-		.. "(emplacements vides compris)."
+	local confirm = L["Les barres d'action du personnage joué vont être remplacées par celles de ce profil "
+		.. "(emplacements vides compris)."]
 	local data = Parse(text)
 	local _, classToken = UnitClass("player")
 	if data and data.class and data.class ~= classToken then
-		confirm = confirm .. "\n\n|cffff4040Profil capturé sur un(e) " .. ClassName(data.class) .. " : "
-			.. "les sorts d'une autre classe seront ignorés.|r"
+		confirm = confirm .. "\n\n|cffff4040" .. L["Profil capturé sur un(e) %s : les sorts d'une autre classe seront ignorés."]
+			:format(ClassName(data.class)) .. "|r"
 	end
 	return confirm
 end
@@ -395,11 +396,11 @@ end
 function ns.ApplyActionBars(text)
 	local data = Parse(text)
 	if not data then
-		return nil, "Texte de barres illisible (première ligne attendue : « " .. HEADER .. " »)."
+		return nil, L["Texte de barres illisible (première ligne attendue : « %s »)."]:format(HEADER)
 	elseif not (GetActionInfo and PickupAction and PlaceAction) then
-		return nil, "Barres d'action indisponibles."
+		return nil, L["Barres d'action indisponibles."]
 	elseif InCombatLockdown() then
-		return nil, "Impossible en combat."
+		return nil, L["Impossible en combat."]
 	end
 	ClearCursor()
 	local context = { data = data, macros = {}, flyouts = FlyoutIndexes(), mounts = MountIndexes() }
@@ -426,17 +427,17 @@ function ns.ApplyActionBars(text)
 			ClearCursor()
 		end
 	end
-	local report = placed .. " action(s) posée(s)"
+	local report = L["%d action(s) posée(s)"]:format(placed)
 	if cleared > 0 then
-		report = report .. ", " .. cleared .. " emplacement(s) vidé(s)"
+		report = report .. ", " .. L["%d emplacement(s) vidé(s)"]:format(cleared)
 	end
 	if #missing > 0 then
 		local shown = {}
 		for i = 1, math.min(3, #missing) do
 			shown[i] = missing[i]
 		end
-		report = report .. ", " .. #missing .. " introuvable(s) (" .. table.concat(shown, ", ")
-			.. (#missing > 3 and "…" or "") .. ")"
+		report = report .. ", " .. L["%d introuvable(s) (%s)"]:format(#missing, table.concat(shown, ", ")
+			.. (#missing > 3 and "…" or ""))
 	end
 	return true, report .. "."
 end

@@ -1,6 +1,7 @@
 -- Polypode Profil: Addons — liste des addons activés, profils de Simple Addon Manager, rechargement
 
 local _, ns = ...
+local L = ns.L
 
 -- LISTE DES ADDONS (genre « addons »), texte propre à Polypode Profil :
 --   Polypode addons v1
@@ -54,7 +55,7 @@ end
 
 function ns.ExportAddons()
 	if not Available() then
-		return nil, "Liste des addons illisible sur ce client."
+		return nil, L["Liste des addons illisible sur ce client."]
 	end
 	local names = {}
 	for index = 1, C_AddOns.GetNumAddOns() do
@@ -70,7 +71,7 @@ function ns.ExportAddons()
 	for _, name in ipairs(names) do
 		lines[#lines + 1] = (IsEnabled(name) and "+" or "-") .. name
 	end
-	return table.concat(lines, "\n"), "Addons (" .. date("%d/%m/%Y") .. ")"
+	return table.concat(lines, "\n"), L["Addons (%s)"]:format(date(L["%d/%m/%Y"]))
 end
 
 local function ParseAddons(text)
@@ -97,7 +98,7 @@ function ns.AddonsDetails(text)
 	for _, entry in ipairs(list) do
 		on = on + (entry.enabled and 1 or 0)
 	end
-	return { on .. " activé(s), " .. (#list - on) .. " désactivé(s)", "Effet au rechargement de l'interface" }
+	return { L["%d activé(s), %d désactivé(s)"]:format(on, #list - on), L["Effet au rechargement de l'interface"] }
 end
 
 -- Applique une liste d'addons au personnage joué. Renvoie true, le compte rendu et vrai s'il
@@ -105,9 +106,9 @@ end
 function ns.ApplyAddons(text)
 	local list = ParseAddons(text)
 	if not list then
-		return nil, "Ce profil n'est pas une liste d'addons."
+		return nil, L["Ce profil n'est pas une liste d'addons."]
 	elseif not Available() then
-		return nil, "Liste des addons indisponible sur ce client."
+		return nil, L["Liste des addons indisponible sur ce client."]
 	end
 	local enabled, disabled, same, missing = 0, 0, 0, 0
 	for _, entry in ipairs(list) do
@@ -128,7 +129,7 @@ function ns.ApplyAddons(text)
 		C_AddOns.SaveAddOns()
 	end
 	local changed = enabled + disabled
-	return true, string.format("Addons : %d activé(s), %d désactivé(s), %d inchangé(s), %d absent(s) de ce PC.",
+	return true, string.format(L["Addons : %d activé(s), %d désactivé(s), %d inchangé(s), %d absent(s) de ce PC."],
 		enabled, disabled, same, missing), changed > 0
 end
 
@@ -168,13 +169,13 @@ end
 function ns.ExportSAMProfile(name)
 	local module = SAMProfiles()
 	if not module then
-		return nil, "Simple Addon Manager n'est pas chargé."
+		return nil, L["Simple Addon Manager n'est pas chargé."]
 	end
 	local ok, text = pcall(module.ExportProfile, module, name)
 	if ok and type(text) == "string" and text ~= "" then
 		return text
 	end
-	return nil, "Export du profil « " .. tostring(name) .. " » impossible."
+	return nil, L["Export du profil « %s » impossible."]:format(tostring(name))
 end
 
 -- Profils principaux d'une chaîne d'export : ceux dont aucun autre ne dépend.
@@ -209,17 +210,18 @@ end
 function ns.ImportSAMProfile(text)
 	local module, sam = SAMProfiles()
 	if not module then
-		return nil, "Simple Addon Manager n'est pas chargé."
+		return nil, L["Simple Addon Manager n'est pas chargé."]
 	end
 	local ok = pcall(module.ImportProfile, module, text)
 	if not ok then
-		return nil, "Chaîne refusée par Simple Addon Manager."
+		return nil, L["Chaîne refusée par Simple Addon Manager."]
 	end
 	if sam.Update then
 		pcall(sam.Update, sam)
 	end
 	local mains = MainProfiles(text)
-	local message = "Importé dans Simple Addon Manager" .. (#mains > 0 and (" : " .. table.concat(mains, ", ")) or "") .. "."
+	local message = #mains > 0 and L["Importé dans Simple Addon Manager : %s."]:format(table.concat(mains, ", "))
+		or L["Importé dans Simple Addon Manager."]
 	local followUp
 	if #mains == 1 and module.ShowLoadProfileAndReloadUIDialog then
 		followUp = function()

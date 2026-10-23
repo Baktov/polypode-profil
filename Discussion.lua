@@ -1,6 +1,7 @@
 -- Polypode Profil: Discussion — paramétrage des fenêtres de discussion (capture et application)
 
 local _, ns = ...
+local L = ns.L
 
 -- Genre « chat », texte propre à Polypode Profil (champs séparés par « : », textes encodés par
 -- ns.Enc, Options.lua) :
@@ -53,7 +54,7 @@ end
 
 function ns.ExportChat()
 	if not (GetChatWindowInfo and GetChatWindowMessages and GetChatWindowChannels) then
-		return nil, "Fenêtres de discussion illisibles sur ce client."
+		return nil, L["Fenêtres de discussion illisibles sur ce client."]
 	end
 	local lines = { HEADER }
 	for id = 1, NumWindows() do
@@ -96,7 +97,7 @@ function ns.ExportChat()
 			lines[#lines + 1] = "cvar=" .. cvar .. ":" .. Enc(value)
 		end
 	end
-	return table.concat(lines, "\n"), "Discussion (" .. date("%d/%m/%Y") .. ")"
+	return table.concat(lines, "\n"), L["Discussion (%s)"]:format(date(L["%d/%m/%Y"]))
 end
 
 -- LECTURE ------------------------------------------------------------------------------------
@@ -165,7 +166,7 @@ function ns.ChatDetails(text)
 			names[#names + 1] = window.name ~= "" and window.name or ("n° " .. id)
 		end
 	end
-	return { #names .. " fenêtre(s) : " .. table.concat(names, ", "), #profile.colors .. " couleur(s) de messages" }
+	return { L["%d fenêtre(s) : %s"]:format(#names, table.concat(names, ", ")), L["%d couleur(s) de messages"]:format(#profile.colors) }
 end
 
 -- APPLICATION --------------------------------------------------------------------------------
@@ -222,11 +223,11 @@ end
 function ns.ApplyChat(text)
 	local profile = Parse(text)
 	if not profile then
-		return nil, "Ce profil n'est pas un paramétrage de discussion."
+		return nil, L["Ce profil n'est pas un paramétrage de discussion."]
 	elseif InCombatLockdown() then
-		return nil, "Impossible en combat."
+		return nil, L["Impossible en combat."]
 	elseif not (FCF_OpenNewWindow and FCF_Close and GetChatWindowInfo) then
-		return nil, "Fenêtres de discussion indisponibles sur ce client."
+		return nil, L["Fenêtres de discussion indisponibles sur ce client."]
 	end
 	-- Fenêtres actives absentes du profil : fermées (1 et 2 jamais).
 	for id = 3, NumWindows() do
@@ -264,5 +265,5 @@ function ns.ApplyChat(text)
 			C_CVar.SetCVar(entry[1], entry[2])
 		end
 	end
-	return true, "Discussion paramétrée : " .. count .. " fenêtre(s). Un /reload est conseillé."
+	return true, L["Discussion paramétrée : %d fenêtre(s). Un /reload est conseillé."]:format(count)
 end

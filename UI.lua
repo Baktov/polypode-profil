@@ -2,6 +2,7 @@
 
 local _, ns = ...
 local P = Polypode
+local L = ns.L
 
 -- Infobulles : notions de clic en bleu (règle commune, P.ShowTooltip de Polypode 0.59.1), sinon
 -- affichage simple.
@@ -115,14 +116,14 @@ local function UpdateEditorHeader()
 	if profile then
 		header = profile.name .. Gray("  · " .. FormatDate(profile.updated))
 	else
-		header = "Nouveau profil"
+		header = L["Nouveau profil"]
 	end
 	local size = #Trim(EditorText())
 	if size > 0 then
-		header = header .. Gray("  · " .. size .. " caractères")
+		header = header .. Gray("  · " .. L["%d caractères"]:format(size))
 	end
 	if IsDirty() then
-		header = header .. "  |cffff9933(non enregistré)|r"
+		header = header .. "  |cffff9933" .. L["(non enregistré)"] .. "|r"
 	end
 	editor.header:SetText(header)
 	deleteButton:SetEnabled(profile ~= nil)
@@ -194,7 +195,7 @@ local function ConfirmDiscard(action)
 end
 
 StaticPopupDialogs["POLYPODE_PROFIL_DISCARD"] = {
-	text = "Le profil en cours d'édition n'est pas enregistré. Abandonner les modifications ?",
+	text = L["Le profil en cours d'édition n'est pas enregistré. Abandonner les modifications ?"],
 	button1 = YES,
 	button2 = NO,
 	OnAccept = function(_, action)
@@ -210,7 +211,7 @@ StaticPopupDialogs["POLYPODE_PROFIL_DISCARD"] = {
 local UNKNOWN_SEASON = ""
 
 local function SeasonLabel(season)
-	return season == UNKNOWN_SEASON and "Saison inconnue (sauvegardes anciennes)" or season
+	return season == UNKNOWN_SEASON and L["Saison inconnue (sauvegardes anciennes)"] or season
 end
 
 -- { { season, ids = { ... } }, ... } triées par nom de saison, inconnue en dernier.
@@ -234,14 +235,14 @@ local function ProfilesBySeason()
 end
 
 StaticPopupDialogs["POLYPODE_PROFIL_DELETE_SEASON"] = {
-	text = "Supprimer les %s profil(s) enregistrés pendant « %s » ?\n(sur tous vos clients)",
-	button1 = DELETE or "Supprimer",
+	text = L["Supprimer les %s profil(s) enregistrés pendant « %s » ?\n(sur tous vos clients)"],
+	button1 = DELETE or L["Supprimer"],
 	button2 = CANCEL,
 	OnAccept = function(_, group)
 		for _, id in ipairs(group.ids) do
 			ns.Delete(id)
 		end
-		Notify(#group.ids .. " profil(s) supprimé(s) : " .. SeasonLabel(group.season) .. ".")
+		Notify(L["%d profil(s) supprimé(s) : %s."]:format(#group.ids, SeasonLabel(group.season)))
 	end,
 	timeout = 0,
 	whileDead = true,
@@ -251,11 +252,11 @@ StaticPopupDialogs["POLYPODE_PROFIL_DELETE_SEASON"] = {
 local function ShowSeasonDeleteMenu(button)
 	local groups = ProfilesBySeason()
 	if #groups == 0 or not (MenuUtil and MenuUtil.CreateContextMenu) then
-		Notify("Aucun profil enregistré.")
+		Notify(L["Aucun profil enregistré."])
 		return
 	end
 	MenuUtil.CreateContextMenu(button, function(_, root)
-		root:CreateTitle("Supprimer tous les profils de la saison")
+		root:CreateTitle(L["Supprimer tous les profils de la saison"])
 		for _, group in ipairs(groups) do
 			root:CreateButton(SeasonLabel(group.season) .. Gray(" (" .. #group.ids .. ")"), function()
 				StaticPopup_Show("POLYPODE_PROFIL_DELETE_SEASON", #group.ids, SeasonLabel(group.season), group)
@@ -265,8 +266,8 @@ local function ShowSeasonDeleteMenu(button)
 end
 
 StaticPopupDialogs["POLYPODE_PROFIL_DELETE"] = {
-	text = "Supprimer le profil « %s » ?\n(sur tous vos clients)",
-	button1 = DELETE or "Supprimer",
+	text = L["Supprimer le profil « %s » ?\n(sur tous vos clients)"],
+	button1 = DELETE or L["Supprimer"],
 	button2 = CANCEL,
 	OnAccept = function(_, id)
 		ns.Delete(id)
@@ -310,7 +311,7 @@ local function SelectAll()
 	end
 	textBox:SetFocus()
 	textBox:GetEditBox():HighlightText()
-	Notify("Chaîne sélectionnée : Ctrl+C pour la copier.")
+	Notify(L["Chaîne sélectionnée : Ctrl+C pour la copier."])
 end
 
 -- Chaîne capturée en jeu : remplace le texte ; le nom proposé n'est pris que si le nom est vide.
@@ -321,7 +322,7 @@ local function ApplyCapture(text, name, char)
 	local kind, target = editKind, char or editChar
 	ConfirmDiscard(function()
 		Load(nil, { name = name, kind = kind, text = text }, target)
-		Notify("Chaîne capturée : « Enregistrer » pour la garder.")
+		Notify(L["Chaîne capturée : « Enregistrer » pour la garder."])
 	end)
 end
 
@@ -339,12 +340,12 @@ local function Capture(button)
 		end
 		local sets = ns.GetCustomSets()
 		MenuUtil.CreateContextMenu(button, function(_, root)
-			root:CreateTitle("Tenue à capturer")
-			root:CreateButton("Apparence actuelle", function()
+			root:CreateTitle(L["Tenue à capturer"])
+			root:CreateButton(L["Apparence actuelle"], function()
 				ns.ExportCurrentAppearance(function(text, reason)
 					if text then
 						-- Tenue du personnage joué, datée : plusieurs captures restent distinctes.
-						ApplyCapture(text, "Apparence actuelle (" .. FormatDate(GetServerTime()) .. ")", P.GetCharKey())
+						ApplyCapture(text, L["Apparence actuelle (%s)"]:format(FormatDate(GetServerTime())), P.GetCharKey())
 					else
 						Notify(reason)
 					end
@@ -352,7 +353,7 @@ local function Capture(button)
 			end)
 			if #sets > 0 then
 				root:CreateDivider()
-				root:CreateTitle("Ensembles personnalisés")
+				root:CreateTitle(L["Ensembles personnalisés"])
 				for _, set in ipairs(sets) do
 					root:CreateButton(set.name, function()
 						local text, reason = ns.ExportCustomSet(set.id)
@@ -368,7 +369,7 @@ local function Capture(button)
 	elseif editKind == "options" then
 		local categories = ns.GetOptionCategories()
 		if #categories == 0 or not (MenuUtil and MenuUtil.CreateContextMenu) then
-			Notify("Aucun réglage lisible (ouvrez une fois le panneau Options, puis recommencez).")
+			Notify(L["Aucun réglage lisible (ouvrez une fois le panneau Options, puis recommencez)."])
 			return
 		end
 		local function CaptureOptions(categoryName)
@@ -380,8 +381,8 @@ local function Capture(button)
 			end
 		end
 		MenuUtil.CreateContextMenu(button, function(_, root)
-			root:CreateTitle("Catégorie d'options à capturer")
-			root:CreateButton("Toutes les catégories", function()
+			root:CreateTitle(L["Catégorie d'options à capturer"])
+			root:CreateButton(L["Toutes les catégories"], function()
 				CaptureOptions(nil)
 			end)
 			root:CreateDivider()
@@ -394,14 +395,14 @@ local function Capture(button)
 	elseif editKind == "simpleaddonmanager" then
 		local names = ns.GetSAMProfiles()
 		if #names == 0 or not (MenuUtil and MenuUtil.CreateContextMenu) then
-			Notify(ns.HasSimpleAddonManager() and "Aucun profil dans Simple Addon Manager."
-				or "Simple Addon Manager n'est pas chargé.")
+			Notify(ns.HasSimpleAddonManager() and L["Aucun profil dans Simple Addon Manager."]
+				or L["Simple Addon Manager n'est pas chargé."])
 			return
 		end
 		MenuUtil.CreateContextMenu(button, function(_, root)
-			root:CreateTitle("Profil de Simple Addon Manager")
+			root:CreateTitle(L["Profil de Simple Addon Manager"])
 			-- Tous : enregistrés directement, un profil Polypode chacun (sans passer par l'éditeur).
-			root:CreateButton("Tous les profils (enregistrés chacun)", function()
+			root:CreateButton(L["Tous les profils (enregistrés chacun)"], function()
 				local saved = 0
 				for _, name in ipairs(names) do
 					local text = ns.ExportSAMProfile(name)
@@ -409,7 +410,7 @@ local function Capture(button)
 						saved = saved + 1
 					end
 				end
-				Notify(saved .. " profil(s) de Simple Addon Manager enregistré(s).")
+				Notify(L["%d profil(s) de Simple Addon Manager enregistré(s)."]:format(saved))
 			end)
 			root:CreateDivider()
 			for _, name in ipairs(names) do
@@ -436,11 +437,11 @@ local function Capture(button)
 	elseif editKind == "equipset" then
 		local sets = ns.GetEquipmentSets()
 		if #sets == 0 or not (MenuUtil and MenuUtil.CreateContextMenu) then
-			Notify("Aucun ensemble d'équipement chez ce personnage.")
+			Notify(L["Aucun ensemble d'équipement chez ce personnage."])
 			return
 		end
 		MenuUtil.CreateContextMenu(button, function(_, root)
-			root:CreateTitle("Ensemble à capturer")
+			root:CreateTitle(L["Ensemble à capturer"])
 			for _, set in ipairs(sets) do
 				root:CreateButton(set.name .. (set.spec and Gray(" (" .. set.spec .. ")") or ""), function()
 					local text, nameOrReason = ns.ExportEquipmentSet(set.id)
@@ -455,7 +456,7 @@ local function Capture(button)
 	elseif editKind == "macro" then
 		local macros = ns.GetMacros()
 		if #macros == 0 or not (MenuUtil and MenuUtil.CreateContextMenu) then
-			Notify("Aucune macro chez ce personnage.")
+			Notify(L["Aucune macro chez ce personnage."])
 			return
 		end
 		local function AddGroup(root, title, perCharacter)
@@ -480,8 +481,8 @@ local function Capture(button)
 			end
 		end
 		MenuUtil.CreateContextMenu(button, function(_, root)
-			AddGroup(root, "Macros générales", false)
-			AddGroup(root, "Macros de " .. P.GetDisplayName(P.GetCharKey()), true)
+			AddGroup(root, L["Macros générales"], false)
+			AddGroup(root, L["Macros de %s"]:format(P.GetDisplayName(P.GetCharKey())), true)
 		end)
 	elseif editKind == "title" then
 		local text, nameOrReason = ns.ExportTitle()
@@ -493,16 +494,16 @@ local function Capture(button)
 	elseif editKind == "editmode" then
 		local layouts = ns.GetEditModeLayouts()
 		if #layouts == 0 or not (MenuUtil and MenuUtil.CreateContextMenu) then
-			Notify("Aucune disposition du mode Édition disponible.")
+			Notify(L["Aucune disposition du mode Édition disponible."])
 			return
 		end
 		MenuUtil.CreateContextMenu(button, function(_, root)
-			root:CreateTitle("Disposition à capturer")
+			root:CreateTitle(L["Disposition à capturer"])
 			for _, entry in ipairs(layouts) do
-				root:CreateButton(entry.name .. (entry.active and Gray(" (active)") or ""), function()
+				root:CreateButton(entry.name .. (entry.active and Gray(" " .. L["(active)"]) or ""), function()
 					local text, reason = ns.ExportEditModeLayout(entry.layout)
 					if text then
-						ApplyCapture(text, "Mode Édition — " .. entry.name)
+						ApplyCapture(text, L["Mode Édition — %s"]:format(entry.name))
 					else
 						Notify(reason)
 					end
@@ -528,7 +529,7 @@ end
 
 -- Contenu de la liste déroulante des genres.
 local function KindMenu(root)
-	root:CreateTitle("Genre du profil")
+	root:CreateTitle(L["Genre du profil"])
 	for _, kind in ipairs(ns.KINDS) do
 		root:CreateRadio(kind.label, function()
 			return editKind == kind.key
@@ -548,7 +549,7 @@ local function CharMenu(root)
 	if editChar then
 		set[editChar] = set[editChar] or true
 	end
-	root:CreateTitle("Personnage du profil")
+	root:CreateTitle(L["Personnage du profil"])
 	for _, item in ipairs(P.SortedKeyItems(set, IsConnected)) do
 		root:CreateRadio(FormatChar(item.key), function()
 			return editChar == item.key
@@ -603,13 +604,13 @@ local function ShowRowMenu(id)
 	end
 	MenuUtil.CreateContextMenu(frame, function(_, root)
 		root:CreateTitle(profile.name)
-		root:CreateButton("Dupliquer", function()
+		root:CreateButton(L["Dupliquer"], function()
 			ConfirmDiscard(function()
-				Load(nil, { name = profile.name .. " (copie)", kind = profile.kind, text = profile.text,
+				Load(nil, { name = L["%s (copie)"]:format(profile.name), kind = profile.kind, text = profile.text,
 					char = profile.char })
 			end)
 		end)
-		root:CreateButton("Supprimer", function()
+		root:CreateButton(L["Supprimer"], function()
 			AskDelete(id)
 		end)
 	end)
@@ -629,7 +630,7 @@ local function ShowCharRowMenu(key)
 	end
 	MenuUtil.CreateContextMenu(frame, function(_, root)
 		root:CreateTitle(CharName(key))
-		root:CreateButton("Nouveau profil pour ce personnage", function()
+		root:CreateButton(L["Nouveau profil pour ce personnage"], function()
 			NewForChar(key)
 		end)
 	end)
@@ -649,31 +650,31 @@ local ROW_ACTIONS = {
 	transmog = {
 		atlas = "lootroll-toast-icon-transmog",
 		texture = "Interface\\Icons\\INV_Chest_Cloth_17",
-		title = "Essayer la tenue",
-		tooltip = "Ouvre la cabine d'essayage sur cette tenue (comme la chaîne collée dans la discussion). Hors combat.",
-		hint = "essayer la tenue (cabine d'essayage)",
+		title = L["Essayer la tenue"],
+		tooltip = L["Ouvre la cabine d'essayage sur cette tenue (comme la chaîne collée dans la discussion). Hors combat."],
+		hint = L["essayer la tenue (cabine d'essayage)"],
 		run = function(profile)
 			return ns.TryOnTransmog(profile.text)
 		end,
 	},
 	equipset = {
 		texture = "Interface\\Icons\\INV_Helmet_03",
-		title = "Ajouter aux ensembles d'équipement",
-		tooltip = "Crée cet ensemble (nom du profil) chez le personnage joué, avec sa spécialisation. WoW "
+		title = L["Ajouter aux ensembles d'équipement"],
+		tooltip = L["Crée cet ensemble (nom du profil) chez le personnage joué, avec sa spécialisation. WoW "
 			.. "n'enregistre que ce qui est porté : les pièces (sacs ou équipées) sont équipées une à une, "
-			.. "l'ensemble est créé, puis la tenue d'avant est remise. Hors combat.",
-		hint = "ajouter aux ensembles d'équipement du personnage joué",
-		done = "Création de l'ensemble…",
+			.. "l'ensemble est créé, puis la tenue d'avant est remise. Hors combat."],
+		hint = L["ajouter aux ensembles d'équipement du personnage joué"],
+		done = L["Création de l'ensemble…"],
 		run = function(profile)
 			return ns.CreateEquipmentSet(profile.text, profile.name, Notify)
 		end,
 	},
 	title = {
 		texture = "Interface\\Icons\\INV_Scroll_03",
-		title = "Porter ce titre",
-		tooltip = "Le personnage joué porte ce titre (s'il le connaît) ; « Aucun titre » retire le titre.",
-		hint = "porter ce titre",
-		done = "Titre changé.",
+		title = L["Porter ce titre"],
+		tooltip = L["Le personnage joué porte ce titre (s'il le connaît) ; « Aucun titre » retire le titre."],
+		hint = L["porter ce titre"],
+		done = L["Titre changé."],
 		run = function(profile)
 			return ns.ApplyTitle(profile.text)
 		end,
@@ -683,13 +684,13 @@ local ROW_ACTIONS = {
 		iconFor = function(profile)
 			return ns.MacroIcon(profile.text)
 		end,
-		title = "Ajouter aux macros",
-		tooltip = "Crée cette macro (nom, icône, texte) chez le personnage joué, dans les macros générales "
-			.. "ou propres au personnage selon le profil ; une macro du même nom est mise à jour. Hors combat.",
-		hint = "ajouter aux macros du personnage joué",
+		title = L["Ajouter aux macros"],
+		tooltip = L["Crée cette macro (nom, icône, texte) chez le personnage joué, dans les macros générales "
+			.. "ou propres au personnage selon le profil ; une macro du même nom est mise à jour. Hors combat."],
+		hint = L["ajouter aux macros du personnage joué"],
 		-- Confirmation seulement si une macro du même nom serait remplacée.
 		confirm = function(profile)
-			return ns.MacroExists(profile.text) and "Une macro de ce nom existe déjà : elle va être remplacée." or nil
+			return ns.MacroExists(profile.text) and L["Une macro de ce nom existe déjà : elle va être remplacée."] or nil
 		end,
 		run = function(profile)
 			return ns.AddMacro(profile.text)
@@ -697,11 +698,11 @@ local ROW_ACTIONS = {
 	},
 	actionbars = {
 		texture = 132333, -- ability_warrior_battleshout
-		title = "Appliquer ces barres d'action",
-		tooltip = "Repose chaque action du profil (sorts, objets, macros, montures, mascottes, ensembles...) sur les "
+		title = L["Appliquer ces barres d'action"],
+		tooltip = L["Repose chaque action du profil (sorts, objets, macros, montures, mascottes, ensembles...) sur les "
 			.. "barres 1 à 15 du personnage joué et vide les autres emplacements. Les macros sont retrouvées par "
-			.. "leur nom, sinon créées. Un sort non appris ou un objet absent laisse l'emplacement vide. Hors combat.",
-		hint = "appliquer ces barres d'action au personnage joué",
+			.. "leur nom, sinon créées. Un sort non appris ou un objet absent laisse l'emplacement vide. Hors combat."],
+		hint = L["appliquer ces barres d'action au personnage joué"],
 		confirm = function(profile)
 			return ns.ActionBarsConfirm(profile.text)
 		end,
@@ -711,44 +712,44 @@ local ROW_ACTIONS = {
 	},
 	options = {
 		texture = "Interface\\Icons\\INV_Misc_Gear_01",
-		title = "Appliquer ces options",
-		tooltip = "Applique ces réglages du panneau Options de WoW (hors combat). Les réglages verrouillés ou "
-			.. "inconnus sont ignorés ; certains réglages graphiques demandent de relancer le jeu.",
-		hint = "appliquer ces options de WoW",
-		confirm = "Les options de WoW de ce profil vont remplacer les vôtres.",
+		title = L["Appliquer ces options"],
+		tooltip = L["Applique ces réglages du panneau Options de WoW (hors combat). Les réglages verrouillés ou "
+			.. "inconnus sont ignorés ; certains réglages graphiques demandent de relancer le jeu."],
+		hint = L["appliquer ces options de WoW"],
+		confirm = L["Les options de WoW de ce profil vont remplacer les vôtres."],
 		run = function(profile)
 			return ns.ApplyOptions(profile.text)
 		end,
 	},
 	bindings = {
 		texture = "Interface\\Icons\\INV_Misc_Key_03",
-		title = "Appliquer ces raccourcis",
-		tooltip = "Le jeu de raccourcis actif (compte ou personnage) devient celui du profil : les touches liées "
-			.. "autrement sont libérées. Hors combat.",
-		hint = "appliquer ces raccourcis clavier",
-		confirm = "Vos raccourcis clavier actuels vont être remplacés par ceux de ce profil.",
+		title = L["Appliquer ces raccourcis"],
+		tooltip = L["Le jeu de raccourcis actif (compte ou personnage) devient celui du profil : les touches liées "
+			.. "autrement sont libérées. Hors combat."],
+		hint = L["appliquer ces raccourcis clavier"],
+		confirm = L["Vos raccourcis clavier actuels vont être remplacés par ceux de ce profil."],
 		run = function(profile)
 			return ns.ApplyBindings(profile.text)
 		end,
 	},
 	chat = {
 		texture = "Interface\\Icons\\INV_Letter_15",
-		title = "Appliquer ce paramétrage",
-		tooltip = "Fenêtres de discussion (ouvertes, fermées, nom, police, couleur, types de messages, canaux, "
-			.. "position), couleurs des messages et réglages de la discussion. Hors combat ; /reload conseillé ensuite.",
-		hint = "appliquer ce paramétrage de discussion",
-		confirm = "Vos fenêtres de discussion vont être remplacées par celles de ce profil.",
+		title = L["Appliquer ce paramétrage"],
+		tooltip = L["Fenêtres de discussion (ouvertes, fermées, nom, police, couleur, types de messages, canaux, "
+			.. "position), couleurs des messages et réglages de la discussion. Hors combat ; /reload conseillé ensuite."],
+		hint = L["appliquer ce paramétrage de discussion"],
+		confirm = L["Vos fenêtres de discussion vont être remplacées par celles de ce profil."],
 		run = function(profile)
 			return ns.ApplyChat(profile.text)
 		end,
 	},
 	addons = {
 		texture = "Interface\\Icons\\INV_Misc_Gear_08",
-		title = "Appliquer cette liste d'addons",
-		tooltip = "Active / désactive les addons de la liste pour le personnage joué (les autres ne changent pas ; "
-			.. "Polypode et Polypode Profil restent activés), puis propose de recharger l'interface.",
-		hint = "appliquer cette liste d'addons (rechargement ensuite)",
-		confirm = "Les addons du personnage joué vont être activés / désactivés comme dans ce profil.",
+		title = L["Appliquer cette liste d'addons"],
+		tooltip = L["Active / désactive les addons de la liste pour le personnage joué (les autres ne changent pas ; "
+			.. "Polypode et Polypode Profil restent activés), puis propose de recharger l'interface."],
+		hint = L["appliquer cette liste d'addons (rechargement ensuite)"],
+		confirm = L["Les addons du personnage joué vont être activés / désactivés comme dans ce profil."],
 		run = function(profile)
 			local ok, message, needsReload = ns.ApplyAddons(profile.text)
 			if ok and needsReload then
@@ -761,11 +762,11 @@ local ROW_ACTIONS = {
 	},
 	simpleaddonmanager = {
 		texture = 133742, -- icône de Simple Addon Manager
-		title = "Importer dans Simple Addon Manager",
-		tooltip = "Importe ce profil dans Simple Addon Manager (le profil du même nom y est remplacé), puis "
-			.. "propose sa boîte « charger le profil et recharger ». Simple Addon Manager doit être chargé.",
-		hint = "importer dans Simple Addon Manager",
-		confirm = "Ce profil va être importé dans Simple Addon Manager (le profil du même nom y sera remplacé).",
+		title = L["Importer dans Simple Addon Manager"],
+		tooltip = L["Importe ce profil dans Simple Addon Manager (le profil du même nom y est remplacé), puis "
+			.. "propose sa boîte « charger le profil et recharger ». Simple Addon Manager doit être chargé."],
+		hint = L["importer dans Simple Addon Manager"],
+		confirm = L["Ce profil va être importé dans Simple Addon Manager (le profil du même nom y sera remplacé)."],
 		run = function(profile)
 			return ns.ImportSAMProfile(profile.text)
 		end,
@@ -775,9 +776,9 @@ local ROW_ACTIONS = {
 -- Rechargement proposé (Entrée ou clic sur « Recharger ») ; sur WoW Forever, où l'addon ne peut
 -- pas recharger, un message demande de taper /reload.
 StaticPopupDialogs["POLYPODE_PROFIL_RELOAD"] = {
-	text = "%s\n\nRecharger l'interface maintenant pour appliquer ?",
-	button1 = RELOADUI or "Recharger",
-	button2 = "Plus tard",
+	text = L["%s\n\nRecharger l'interface maintenant pour appliquer ?"],
+	button1 = RELOADUI or L["Recharger"],
+	button2 = L["Plus tard"],
 	OnAccept = function()
 		ns.Reload()
 	end,
@@ -791,7 +792,7 @@ function ShowReload(message)
 	if ns.CanReload() then
 		StaticPopup_Show("POLYPODE_PROFIL_RELOAD", message)
 	else
-		Notify(message .. " Tapez /reload pour appliquer.")
+		Notify(message .. " " .. L["Tapez /reload pour appliquer."])
 	end
 end
 
@@ -837,7 +838,7 @@ local function RunAction(action, profile)
 end
 
 StaticPopupDialogs["POLYPODE_PROFIL_APPLY"] = {
-	text = "%s\n\nAppliquer le profil « %s » ?",
+	text = L["%s\n\nAppliquer le profil « %s » ?"],
 	button1 = YES,
 	button2 = NO,
 	OnAccept = function(_, data)
@@ -852,10 +853,10 @@ local function RowTooltip(data)
 	if data.header then
 		-- Mêmes indications que « Personnages disponibles » (P.CharacterTooltip : nom, équipes).
 		local hints = {
-			data.online and "|cff40ff40Connecté|r" or "|cff999999Déconnecté (ou pas vu cette session)|r",
-			data.count .. " profil(s)",
-			"Clic gauche : " .. (data.collapsed and "déplier" or "replier"),
-			"Clic droit : nouveau profil pour ce personnage",
+			data.online and "|cff40ff40" .. L["Connecté"] .. "|r" or "|cff999999" .. L["Déconnecté (ou pas vu cette session)"] .. "|r",
+			L["%d profil(s)"]:format(data.count),
+			data.collapsed and L["Clic gauche : déplier"] or L["Clic gauche : replier"],
+			L["Clic droit : nouveau profil pour ce personnage"],
 		}
 		if P.CharacterTooltip and P.GetCharacter and P.GetCharacter(data.key) then
 			return P.CharacterTooltip(data.key, hints)
@@ -870,12 +871,12 @@ local function RowTooltip(data)
 	end
 	local lines = {
 		profile.name,
-		Label("Genre :") .. ns.KindLabel(profile.kind),
-		Label("Personnage :") .. CharName(profile.char),
-		Label("Enregistré le") .. FormatDate(profile.updated),
+		Label(L["Genre :"]) .. ns.KindLabel(profile.kind),
+		Label(L["Personnage :"]) .. CharName(profile.char),
+		Label(L["Enregistré le"]) .. FormatDate(profile.updated),
 		-- Saison et version du jeu au moment de la sauvegarde (inconnues avant la 1.9.0).
-		Label("Enregistré sous :") .. (ns.GameContextText(profile) or Gray("inconnu (sauvegarde plus ancienne)")),
-		#(profile.text or "") .. " caractères",
+		Label(L["Enregistré sous :"]) .. (ns.GameContextText(profile) or Gray(L["inconnu (sauvegarde plus ancienne)"])),
+		L["%d caractères"]:format(#(profile.text or "")),
 	}
 	local details = KIND_DETAILS[ns.NormalizeKind(profile.kind)]
 	for _, line in ipairs(details and details(profile.text) or {}) do
@@ -884,10 +885,10 @@ local function RowTooltip(data)
 	lines[#lines + 1] = " "
 	local action = ROW_ACTIONS[ns.NormalizeKind(profile.kind)]
 	if action then
-		lines[#lines + 1] = Gray("Icône : " .. action.hint)
+		lines[#lines + 1] = Gray(L["Icône : %s"]:format(action.hint))
 	end
-	lines[#lines + 1] = Gray("Clic gauche : ouvrir dans l'éditeur")
-	lines[#lines + 1] = Gray("Clic droit : dupliquer, supprimer")
+	lines[#lines + 1] = Gray(L["Clic gauche : ouvrir dans l'éditeur"])
+	lines[#lines + 1] = Gray(L["Clic droit : dupliquer, supprimer"])
 	return lines
 end
 
@@ -1017,23 +1018,23 @@ local function BuildEditor()
 	-- Ligne du nom : « Nom » [champ] [genre] [Capturer]
 	local nameLabel = editor:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 	nameLabel:SetPoint("TOPLEFT", 10, -34)
-	nameLabel:SetText("Nom")
+	nameLabel:SetText(L["Nom"])
 
-	captureButton = CreateButton(editor, "Capturer", 80, function(self)
+	captureButton = CreateButton(editor, L["Capturer"], 80, function(self)
 		Capture(self)
 	end)
 	captureButton:SetPoint("TOPRIGHT", -10, -29)
-	SetTooltip(captureButton, "Capturer",
-		"Relève la chaîne en jeu : une disposition du mode Édition (menu), les talents de la configuration "
+	SetTooltip(captureButton, L["Capturer"],
+		L["Relève la chaîne en jeu : une disposition du mode Édition (menu), les talents de la configuration "
 			.. "active (la fenêtre des talents doit avoir été ouverte une fois), ou une tenue (apparence actuelle "
 			.. "ou ensemble personnalisé : chaîne « /customset », à coller dans la discussion pour l'essayer), "
 			.. "le titre porté (chaîne « /settitle »), un ensemble d'équipement (menu, avec sa spécialisation), les barres d'action (et leurs macros), les options de WoW (menu par catégorie), les raccourcis clavier ou les fenêtres de discussion. "
 			.. "Chaque capture ouvre un nouveau profil, nommé d'après la disposition, les talents, le titre ou l'ensemble "
-			.. "(« Apparence actuelle » datée) : le profil ouvert n'est jamais écrasé.")
+			.. "(« Apparence actuelle » datée) : le profil ouvert n'est jamais écrasé."])
 
 	kindButton = CreateChoice(editor, 130, KindMenu)
 	kindButton:SetPoint("RIGHT", captureButton, "LEFT", -6, 0)
-	SetTooltip(kindButton, "Genre", "Mode Édition, talents ou addon d'où vient la chaîne (range la liste).")
+	SetTooltip(kindButton, L["Genre"], L["Mode Édition, talents ou addon d'où vient la chaîne (range la liste)."])
 
 	nameBox = CreateFrame("EditBox", nil, editor, "InputBoxTemplate")
 	nameBox:SetHeight(20)
@@ -1051,47 +1052,47 @@ local function BuildEditor()
 	-- Ligne du personnage : « Personnage » [menu du roster]
 	local charLabel = editor:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 	charLabel:SetPoint("TOPLEFT", nameLabel, "BOTTOMLEFT", 0, -16)
-	charLabel:SetText("Personnage")
+	charLabel:SetText(L["Personnage"])
 
 	charButton = CreateChoice(editor, 200, CharMenu)
 	charButton:SetPoint("LEFT", charLabel, "RIGHT", 12, 0)
 	charButton:SetPoint("RIGHT", -10, 0)
-	SetTooltip(charButton, "Personnage", "Personnage sous lequel le profil est rangé dans la liste.")
+	SetTooltip(charButton, L["Personnage"], L["Personnage sous lequel le profil est rangé dans la liste."])
 
 	-- Boutons du bas.
-	local newButton = CreateButton(editor, "Nouveau", 80, function()
+	local newButton = CreateButton(editor, L["Nouveau"], 80, function()
 		ConfirmDiscard(function()
 			Load(nil)
 		end)
 	end)
 	newButton:SetPoint("BOTTOMLEFT", 10, 10)
-	SetTooltip(newButton, "Nouveau profil", "Vide l'éditeur pour coller (Ctrl+V) une nouvelle chaîne d'export.")
+	SetTooltip(newButton, L["Nouveau profil"], L["Vide l'éditeur pour coller (Ctrl+V) une nouvelle chaîne d'export."])
 
-	local saveButton = CreateButton(editor, "Enregistrer", 90, SaveEditor)
+	local saveButton = CreateButton(editor, L["Enregistrer"], 90, SaveEditor)
 	saveButton:SetPoint("LEFT", newButton, "RIGHT", 6, 0)
-	SetTooltip(saveButton, "Enregistrer",
-		"Garde le profil (nom, genre, chaîne) pour tous vos personnages et l'envoie à vos autres clients connectés.")
+	SetTooltip(saveButton, L["Enregistrer"],
+		L["Garde le profil (nom, genre, chaîne) pour tous vos personnages et l'envoie à vos autres clients connectés."])
 
-	deleteButton = CreateButton(editor, "Supprimer", 80, function()
+	deleteButton = CreateButton(editor, L["Supprimer"], 80, function()
 		if selectedID then
 			AskDelete(selectedID)
 		end
 	end)
 	deleteButton:SetPoint("LEFT", saveButton, "RIGHT", 6, 0)
 
-	local seasonButton = CreateButton(editor, "Supprimer une saison", 140, function(self)
+	local seasonButton = CreateButton(editor, L["Supprimer une saison"], 140, function(self)
 		ShowSeasonDeleteMenu(self)
 	end)
 	seasonButton:SetPoint("LEFT", deleteButton, "RIGHT", 6, 0)
-	SetTooltip(seasonButton, "Supprimer une saison",
-		"Liste les saisons de vos profils enregistrés ; en choisir une supprime (après confirmation) tous "
-			.. "les profils enregistrés pendant cette saison, sur tous vos clients.")
+	SetTooltip(seasonButton, L["Supprimer une saison"],
+		L["Liste les saisons de vos profils enregistrés ; en choisir une supprime (après confirmation) tous "
+			.. "les profils enregistrés pendant cette saison, sur tous vos clients."])
 
-	local selectButton = CreateButton(editor, "Tout sélectionner", 120, SelectAll)
+	local selectButton = CreateButton(editor, L["Tout sélectionner"], 120, SelectAll)
 	selectButton:SetPoint("BOTTOMRIGHT", -10, 10)
-	SetTooltip(selectButton, "Tout sélectionner",
-		"Sélectionne la chaîne : Ctrl+C pour la copier, puis Ctrl+V dans la fenêtre d'import du mode Édition, "
-			.. "des talents ou de l'addon.")
+	SetTooltip(selectButton, L["Tout sélectionner"],
+		L["Sélectionne la chaîne : Ctrl+C pour la copier, puis Ctrl+V dans la fenêtre d'import du mode Édition, "
+			.. "des talents ou de l'addon."])
 
 	-- Zone de texte défilante (Ctrl+V pour coller une chaîne).
 	local textPanel = P.CreatePanel(editor, "")
@@ -1106,7 +1107,7 @@ local function BuildEditor()
 	if editBox.SetMaxBytes then
 		editBox:SetMaxBytes(0)
 	end
-	textBox:SetDefaultText("Collez ici (Ctrl+V) la chaîne d'export du mode Édition, des talents ou d'un addon.")
+	textBox:SetDefaultText(L["Collez ici (Ctrl+V) la chaîne d'export du mode Édition, des talents ou d'un addon."])
 	textBox:RegisterCallback("OnTextChanged", UpdateEditorHeader, editor)
 
 	local scrollBar = CreateFrame("EventFrame", nil, textPanel, "MinimalScrollBar")
@@ -1153,19 +1154,19 @@ local function Build()
 
 	local title = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
 	title:SetPoint("TOPLEFT", 12, -8)
-	title:SetText("Profils")
+	title:SetText(L["Profils"])
 	frame.TitleText = title
 
 	local closeBtn = CreateFrame("Button", nil, frame, "UIPanelCloseButton")
 	closeBtn:SetPoint("TOPRIGHT", -4, -4)
 	frame.CloseButton = closeBtn
 
-	listPanel = P.CreatePanel(frame, "Personnages")
+	listPanel = P.CreatePanel(frame, L["Personnages"])
 	listPanel:SetPoint("TOPLEFT", 12, -36)
 	listPanel:SetPoint("BOTTOMLEFT", 12, 12)
 
 	-- « Tout replier » / « Tout déplier », à droite du titre du cadre : condense la liste.
-	collapseAllButton = CreateButton(listPanel, "Tout replier", 90, function()
+	collapseAllButton = CreateButton(listPanel, L["Tout replier"], 90, function()
 		local collapsed = Collapsed()
 		if AllCollapsed() then
 			wipe(collapsed)
@@ -1181,8 +1182,8 @@ local function Build()
 	collapseAllButton:SetHeight(18)
 	collapseAllButton:SetPoint("TOPRIGHT", -6, -4)
 	listPanel.header:SetPoint("RIGHT", collapseAllButton, "LEFT", -6, 0)
-	SetTooltip(collapseAllButton, "Tout replier / déplier",
-		"Replie tous les personnages pour ne voir que leurs noms, ou les déplie tous.")
+	SetTooltip(collapseAllButton, L["Tout replier / déplier"],
+		L["Replie tous les personnages pour ne voir que leurs noms, ou les déplie tous."])
 	P.CreateScrollList(listPanel, function(data)
 		if data.header then
 			-- Personnage comme dans « Personnages disponibles », précédé du repli, suivi du nombre.
@@ -1225,7 +1226,7 @@ local function Build()
 			end
 		end,
 	})
-	listPanel.emptyText:SetText("Aucun profil enregistré.")
+	listPanel.emptyText:SetText(L["Aucun profil enregistré."])
 
 	BuildEditor()
 
@@ -1277,7 +1278,7 @@ function ns.Refresh()
 		end
 	end
 	P.SetListData(listPanel, BuildItems())
-	collapseAllButton:SetText(AllCollapsed() and "Tout déplier" or "Tout replier")
+	collapseAllButton:SetText(AllCollapsed() and L["Tout déplier"] or L["Tout replier"])
 	UpdateEditorHeader()
 end
 
@@ -1300,15 +1301,15 @@ end
 
 if P.AddTitleButton then
 	P.AddTitleButton({
-		text = "Profils",
+		text = L["Profils"],
 		width = 60,
 		onClick = function()
 			P.ToggleProfil()
 		end,
 		tooltip = {
-			"Profils",
-			"Chaînes d'export du mode Édition, des talents et des addons (EllesmereUI, ElvUI, Baganator, "
-				.. "MySlots, Simple Addon Manager...), gardées pour tous vos personnages.",
+			L["Profils"],
+			L["Chaînes d'export du mode Édition, des talents et des addons (EllesmereUI, ElvUI, Baganator, "
+				.. "MySlots, Simple Addon Manager...), gardées pour tous vos personnages."],
 		},
 		onCreate = function(button)
 			P.ui.profilButton = button
@@ -1317,5 +1318,5 @@ if P.AddTitleButton then
 end
 
 if P.RegisterSlashCommand then
-	P.RegisterSlashCommand("profil", P.ToggleProfil, "profils (chaînes d'export du mode Édition, des talents, des addons)")
+	P.RegisterSlashCommand("profil", P.ToggleProfil, L["profils (chaînes d'export du mode Édition, des talents, des addons)"])
 end

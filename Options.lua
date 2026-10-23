@@ -1,6 +1,7 @@
 -- Polypode Profil: Options — options de WoW (CVars du panneau Options) et raccourcis clavier
 
 local _, ns = ...
+local L = ns.L
 
 -- Deux genres, en texte propre à Polypode Profil (pas de chaîne d'export chez Blizzard) :
 --
@@ -127,7 +128,7 @@ function ns.ExportOptions(categoryName)
 		end
 	end
 	if #names == 0 then
-		return nil, "Aucun réglage trouvé (panneau Options pas encore chargé ?)."
+		return nil, L["Aucun réglage trouvé (panneau Options pas encore chargé ?)."]
 	end
 	table.sort(names)
 	local lines, count = { OPTIONS_HEADER }, 0
@@ -146,7 +147,7 @@ function ns.ExportOptions(categoryName)
 			end
 		end
 	end
-	return table.concat(lines, "\n"), "Options — " .. (categoryName or "toutes") .. " (" .. date("%d/%m/%Y") .. ")", count
+	return table.concat(lines, "\n"), L["Options — %s (%s)"]:format(categoryName or L["toutes"], date(L["%d/%m/%Y"])), count
 end
 
 -- Préréglages graphiques appliqués avant les réglages fins qu'ils modifient.
@@ -158,9 +159,9 @@ end
 function ns.ApplyOptions(text)
 	local list = Lines(text, OPTIONS_HEADER)
 	if not list then
-		return nil, "Ce profil n'est pas un profil d'options."
+		return nil, L["Ce profil n'est pas un profil d'options."]
 	elseif InCombatLockdown() then
-		return nil, "Impossible en combat."
+		return nil, L["Impossible en combat."]
 	end
 	table.sort(list, function(a, b)
 		local ra, rb = OptionRank(a[1]), OptionRank(b[1])
@@ -183,8 +184,8 @@ function ns.ApplyOptions(text)
 			refused = refused + 1
 		end
 	end
-	return true, string.format("Options : %d appliquée(s), %d déjà à jour, %d ignorée(s).%s", applied, same, refused,
-		applied > 0 and " Certains réglages graphiques demandent de relancer le jeu." or "")
+	return true, L["Options : %d appliquée(s), %d déjà à jour, %d ignorée(s)."]:format(applied, same, refused)
+		.. (applied > 0 and " " .. L["Certains réglages graphiques demandent de relancer le jeu."] or "")
 end
 
 function ns.OptionsDetails(text)
@@ -196,7 +197,7 @@ function ns.OptionsDetails(text)
 	for name in tostring(text):gmatch("\n# ([^\r\n]+)") do
 		categories[#categories + 1] = name
 	end
-	return { #list .. " réglage(s)", "Catégories : " .. (#categories > 0 and table.concat(categories, ", ") or "?") }
+	return { L["%d réglage(s)"]:format(#list), L["Catégories : %s"]:format(#categories > 0 and table.concat(categories, ", ") or "?") }
 end
 
 -- RACCOURCIS ---------------------------------------------------------------------------------
@@ -230,11 +231,17 @@ local function BindingSetLabel()
 	return set == CHARACTER_SET and "personnage" or "compte"
 end
 
+-- Libellé affiché d'un jeu de raccourcis (« personnage », « compte » restent en français dans la
+-- chaîne d'export, relue à l'import).
+local function SetLabelText(label)
+	return label == "personnage" and L["personnage"] or label == "compte" and L["compte"] or label
+end
+
 -- Texte de tous les raccourcis et nom proposé.
 function ns.ExportBindings()
 	local bindings = CurrentBindings()
 	if #bindings == 0 then
-		return nil, "Aucun raccourci lisible."
+		return nil, L["Aucun raccourci lisible."]
 	end
 	local lines = { BINDINGS_HEADER, "# jeu de raccourcis : " .. BindingSetLabel() }
 	for _, binding in ipairs(bindings) do
@@ -244,7 +251,7 @@ function ns.ExportBindings()
 		end
 		lines[#lines + 1] = Enc(binding.command) .. "=" .. table.concat(keys, ",")
 	end
-	return table.concat(lines, "\n"), "Raccourcis (" .. date("%d/%m/%Y") .. ")"
+	return table.concat(lines, "\n"), L["Raccourcis (%s)"]:format(date(L["%d/%m/%Y"]))
 end
 
 -- Applique un profil de raccourcis au jeu de raccourcis actif ; true et le compte rendu, ou nil
@@ -252,11 +259,11 @@ end
 function ns.ApplyBindings(text)
 	local list = Lines(text, BINDINGS_HEADER)
 	if not list then
-		return nil, "Ce profil n'est pas un profil de raccourcis."
+		return nil, L["Ce profil n'est pas un profil de raccourcis."]
 	elseif InCombatLockdown() then
-		return nil, "Impossible en combat."
+		return nil, L["Impossible en combat."]
 	elseif not (SetBinding and SaveBindings and GetBindingAction) then
-		return nil, "Raccourcis indisponibles sur ce client."
+		return nil, L["Raccourcis indisponibles sur ce client."]
 	end
 	local wanted = {} -- [touche] = commande
 	for _, entry in ipairs(list) do
@@ -286,8 +293,8 @@ function ns.ApplyBindings(text)
 		end
 	end
 	SaveBindings(GetCurrentBindingSet and GetCurrentBindingSet() or ACCOUNT_SET)
-	return true, string.format("Raccourcis (%s) : %d lié(s), %d déjà en place, %d libéré(s), %d inconnu(s).",
-		BindingSetLabel(), set, same, cleared, failed)
+	return true, L["Raccourcis (%s) : %d lié(s), %d déjà en place, %d libéré(s), %d inconnu(s)."]:format(
+		SetLabelText(BindingSetLabel()), set, same, cleared, failed)
 end
 
 function ns.BindingsDetails(text)
@@ -296,5 +303,5 @@ function ns.BindingsDetails(text)
 		return nil
 	end
 	local setName = tostring(text):match("# jeu de raccourcis : (%a+)")
-	return { #list .. " commande(s) liée(s)", "Jeu de raccourcis d'origine : " .. (setName or "?") }
+	return { L["%d commande(s) liée(s)"]:format(#list), L["Jeu de raccourcis d'origine : %s"]:format(setName and SetLabelText(setName) or "?") }
 end

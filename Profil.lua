@@ -2,6 +2,7 @@
 
 local _, ns = ...
 local P = Polypode -- dépendance obligatoire (## Dependencies: Polypode), chargée avant nous
+local L = ns.L
 
 -- Addon compagnon de Polypode : une bibliothèque de « profils », c'est-à-dire des chaînes
 -- d'export copiées depuis le mode Édition de WoW, la fenêtre des talents ou un addon (EllesmereUI,
@@ -30,24 +31,24 @@ local P = Polypode -- dépendance obligatoire (## Dependencies: Polypode), charg
 
 -- Genres de profil, dans l'ordre d'affichage. capture = le texte peut être relevé en jeu.
 ns.KINDS = {
-	{ key = "editmode", label = "Mode Édition", capture = true },
-	{ key = "talents", label = "Talents", capture = true },
+	{ key = "editmode", label = L["Mode Édition"], capture = true },
+	{ key = "talents", label = L["Talents"], capture = true },
 	-- short : libellé du bouton de genre quand le libellé complet n'y tient pas.
-	{ key = "transmog", label = "Transmogrification", short = "Transmo", capture = true },
-	{ key = "title", label = "Titre", capture = true },
-	{ key = "macro", label = "Macro", capture = true }, -- Macro.lua
-	{ key = "equipset", label = "Ensemble d'équipement", short = "Ensemble", capture = true }, -- Equipement.lua
-	{ key = "options", label = "Options de WoW", capture = true }, -- Options.lua
-	{ key = "actionbars", label = "Barres d'action", short = "Barres", capture = true }, -- Barres.lua
-	{ key = "bindings", label = "Raccourcis clavier", short = "Raccourcis", capture = true }, -- Options.lua
-	{ key = "chat", label = "Fenêtres de discussion", short = "Discussion", capture = true }, -- Discussion.lua
-	{ key = "addons", label = "Liste des addons", short = "Addons", capture = true }, -- Addons.lua
+	{ key = "transmog", label = L["Transmogrification"], short = L["Transmo"], capture = true },
+	{ key = "title", label = L["Titre"], capture = true },
+	{ key = "macro", label = L["Macro"], capture = true }, -- Macro.lua
+	{ key = "equipset", label = L["Ensemble d'équipement"], short = L["Ensemble"], capture = true }, -- Equipement.lua
+	{ key = "options", label = L["Options de WoW"], capture = true }, -- Options.lua
+	{ key = "actionbars", label = L["Barres d'action"], short = L["Barres"], capture = true }, -- Barres.lua
+	{ key = "bindings", label = L["Raccourcis clavier"], short = L["Raccourcis"], capture = true }, -- Options.lua
+	{ key = "chat", label = L["Fenêtres de discussion"], short = L["Discussion"], capture = true }, -- Discussion.lua
+	{ key = "addons", label = L["Liste des addons"], short = L["Addons"], capture = true }, -- Addons.lua
 	{ key = "ellesmereui", label = "EllesmereUI" },
 	{ key = "elvui", label = "ElvUI" },
 	{ key = "baganator", label = "Baganator" },
 	{ key = "myslots", label = "MySlots" },
 	{ key = "simpleaddonmanager", label = "Simple Addon Manager", short = "Simple AM", capture = true }, -- Addons.lua
-	{ key = "other", label = "Autre" },
+	{ key = "other", label = L["Autre"] },
 }
 ns.DEFAULT_KIND = "other"
 
@@ -109,9 +110,9 @@ local function GameContext()
 	end)
 	local season
 	if okExpansion and expansion then
-		local name = _G["EXPANSION_NAME" .. expansion] or ("Extension " .. expansion)
+		local name = _G["EXPANSION_NAME" .. expansion] or L["Extension %s"]:format(expansion)
 		number = okNumber and tonumber(number) or nil
-		season = (number and number > 0) and (name .. ", saison " .. number) or (name .. ", hors saison")
+		season = (number and number > 0) and L["%s, saison %d"]:format(name, number) or L["%s, hors saison"]:format(name)
 	end
 	return season, build
 end
@@ -121,7 +122,7 @@ function ns.GameContextText(profile)
 	if not (profile.season or profile.build) then
 		return nil
 	end
-	local text = profile.season or "saison inconnue"
+	local text = profile.season or L["saison inconnue"]
 	return profile.build and (text .. " (" .. profile.build .. ")") or text
 end
 
@@ -171,11 +172,11 @@ end
 -- joué) ; renvoie son id, ou nil et la raison.
 function ns.Save(id, name, kind, text, char)
 	if not store then
-		return nil, "Données non chargées."
+		return nil, L["Données non chargées."]
 	end
 	name, text = Trim(name), Trim(text)
 	if text == "" then
-		return nil, "La chaîne est vide."
+		return nil, L["La chaîne est vide."]
 	end
 	if name == "" then
 		name = ns.KindLabel(kind)
@@ -219,7 +220,7 @@ function ns.GetEditModeLayouts()
 		return list
 	end
 	for index, layout in ipairs(info.layouts) do
-		list[#list + 1] = { name = layout.layoutName or ("Disposition " .. index), active = index == info.activeLayout,
+		list[#list + 1] = { name = layout.layoutName or L["Disposition %s"]:format(index), active = index == info.activeLayout,
 			layout = layout }
 	end
 	return list
@@ -231,7 +232,7 @@ function ns.ExportEditModeLayout(layout)
 	if ok and type(text) == "string" and text ~= "" then
 		return text
 	end
-	return nil, "Export de la disposition impossible."
+	return nil, L["Export de la disposition impossible."]
 end
 
 -- Chaîne d'export des talents affichés par la fenêtre des talents de Blizzard (configuration
@@ -239,19 +240,19 @@ end
 -- arbre qu'à son premier affichage. Elle n'est jamais chargée d'ici : chargée par un addon, elle
 -- serait « souillée » (taint) et WoW pourrait bloquer ensuite l'application des talents.
 function ns.ExportTalents()
-	local OPEN_FIRST = "Ouvrez une fois la fenêtre des talents (N), puis recommencez."
+	local OPEN_FIRST = L["Ouvrez une fois la fenêtre des talents (N), puis recommencez."]
 	if not PlayerSpellsFrame then
 		return nil, OPEN_FIRST
 	end
 	local talents = PlayerSpellsFrame.TalentsFrame
 	if not (talents and talents.GetLoadoutExportString) then
-		return nil, "Talents indisponibles sur ce client."
+		return nil, L["Talents indisponibles sur ce client."]
 	end
 	local ok, text = pcall(talents.GetLoadoutExportString, talents)
 	if not ok or type(text) ~= "string" or text == "" then
 		return nil, OPEN_FIRST
 	end
-	local name = "Talents"
+	local name = L["Talents"]
 	if PlayerUtil and PlayerUtil.GetSpecName then
 		local okSpec, spec = pcall(PlayerUtil.GetSpecName)
 		if okSpec and spec then
@@ -309,7 +310,7 @@ function ns.GetCustomSets()
 	local ok, ids = pcall(C_TransmogCollection.GetCustomSets)
 	for _, id in ipairs(ok and ids or {}) do
 		local name = C_TransmogCollection.GetCustomSetInfo(id)
-		list[#list + 1] = { id = id, name = name or ("Ensemble " .. id) }
+		list[#list + 1] = { id = id, name = name or L["Ensemble %s"]:format(id) }
 	end
 	table.sort(list, function(a, b)
 		return a.name:lower() < b.name:lower()
@@ -325,7 +326,7 @@ function ns.ExportCustomSet(id)
 	if text then
 		return text
 	end
-	return nil, "Export de l'ensemble impossible."
+	return nil, L["Export de l'ensemble impossible."]
 end
 
 -- Ouvre la cabine d'essayage sur une chaîne « /customset v1 ... », comme la commande tapée dans la
@@ -335,15 +336,15 @@ end
 function ns.TryOnTransmog(text)
 	local args = tostring(text or ""):match("^%s*/customset%s+(.-)%s*$")
 	if not args then
-		return nil, "Ce profil n'est pas une chaîne « /customset »."
+		return nil, L["Ce profil n'est pas une chaîne « /customset »."]
 	elseif InCombatLockdown() then
-		return nil, "Impossible en combat."
+		return nil, L["Impossible en combat."]
 	elseif not (TransmogUtil and TransmogUtil.ParseCustomSetSlashCommand and DressUpItemTransmogInfoList) then
-		return nil, "Cabine d'essayage indisponible sur ce client."
+		return nil, L["Cabine d'essayage indisponible sur ce client."]
 	end
 	local ok, list = pcall(TransmogUtil.ParseCustomSetSlashCommand, args)
 	if not ok or not list then
-		return nil, "Chaîne de transmogrification invalide."
+		return nil, L["Chaîne de transmogrification invalide."]
 	end
 	local showCustomSetDetails = true
 	DressUpItemTransmogInfoList(list, showCustomSetDetails)
@@ -361,14 +362,14 @@ end
 -- Titre porté par le personnage joué : chaîne et nom proposé.
 function ns.ExportTitle()
 	if not (GetCurrentTitle and GetTitleName) then
-		return nil, "Titres indisponibles sur ce client."
+		return nil, L["Titres indisponibles sur ce client."]
 	end
 	local id = GetCurrentTitle()
 	local name = id and id > 0 and (not IsTitleKnown or IsTitleKnown(id)) and TitleName(id)
 	if name and name ~= "" then
 		return "/settitle " .. name, name
 	end
-	return "/settitle", "Aucun titre"
+	return "/settitle", L["Aucun titre"]
 end
 
 -- Porte le titre d'une chaîne « /settitle Nom » (nom exact, parmi les titres connus du
@@ -376,9 +377,9 @@ end
 function ns.ApplyTitle(text)
 	local wanted = tostring(text or ""):match("^%s*/settitle%s*(.-)%s*$")
 	if not wanted then
-		return nil, "Ce profil n'est pas une chaîne « /settitle »."
+		return nil, L["Ce profil n'est pas une chaîne « /settitle »."]
 	elseif not (SetCurrentTitle and GetNumTitles and IsTitleKnown) then
-		return nil, "Titres indisponibles sur ce client."
+		return nil, L["Titres indisponibles sur ce client."]
 	elseif wanted == "" then
 		SetCurrentTitle(-1)
 		return true
@@ -390,7 +391,7 @@ function ns.ApplyTitle(text)
 			return true
 		end
 	end
-	return nil, "Titre inconnu de ce personnage."
+	return nil, L["Titre inconnu de ce personnage."]
 end
 
 -- Apparence portée par le personnage joué, lue sur un modèle de cabine d'essayage invisible
@@ -402,7 +403,7 @@ function ns.ExportCurrentAppearance(callback)
 	if not appearanceModel then
 		local ok, model = pcall(CreateFrame, "DressUpModel", nil, UIParent)
 		if not ok or not model or not model.GetItemTransmogInfoList then
-			callback(nil, "Transmogrification indisponible sur ce client.")
+			callback(nil, L["Transmogrification indisponible sur ce client."])
 			return
 		end
 		model:SetSize(1, 1)
@@ -424,7 +425,7 @@ function ns.ExportCurrentAppearance(callback)
 			if text then
 				callback(text)
 			else
-				callback(nil, "Apparence du personnage illisible pour l'instant, réessayez.")
+				callback(nil, L["Apparence du personnage illisible pour l'instant, réessayez."])
 			end
 			return
 		end
@@ -623,7 +624,7 @@ if P.RegisterCharacterData then
 		describe = function(key)
 			local count = #ProfilesOf(key)
 			if count > 0 then
-				return count .. " profil(s) rangé(s) sous ce personnage"
+				return L["%d profil(s) rangé(s) sous ce personnage"]:format(count)
 			end
 		end,
 		remove = function(key, fromSync)

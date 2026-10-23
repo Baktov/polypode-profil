@@ -209,8 +209,22 @@ Cet addon n'a pas d'options.
 
 ---
 
+## Langues (Languages)
+
+Polypode Profil s'affiche dans la langue choisie dans Polypode (option « Langue / Language », `/poly langue`),
+par défaut celle du jeu : français, anglais, allemand, espagnol, italien ou portugais du Brésil
+(anglais pour une autre langue). Nécessite Polypode 2.9 pour choisir la langue ; avec un Polypode plus
+ancien, le module reste en français. La commande `C:/Program Files/Git/poly profil` garde son nom.
+
+*Polypode Profil follows the language chosen in Polypode ("Langue / Language" option, `/poly language`), by
+default the game's: French, English, German, Spanish, Italian or Brazilian Portuguese (English for any
+other language).*
+
+---
+
 ## Version
 
+`2.2.0` : Polypode Profil en anglais, allemand, espagnol, italien et portugais du Brésil, selon la langue choisie dans Polypode (Profiles, Profile, Perfiles, Profili, Perfis) ; les chaînes d'export gardent leur format (en-têtes et lignes en français), lisibles quelle que soit la langue. *Translated into English, German, Spanish, Italian and Brazilian Portuguese.*
 `2.1.1` : genre « MySlots » rétabli (ses profils ne sont plus supprimés) : « Barres d'action » en reprend moins que MySlot.
 `2.1.0` : genre « Barres d'action » (capture des barres 1 à 15 et de leurs macros, application par l'icône de la liste) ; genre « MySlots » retiré, ses profils supprimés.
 `2.0.0` : première version publique (release GitHub v2.0.0). Nécessite Polypode 2.0.0.

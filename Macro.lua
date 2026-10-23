@@ -1,6 +1,7 @@
 -- Polypode Profil: Macro — macros : capture (nom, icône, texte) et ajout chez le personnage joué
 
 local _, ns = ...
+local L = ns.L
 
 -- Une macro de WoW, en texte :
 --   Polypode macro v1
@@ -105,7 +106,7 @@ end
 function ns.ExportMacro(index)
 	local name, icon, body = GetMacroInfo(index)
 	if not name then
-		return nil, "Macro introuvable."
+		return nil, L["Macro introuvable."]
 	end
 	local maxAccount = MaxMacros()
 	return table.concat({
@@ -125,8 +126,8 @@ function ns.MacroDetails(text)
 		return nil
 	end
 	local lines = {
-		(macro.icon and ("|T" .. macro.icon .. ":16|t ") or "") .. "Macro « " .. macro.name .. " » ("
-			.. (macro.perCharacter and "propre au personnage" or "générale") .. ")",
+		(macro.icon and ("|T" .. macro.icon .. ":16|t ") or "") .. (macro.perCharacter and L["Macro « %s » (propre au personnage)"]
+			or L["Macro « %s » (générale)"]):format(macro.name),
 	}
 	for line in (macro.body .. "\n"):gmatch("(.-)\n") do
 		lines[#lines + 1] = "|cffcccccc" .. line:gsub("|", "||") .. "|r"
@@ -160,31 +161,32 @@ end
 function ns.AddMacro(text)
 	local macro = Parse(text)
 	if not macro then
-		return nil, "Texte de macro illisible (première ligne attendue : « " .. HEADER .. " »)."
+		return nil, L["Texte de macro illisible (première ligne attendue : « %s »)."]:format(HEADER)
 	elseif not (CreateMacro and EditMacro and GetNumMacros) then
-		return nil, "Macros indisponibles."
+		return nil, L["Macros indisponibles."]
 	elseif InCombatLockdown() then
-		return nil, "Impossible en combat."
+		return nil, L["Impossible en combat."]
 	end
 	local icon = macro.icon or 134400 -- point d'interrogation (INV_Misc_QuestionMark)
-	local kind = macro.perCharacter and "propres au personnage" or "générales"
 	local index = FindMacro(macro.name, macro.perCharacter)
 	if index then
 		local ok = pcall(EditMacro, index, macro.name, icon, macro.body)
 		if not ok then
-			return nil, "Échec de la mise à jour de la macro « " .. macro.name .. " »."
+			return nil, L["Échec de la mise à jour de la macro « %s »."]:format(macro.name)
 		end
-		return true, "Macro « " .. macro.name .. " » mise à jour (" .. kind .. ")."
+		return true, (macro.perCharacter and L["Macro « %s » mise à jour (propre au personnage)."] or L["Macro « %s » mise à jour (générale)."])
+			:format(macro.name)
 	end
 	local maxAccount, maxCharacter = MaxMacros()
 	local numAccount, numCharacter = GetNumMacros()
 	if macro.perCharacter and (numCharacter or 0) >= maxCharacter
 		or not macro.perCharacter and (numAccount or 0) >= maxAccount then
-		return nil, "Plus de place pour une macro " .. (macro.perCharacter and "propre au personnage." or "générale.")
+		return nil, macro.perCharacter and L["Plus de place pour une macro propre au personnage."] or L["Plus de place pour une macro générale."]
 	end
 	local ok, created = pcall(CreateMacro, macro.name, icon, macro.body, macro.perCharacter)
 	if not ok or not created then
-		return nil, "Échec de la création de la macro « " .. macro.name .. " »."
+		return nil, L["Échec de la création de la macro « %s »."]:format(macro.name)
 	end
-	return true, "Macro « " .. macro.name .. " » ajoutée aux macros " .. kind .. "."
+	return true, (macro.perCharacter and L["Macro « %s » ajoutée aux macros propres au personnage."]
+		or L["Macro « %s » ajoutée aux macros générales."]):format(macro.name)
 end
