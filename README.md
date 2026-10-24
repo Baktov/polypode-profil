@@ -1,5 +1,7 @@
 # Polypode Profil
 
+*English version: [README.en.md](README.en.md)*
+
 Fenêtre **« Profils »** de [Polypode](https://github.com/Baktov/polypode), sous forme d'addon
 séparé : une bibliothèque de **chaînes d'export** — disposition du **mode Édition** de WoW,
 **talents**, profils d'addons (**EllesmereUI**, **ElvUI**, **Baganator**, **MySlots**, **Simple Addon Manager**...), **barres d'action** —
@@ -7,6 +9,11 @@ gardées une fois pour toutes et disponibles sur tous vos personnages, pour conf
 rapidement un nouveau personnage ou une nouvelle fenêtre.
 
 Désactivé, Polypode fonctionne normalement, sans bouton « Profils » ni commande `/poly profil`.
+
+> **Langues** : français, anglais, allemand, espagnol, italien et portugais du Brésil, selon la
+> langue choisie dans Polypode (option « Langue / Language »). Les traductions ont été faites avec
+> l'aide de Claude, l'IA d'Anthropic : les retours de joueurs dont c'est la langue maternelle sont
+> les bienvenus ([issue GitHub](https://github.com/Baktov/polypode-profil/issues)).
 
 ---
 
@@ -214,7 +221,7 @@ Cet addon n'a pas d'options.
 Polypode Profil s'affiche dans la langue choisie dans Polypode (option « Langue / Language », `/poly langue`),
 par défaut celle du jeu : français, anglais, allemand, espagnol, italien ou portugais du Brésil
 (anglais pour une autre langue). Nécessite Polypode 2.9 pour choisir la langue ; avec un Polypode plus
-ancien, le module reste en français. La commande `C:/Program Files/Git/poly profil` garde son nom.
+ancien, le module reste en français. La commande `/poly profil` garde son nom.
 
 *Polypode Profil follows the language chosen in Polypode ("Langue / Language" option, `/poly language`), by
 default the game's: French, English, German, Spanish, Italian or Brazilian Portuguese (English for any
