@@ -543,6 +543,8 @@ local CAPTURES = {
 	end,
 }
 
+local MENU_MAX_SCREEN_RATIO = 0.5 -- hauteur maximale d'un menu, en part de l'écran
+
 -- Menu « Nouveau » : une section par groupe de genres (ns.KIND_GROUPS) ; genre capturable =
 -- sous-menu (captures en jeu, puis « Coller une chaîne »), genre à coller = nouveau profil vide.
 -- char : personnage du nouveau profil (défaut : le personnage joué).
@@ -551,7 +553,15 @@ local function ShowNewMenu(owner, char)
 		StartNew(ns.DEFAULT_KIND, char)
 		return
 	end
+	-- Menu et sous-menus (macros, options...) limités à la moitié de l'écran, avec ascenseur au-delà.
+	local maxHeight = UIParent:GetHeight() * MENU_MAX_SCREEN_RATIO
+	local function Limit(description)
+		if description.SetScrollMode then
+			description:SetScrollMode(maxHeight)
+		end
+	end
 	MenuUtil.CreateContextMenu(owner, function(_, root)
+		Limit(root)
 		if char and char ~= P.GetCharKey() then
 			root:CreateTitle(L["Nouveau profil pour %s"]:format(CharName(char)))
 			root:CreateDivider()
@@ -566,6 +576,7 @@ local function ShowNewMenu(owner, char)
 					local fill = CAPTURES[kind.key]
 					if fill then
 						local menu = root:CreateButton(kind.label)
+					Limit(menu)
 						-- Lecture fragile (API absente sur un client) : le reste du menu s'affiche quand même.
 						if not pcall(fill, menu, function(text, name, own)
 							StartNew(kind.key, own and P.GetCharKey() or char, text, name)

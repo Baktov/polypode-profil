@@ -107,7 +107,7 @@ menu of types, in three groups:
    "Other".
 
 A type of groups 1 and 2 opens a submenu: its captures (layouts, macros, sets...), then **Paste a
-string** (a string from elsewhere, for example talents found on a website). A type of group 3
+string** (a string from elsewhere, for example talents found on a website); a long menu (macros...) scrolls, limited to half the screen. A type of group 3
 directly opens an empty profile. Either way, the editor gets a **new profile** of that type:
 give a name (or keep the suggested one), paste the string if needed (Ctrl+V), then **Save**.
 

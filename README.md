@@ -115,7 +115,7 @@ menu des genres, en trois groupes :
 
 Un genre des groupes 1 et 2 ouvre un sous-menu : ses captures (dispositions, macros,
 ensembles...), puis **Coller une chaîne** (une chaîne venue d'ailleurs, par exemple des talents
-trouvés sur un site). Un genre du groupe 3 ouvre directement un profil vide. Dans tous les cas,
+trouvés sur un site) ; un menu trop long (macros...) défile, limité à la moitié de l'écran. Un genre du groupe 3 ouvre directement un profil vide. Dans tous les cas,
 l'éditeur reçoit un **nouveau profil** de ce genre : donner un nom (ou garder celui proposé),
 coller la chaîne si besoin (Ctrl+V), puis **Enregistrer**.
 
@@ -264,6 +264,7 @@ other language).*
 
 ## Version
 
+`3.1.1` : menu Nouveau et sous-menus (macros, options...) limités à la moitié de l'écran, avec ascenseur.
 `3.1.0` : transmogrification appliquée chez le transmogrificateur (même icône, par un ensemble personnalisé, validée par « Appliquer » de Blizzard) ; nom d'un profil enregistré affiché en simple texte ; profils EllesmereUI, ElvUI, Baganator et MySlots nommés « Addon — nom ».
 `3.0.0` : menu **Nouveau** en trois groupes (capturer et appliquer, capturer puis copier, coller une chaîne), avec les captures de chaque genre et « Coller une chaîne » ; liste déroulante du genre et bouton Capturer retirés, genre affiché dans l'en-tête ; clic droit sur un personnage = même menu.
 `2.7.0` : boutons Dupliquer, Supprimer et Supprimer une saison sous la liste des personnages ; fenêtre revenue à 900 par défaut (880 au minimum).
