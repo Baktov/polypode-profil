@@ -100,6 +100,15 @@ P.AddTranslations(ns.L, "deDE", {
 	["Chaîne refusée par EllesmereUI."] = "Zeichenfolge von EllesmereUI abgelehnt.",
 	["EllesmereUI a refusé l'import : %s"] = "EllesmereUI hat den Import abgelehnt: %s",
 	["Import ouvert dans EllesmereUI : validez dans sa fenêtre."] = "Import in EllesmereUI geöffnet: in seinem Fenster bestätigen.",
+	["Chaîne Baganator illisible."] = "Unlesbare Baganator-Zeichenfolge.",
+	["profil"] = "Profil",
+	["catégories"] = "Kategorien",
+	["Ces catégories vont être importées dans Baganator."] = "Diese Kategorien werden in Baganator importiert.",
+	["Un nouveau profil Baganator va être créé, puis activé."] = "Ein neues Baganator-Profil wird erstellt und dann aktiviert.",
+	["Baganator n'est pas chargé."] = "Baganator ist nicht geladen.",
+	["Chaîne refusée par Baganator."] = "Zeichenfolge von Baganator abgelehnt.",
+	["Catégories importées dans Baganator."] = "Kategorien in Baganator importiert.",
+	["Nouveau profil Baganator « %s », activé."] = "Neues Baganator-Profil »%s«, aktiviert.",
 	-- Macro.lua
 	["Macro introuvable."] = "Makro nicht gefunden.",
 	["Macro « %s » (propre au personnage)"] = "Makro »%s« (charakterspezifisch)",
@@ -299,4 +308,7 @@ P.AddTranslations(ns.L, "deDE", {
 	["Importer dans EllesmereUI"] = "In EllesmereUI importieren",
 	["Ouvre la page d'import d'EllesmereUI sur cette chaîne : un profil y arrive sous un nouveau nom ; un export complet remplace les réglages du compte (EllesmereUI demande confirmation et recharge). Hors combat."] = "Öffnet die Importseite von EllesmereUI mit dieser Zeichenfolge: Ein Profil kommt dort unter einem neuen Namen an; ein vollständiger Export ersetzt die Accounteinstellungen (EllesmereUI fragt nach Bestätigung und lädt neu). Außerhalb des Kampfes.",
 	["importer dans EllesmereUI"] = "in EllesmereUI importieren",
+	["Importer dans Baganator"] = "In Baganator importieren",
+	["Profil : crée un nouveau profil Baganator (nom libre) et l'active. Catégories : les importe. Hors combat."] = "Profil: erstellt ein neues Baganator-Profil (freier Name) und aktiviert es. Kategorien: importiert sie. Außerhalb des Kampfes.",
+	["importer dans Baganator"] = "in Baganator importieren",
 })

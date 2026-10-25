@@ -100,6 +100,15 @@ P.AddTranslations(ns.L, "esES", {
 	["Chaîne refusée par EllesmereUI."] = "Cadena rechazada por EllesmereUI.",
 	["EllesmereUI a refusé l'import : %s"] = "EllesmereUI rechazó la importación: %s",
 	["Import ouvert dans EllesmereUI : validez dans sa fenêtre."] = "Importación abierta en EllesmereUI: confirma en su ventana.",
+	["Chaîne Baganator illisible."] = "Cadena de Baganator ilegible.",
+	["profil"] = "perfil",
+	["catégories"] = "categorías",
+	["Ces catégories vont être importées dans Baganator."] = "Estas categorías se importarán en Baganator.",
+	["Un nouveau profil Baganator va être créé, puis activé."] = "Se creará un nuevo perfil de Baganator y luego se activará.",
+	["Baganator n'est pas chargé."] = "Baganator no está cargado.",
+	["Chaîne refusée par Baganator."] = "Cadena rechazada por Baganator.",
+	["Catégories importées dans Baganator."] = "Categorías importadas en Baganator.",
+	["Nouveau profil Baganator « %s », activé."] = "Nuevo perfil de Baganator «%s», activado.",
 	-- Macro.lua
 	["Macro introuvable."] = "Macro no encontrada.",
 	["Macro « %s » (propre au personnage)"] = "Macro «%s» (del personaje)",
@@ -299,4 +308,7 @@ P.AddTranslations(ns.L, "esES", {
 	["Importer dans EllesmereUI"] = "Importar en EllesmereUI",
 	["Ouvre la page d'import d'EllesmereUI sur cette chaîne : un profil y arrive sous un nouveau nom ; un export complet remplace les réglages du compte (EllesmereUI demande confirmation et recharge). Hors combat."] = "Abre la página de importación de EllesmereUI con esta cadena: un perfil llega allí con un nuevo nombre; una exportación completa reemplaza los ajustes de la cuenta (EllesmereUI pide confirmación y recarga). Fuera de combate.",
 	["importer dans EllesmereUI"] = "importar en EllesmereUI",
+	["Importer dans Baganator"] = "Importar en Baganator",
+	["Profil : crée un nouveau profil Baganator (nom libre) et l'active. Catégories : les importe. Hors combat."] = "Perfil: crea un nuevo perfil de Baganator (nombre libre) y lo activa. Categorías: las importa. Fuera de combate.",
+	["importer dans Baganator"] = "importar en Baganator",
 })

@@ -100,6 +100,15 @@ P.AddTranslations(ns.L, "itIT", {
 	["Chaîne refusée par EllesmereUI."] = "Stringa rifiutata da EllesmereUI.",
 	["EllesmereUI a refusé l'import : %s"] = "EllesmereUI ha rifiutato l'importazione: %s",
 	["Import ouvert dans EllesmereUI : validez dans sa fenêtre."] = "Importazione aperta in EllesmereUI: conferma nella sua finestra.",
+	["Chaîne Baganator illisible."] = "Stringa di Baganator illeggibile.",
+	["profil"] = "profilo",
+	["catégories"] = "categorie",
+	["Ces catégories vont être importées dans Baganator."] = "Queste categorie verranno importate in Baganator.",
+	["Un nouveau profil Baganator va être créé, puis activé."] = "Un nuovo profilo Baganator verrà creato, poi attivato.",
+	["Baganator n'est pas chargé."] = "Baganator non è caricato.",
+	["Chaîne refusée par Baganator."] = "Stringa rifiutata da Baganator.",
+	["Catégories importées dans Baganator."] = "Categorie importate in Baganator.",
+	["Nouveau profil Baganator « %s », activé."] = "Nuovo profilo Baganator «%s», attivato.",
 	-- Macro.lua
 	["Macro introuvable."] = "Macro non trovata.",
 	["Macro « %s » (propre au personnage)"] = "Macro «%s» (del personaggio)",
@@ -299,4 +308,7 @@ P.AddTranslations(ns.L, "itIT", {
 	["Importer dans EllesmereUI"] = "Importa in EllesmereUI",
 	["Ouvre la page d'import d'EllesmereUI sur cette chaîne : un profil y arrive sous un nouveau nom ; un export complet remplace les réglages du compte (EllesmereUI demande confirmation et recharge). Hors combat."] = "Apre la pagina di importazione di EllesmereUI su questa stringa: un profilo vi arriva con un nuovo nome; un'esportazione completa sostituisce le impostazioni dell'account (EllesmereUI chiede conferma e ricarica). Fuori dal combattimento.",
 	["importer dans EllesmereUI"] = "importare in EllesmereUI",
+	["Importer dans Baganator"] = "Importa in Baganator",
+	["Profil : crée un nouveau profil Baganator (nom libre) et l'active. Catégories : les importe. Hors combat."] = "Profilo: crea un nuovo profilo Baganator (nome libero) e lo attiva. Categorie: le importa. Fuori dal combattimento.",
+	["importer dans Baganator"] = "importare in Baganator",
 })

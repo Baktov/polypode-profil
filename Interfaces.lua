@@ -1,4 +1,4 @@
--- Polypode Profil: Interfaces — profils ElvUI et EllesmereUI (capture et import par leurs fonctions publiques)
+-- Polypode Profil: Interfaces — profils ElvUI, EllesmereUI et Baganator (capture et import par leurs fonctions publiques)
 
 local P = Polypode
 local _, ns = ...
@@ -154,6 +154,77 @@ function ns.ImportElvUI(text)
 		return true, L["Nouveau profil ElvUI « %s », activé."]:format(name)
 	end
 	return true, L["%s d'ElvUI importés."]:format(ElvTypeLabel(dataType))
+end
+
+-- BAGANATOR ----------------------------------------------------------------------------------
+-- Pas d'export public : la chaîne est collée depuis son bouton Exporter. Import public :
+-- Baganator.API.ImportString(chaîne, nom) (API/Main.lua), qui écrase un profil du même nom ; on
+-- lui passe un nom libre parmi BAGANATOR_CONFIG.Profiles pour toujours créer un nouveau profil.
+-- La chaîne (« BGR!1! » + base64 + compression + CBOR, ou JSON) est un profil ou des catégories.
+
+function ns.HasBaganator()
+	return type(Baganator) == "table" and type(Baganator.API) == "table"
+		and type(Baganator.API.ImportString) == "function"
+end
+
+-- Contenu d'une chaîne Baganator : "profile", "categories", ou nil (illisible).
+local function BaganatorContent(text)
+	local encoding = C_EncodingUtil
+	if not encoding then
+		return
+	end
+	text = tostring(text or "")
+	local ok, data
+	if text:sub(1, 1) == "{" then
+		ok, data = pcall(encoding.DeserializeJSON, text)
+	elseif text:match("^BGR!1!") then
+		ok, data = pcall(function()
+			return encoding.DeserializeCBOR(encoding.DecompressString(encoding.DecodeBase64(text:sub(7))))
+		end)
+	end
+	if not (ok and type(data) == "table") then
+		return
+	end
+	-- Versions 1 et 2 du format : catégories seulement (ImportData de Baganator).
+	return (data.kind == "profile") and "profile" or "categories"
+end
+
+function ns.BaganatorDetails(text)
+	local content = BaganatorContent(text)
+	if not content then
+		return { L["Chaîne Baganator illisible."] }
+	end
+	return { L["Contenu : %s"]:format(content == "profile" and L["profil"] or L["catégories"]) }
+end
+
+function ns.BaganatorConfirm(profile)
+	if BaganatorContent(profile.text) == "categories" then
+		return L["Ces catégories vont être importées dans Baganator."]
+	end
+	return L["Un nouveau profil Baganator va être créé, puis activé."]
+end
+
+-- Import : nom du profil Polypode sans le préfixe « Baganator — », rendu libre dans Baganator.
+function ns.ImportBaganator(text, name)
+	if not ns.HasBaganator() then
+		return nil, L["Baganator n'est pas chargé."]
+	elseif InCombatLockdown() then
+		return nil, L["Impossible en combat."]
+	end
+	local content = BaganatorContent(text)
+	if not content then
+		return nil, L["Chaîne refusée par Baganator."]
+	end
+	local base = strtrim((tostring(name or ""):gsub("^Baganator%s*—%s*", "")))
+	local profiles = type(BAGANATOR_CONFIG) == "table" and BAGANATOR_CONFIG.Profiles or nil
+	local profileName = UniqueName(base ~= "" and base or "Polypode", profiles)
+	if not pcall(Baganator.API.ImportString, text, profileName) then
+		return nil, L["Chaîne refusée par Baganator."]
+	end
+	if content == "categories" then
+		return true, L["Catégories importées dans Baganator."]
+	end
+	return true, L["Nouveau profil Baganator « %s », activé."]:format(profileName)
 end
 
 -- ELLESMEREUI --------------------------------------------------------------------------------

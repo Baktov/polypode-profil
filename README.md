@@ -79,6 +79,10 @@ Le bouton **Profils** (barre de titre de la fenêtre Polypode) ou `/poly profil`
   - Profil **EllesmereUI** : une petite icône (celle d'EllesmereUI) ouvre la **page d'import
     d'EllesmereUI** sur la chaîne : un profil y arrive sous un **nouveau nom** ; un **export
     complet** remplace les réglages du compte (EllesmereUI demande confirmation et recharge).
+  - Profil **Baganator** : une petite icône (celle de Baganator) l'**importe** dans Baganator
+    (par sa fonction d'import), après confirmation : un profil y devient un **nouveau profil**
+    (le nom du profil sans « Baganator — », suffixé « (2) »... s'il est pris), activé ; des
+    catégories y sont importées.
   - Profils d'**options de WoW**, de **raccourcis clavier** et de **fenêtres de discussion** :
     une petite icône devant leur nom les **applique** au personnage joué, après confirmation
     (ils remplacent la configuration actuelle) ; un compte rendu s'affiche.
@@ -111,14 +115,17 @@ en bleu foncé, pour les repérer) :
 
 1. **Capturer et appliquer en jeu** : Transmogrification, Titre, Macro, Ensemble d'équipement,
    Barres d'action, Options de WoW, Raccourcis clavier, Fenêtres de discussion, Liste des addons,
-   Simple Addon Manager, EllesmereUI, ElvUI. La chaîne est relevée en jeu ; dans la liste, l'icône devant le profil
+   Simple Addon Manager, EllesmereUI, ElvUI, Baganator. La chaîne est relevée en jeu ; dans la liste, l'icône devant le profil
    l'applique (la transmogrification s'essaie dans la cabine d'essayage, ou s'applique chez le
    transmogrificateur).
 2. **Capturer, puis copier la chaîne** : Mode Édition, Talents. La chaîne est relevée en jeu, puis
    copiée (Tout sélectionner, Ctrl+C) dans la fenêtre d'import du jeu.
-3. **Coller une chaîne (import / export)** : Baganator, MySlots, Autre. La chaîne est collée
-   depuis le bouton **Exporter** de l'addon, puis recopiée dans son import (ces addons n'offrent
-   pas d'export ni d'import utilisables par un autre addon).
+3. **Coller une chaîne (import / export)** : MySlots, Autre. La chaîne est collée depuis le
+   bouton **Exporter** de l'addon, puis recopiée dans son import (MySlots n'offre ni export ni
+   import utilisables par un autre addon).
+
+Baganator n'a pas d'export utilisable par un autre addon : sa chaîne se **colle** (bouton
+« Exporter » de Baganator, profil ou catégories), mais l'icône de la liste l'**importe**.
 
 Le nom d'un profil d'addon (EllesmereUI, ElvUI, Baganator, MySlots) commence par celui de l'addon
 (« ElvUI — … », proposé à compléter quand on colle une chaîne, ajouté à l'enregistrement s'il
@@ -282,6 +289,7 @@ other language).*
 
 ## Version
 
+`3.3.0` : Baganator importé par sa fonction d'import (nouveau profil au nom libre, ou catégories) ; sa chaîne reste collée.
 `3.2.0` : ElvUI et EllesmereUI capturés et importés par leurs propres fonctions : profils, réglages du personnage, du compte et filtres d'ElvUI, export complet d'EllesmereUI ; l'import crée un nouveau profil dans l'addon.
 `3.1.2` : menu Nouveau : Barres d'action, Options de WoW, Raccourcis clavier et Mode Édition en bleu foncé.
 `3.1.1` : menu Nouveau et sous-menus (macros, options...) limités à la moitié de l'écran, avec ascenseur.

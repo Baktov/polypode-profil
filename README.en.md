@@ -75,6 +75,9 @@ The **Profiles** button (title bar of the Polypode window) or `/poly profil` ope
   - **EllesmereUI** profile: a small icon (EllesmereUI's) opens **EllesmereUI's import page** on
     the string: a profile arrives there under a **new name**; a **full export** replaces the
     account's settings (EllesmereUI asks for confirmation and reloads).
+  - **Baganator** profile: a small icon (Baganator's) **imports** it into Baganator (through its
+    import function), after confirmation: a profile becomes a **new profile** there (the profile's
+    name without "Baganator — ", suffixed "(2)"... if taken), activated; categories are imported.
   - **WoW options**, **Key bindings** and **Chat windows** profiles: a small icon before their name
     **applies** them to the current character, after confirmation (they replace the current
     setup); a report is shown.
@@ -104,15 +107,19 @@ menu of types, in three groups (Action bars, WoW options, Key bindings and Edit 
 spot them):
 
 1. **Capture and apply in game**: Transmogrification, Title, Macro, Equipment set, Action bars,
-   WoW options, Key bindings, Chat windows, Addon list, Simple Addon Manager, EllesmereUI, ElvUI.
+   WoW options, Key bindings, Chat windows, Addon list, Simple Addon Manager, EllesmereUI, ElvUI,
+   Baganator.
    The string is read
    in game; in the list, the icon in front of the profile applies it (transmogrification is tried
    on in the dressing room, or applied at the transmogrifier).
 2. **Capture, then copy the string**: Edit Mode, Talents. The string is read in game, then copied
    (Select all, Ctrl+C) into the game's import window.
-3. **Paste a string (import / export)**: Baganator, MySlots, Other. The string is pasted from the
-   addon's **Export** button, then copied back into its import (these addons offer no export or
-   import usable by another addon).
+3. **Paste a string (import / export)**: MySlots, Other. The string is pasted from the addon's
+   **Export** button, then copied back into its import (MySlots offers no export or import usable
+   by another addon).
+
+Baganator has no export usable by another addon: its string is **pasted** (Baganator's "Export"
+button, profile or categories), but the list icon **imports** it.
 
 The name of an addon profile (EllesmereUI, ElvUI, Baganator, MySlots) starts with the addon's
 ("ElvUI — …", suggested to complete when pasting a string, added on saving if missing).

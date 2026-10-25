@@ -100,6 +100,15 @@ P.AddTranslations(ns.L, "ptBR", {
 	["Chaîne refusée par EllesmereUI."] = "Sequência recusada pelo EllesmereUI.",
 	["EllesmereUI a refusé l'import : %s"] = "O EllesmereUI recusou a importação: %s",
 	["Import ouvert dans EllesmereUI : validez dans sa fenêtre."] = "Importação aberta no EllesmereUI: confirme na janela dele.",
+	["Chaîne Baganator illisible."] = "Sequência do Baganator ilegível.",
+	["profil"] = "perfil",
+	["catégories"] = "categorias",
+	["Ces catégories vont être importées dans Baganator."] = "Estas categorias serão importadas no Baganator.",
+	["Un nouveau profil Baganator va être créé, puis activé."] = "Um novo perfil do Baganator será criado e depois ativado.",
+	["Baganator n'est pas chargé."] = "O Baganator não está carregado.",
+	["Chaîne refusée par Baganator."] = "Sequência recusada pelo Baganator.",
+	["Catégories importées dans Baganator."] = "Categorias importadas no Baganator.",
+	["Nouveau profil Baganator « %s », activé."] = "Novo perfil do Baganator \"%s\", ativado.",
 	-- Macro.lua
 	["Macro introuvable."] = "Macro não encontrada.",
 	["Macro « %s » (propre au personnage)"] = "Macro \"%s\" (do personagem)",
@@ -299,4 +308,7 @@ P.AddTranslations(ns.L, "ptBR", {
 	["Importer dans EllesmereUI"] = "Importar no EllesmereUI",
 	["Ouvre la page d'import d'EllesmereUI sur cette chaîne : un profil y arrive sous un nouveau nom ; un export complet remplace les réglages du compte (EllesmereUI demande confirmation et recharge). Hors combat."] = "Abre a página de importação do EllesmereUI nesta sequência: um perfil chega lá com um novo nome; uma exportação completa substitui as configurações da conta (o EllesmereUI pede confirmação e recarrega). Fora de combate.",
 	["importer dans EllesmereUI"] = "importar no EllesmereUI",
+	["Importer dans Baganator"] = "Importar no Baganator",
+	["Profil : crée un nouveau profil Baganator (nom libre) et l'active. Catégories : les importe. Hors combat."] = "Perfil: cria um novo perfil do Baganator (nome livre) e o ativa. Categorias: importa-as. Fora de combate.",
+	["importer dans Baganator"] = "importar no Baganator",
 })

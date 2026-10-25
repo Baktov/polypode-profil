@@ -100,6 +100,15 @@ P.AddTranslations(ns.L, "enUS", {
 	["Chaîne refusée par EllesmereUI."] = "String refused by EllesmereUI.",
 	["EllesmereUI a refusé l'import : %s"] = "EllesmereUI refused the import: %s",
 	["Import ouvert dans EllesmereUI : validez dans sa fenêtre."] = "Import opened in EllesmereUI: confirm in its window.",
+	["Chaîne Baganator illisible."] = "Unreadable Baganator string.",
+	["profil"] = "profile",
+	["catégories"] = "categories",
+	["Ces catégories vont être importées dans Baganator."] = "These categories will be imported into Baganator.",
+	["Un nouveau profil Baganator va être créé, puis activé."] = "A new Baganator profile will be created, then activated.",
+	["Baganator n'est pas chargé."] = "Baganator is not loaded.",
+	["Chaîne refusée par Baganator."] = "String refused by Baganator.",
+	["Catégories importées dans Baganator."] = "Categories imported into Baganator.",
+	["Nouveau profil Baganator « %s », activé."] = "New Baganator profile \"%s\", activated.",
 	-- Macro.lua
 	["Macro introuvable."] = "Macro not found.",
 	["Macro « %s » (propre au personnage)"] = "Macro \"%s\" (character-specific)",
@@ -299,4 +308,7 @@ P.AddTranslations(ns.L, "enUS", {
 	["Importer dans EllesmereUI"] = "Import into EllesmereUI",
 	["Ouvre la page d'import d'EllesmereUI sur cette chaîne : un profil y arrive sous un nouveau nom ; un export complet remplace les réglages du compte (EllesmereUI demande confirmation et recharge). Hors combat."] = "Opens EllesmereUI's import page on this string: a profile arrives there under a new name; a full export replaces the account's settings (EllesmereUI asks for confirmation and reloads). Out of combat.",
 	["importer dans EllesmereUI"] = "import into EllesmereUI",
+	["Importer dans Baganator"] = "Import into Baganator",
+	["Profil : crée un nouveau profil Baganator (nom libre) et l'active. Catégories : les importe. Hors combat."] = "Profile: creates a new Baganator profile (free name) and activates it. Categories: imports them. Out of combat.",
+	["importer dans Baganator"] = "import into Baganator",
 })

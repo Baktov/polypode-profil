@@ -928,6 +928,22 @@ local ROW_ACTIONS = {
 			return ns.ImportEllesmereUI(profile.text)
 		end,
 	},
+	baganator = {
+		texture = "Interface\\Icons\\INV_Misc_Bag_08", -- repli : l'icône de Baganator (## IconTexture)
+		iconFor = function()
+			return ns.AddonIcon("Baganator")
+		end,
+		title = L["Importer dans Baganator"],
+		tooltip = L["Profil : crée un nouveau profil Baganator (nom libre) et l'active. Catégories : les "
+			.. "importe. Hors combat."],
+		hint = L["importer dans Baganator"],
+		confirm = function(profile)
+			return ns.BaganatorConfirm(profile)
+		end,
+		run = function(profile)
+			return ns.ImportBaganator(profile.text, profile.name)
+		end,
+	},
 }
 
 -- Rechargement proposé (Entrée ou clic sur « Recharger ») ; sur WoW Forever, où l'addon ne peut
@@ -960,6 +976,9 @@ local KIND_DETAILS = {
 	end,
 	ellesmereui = function(text)
 		return ns.EllesmereUIDetails(text)
+	end,
+	baganator = function(text)
+		return ns.BaganatorDetails(text)
 	end,
 	macro = function(text)
 		return ns.MacroDetails(text)
