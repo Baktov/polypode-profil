@@ -93,7 +93,8 @@ during which your profiles were saved (with their count, "Unknown season" for sa
 ### Creating a profile
 
 The **New** button (bottom of the editor, or right-click on a character of the list) opens the
-menu of types, in three groups:
+menu of types, in three groups (Action bars, WoW options, Key bindings and Edit Mode in dark blue, to
+spot them):
 
 1. **Capture and apply in game**: Transmogrification, Title, Macro, Equipment set, Action bars,
    WoW options, Key bindings, Chat windows, Addon list, Simple Addon Manager. The string is read

@@ -99,7 +99,8 @@ les profils de cette saison, sur tous vos clients.
 ### Créer un profil
 
 Le bouton **Nouveau** (en bas de l'éditeur, ou clic droit sur un personnage de la liste) ouvre le
-menu des genres, en trois groupes :
+menu des genres, en trois groupes (Barres d'action, Options de WoW, Raccourcis clavier et Mode Édition
+en bleu foncé, pour les repérer) :
 
 1. **Capturer et appliquer en jeu** : Transmogrification, Titre, Macro, Ensemble d'équipement,
    Barres d'action, Options de WoW, Raccourcis clavier, Fenêtres de discussion, Liste des addons,
@@ -264,6 +265,7 @@ other language).*
 
 ## Version
 
+`3.1.2` : menu Nouveau : Barres d'action, Options de WoW, Raccourcis clavier et Mode Édition en bleu foncé.
 `3.1.1` : menu Nouveau et sous-menus (macros, options...) limités à la moitié de l'écran, avec ascenseur.
 `3.1.0` : transmogrification appliquée chez le transmogrificateur (même icône, par un ensemble personnalisé, validée par « Appliquer » de Blizzard) ; nom d'un profil enregistré affiché en simple texte ; profils EllesmereUI, ElvUI, Baganator et MySlots nommés « Addon — nom ».
 `3.0.0` : menu **Nouveau** en trois groupes (capturer et appliquer, capturer puis copier, coller une chaîne), avec les captures de chaque genre et « Coller une chaîne » ; liste déroulante du genre et bouton Capturer retirés, genre affiché dans l'en-tête ; clic droit sur un personnage = même menu.

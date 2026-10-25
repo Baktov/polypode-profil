@@ -545,6 +545,14 @@ local CAPTURES = {
 
 local MENU_MAX_SCREEN_RATIO = 0.5 -- hauteur maximale d'un menu, en part de l'écran
 
+-- Genres mis en avant dans le menu « Nouveau » (libellé en bleu foncé).
+local MENU_EMPHASIS_COLOR = "|cff3a6fd8"
+local MENU_EMPHASIS = { actionbars = true, options = true, bindings = true, editmode = true }
+
+local function MenuKindLabel(kind)
+	return MENU_EMPHASIS[kind.key] and (MENU_EMPHASIS_COLOR .. kind.label .. "|r") or kind.label
+end
+
 -- Menu « Nouveau » : une section par groupe de genres (ns.KIND_GROUPS) ; genre capturable =
 -- sous-menu (captures en jeu, puis « Coller une chaîne »), genre à coller = nouveau profil vide.
 -- char : personnage du nouveau profil (défaut : le personnage joué).
@@ -575,7 +583,7 @@ local function ShowNewMenu(owner, char)
 				if kind.group == group.key then
 					local fill = CAPTURES[kind.key]
 					if fill then
-						local menu = root:CreateButton(kind.label)
+						local menu = root:CreateButton(MenuKindLabel(kind))
 					Limit(menu)
 						-- Lecture fragile (API absente sur un client) : le reste du menu s'affiche quand même.
 						if not pcall(fill, menu, function(text, name, own)
@@ -588,7 +596,7 @@ local function ShowNewMenu(owner, char)
 							StartNew(kind.key, char)
 						end)
 					else
-						root:CreateButton(kind.label, function()
+						root:CreateButton(MenuKindLabel(kind), function()
 							StartNew(kind.key, char)
 						end)
 					end
