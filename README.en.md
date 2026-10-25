@@ -79,14 +79,14 @@ The **Profiles** button (title bar of the Polypode window) or `/poly profil` ope
   - A **saved profile opens read-only** ("read-only" in the header): name, type and string cannot
     be changed (the string stays selectable for Ctrl+C) and **Save** is greyed out. Only a new
     profile can be saved.
-  - **Duplicate** (between Save and Delete, or right-click on the profile) opens a copy of the
+  - **Duplicate** (under the character list, or right-click on the profile) opens a copy of the
     profile for your **current character**, shown at the top right (name followed by "(copy)" if
     the profile was already theirs): **Save** keeps it under them. To change a profile: duplicate
     it, edit the copy, save it, then delete the old one.
 
 ### Deleting all the profiles of a season
 
-The **Delete a season** button (right of "Delete", at the bottom of the editor) lists the seasons
+The **Delete a season** button (under the character list, right of "Delete") lists the seasons
 during which your profiles were saved (with their count, "Unknown season" for saves older than
 1.9.0 and WoW Forever saves). Picking one deletes, after confirmation, every profile of that season, on all your clients.
 

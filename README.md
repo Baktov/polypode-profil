@@ -81,14 +81,14 @@ Le bouton **Profils** (barre de titre de la fenêtre Polypode) ou `/poly profil`
   - Un **profil enregistré s'ouvre en lecture seule** (« lecture seule » dans l'en-tête) : nom,
     genre et chaîne ne se modifient pas (la chaîne reste sélectionnable pour Ctrl+C) et
     **Enregistrer** est grisé. Seul un nouveau profil s'enregistre.
-  - **Dupliquer** (entre Enregistrer et Supprimer, ou clic droit sur le profil) ouvre une copie
+  - **Dupliquer** (sous la liste des personnages, ou clic droit sur le profil) ouvre une copie
     du profil pour votre **personnage actuel**, affiché en haut à droite (nom suivi de
     « (copie) » si le profil était déjà le sien) : **Enregistrer** la garde sous lui. Pour
     changer un profil : le dupliquer, modifier la copie, l'enregistrer, puis supprimer l'ancien.
 
 ### Supprimer tous les profils d'une saison
 
-Le bouton **Supprimer une saison** (à droite de « Supprimer », en bas de l'éditeur) liste les
+Le bouton **Supprimer une saison** (sous la liste des personnages, à droite de « Supprimer ») liste les
 saisons pendant lesquelles vos profils ont été enregistrés (avec leur nombre, « Saison inconnue »
 pour les sauvegardes antérieures à la 1.9.0 et celles de WoW Forever). En choisir une supprime, après confirmation, tous
 les profils de cette saison, sur tous vos clients.
@@ -245,6 +245,7 @@ other language).*
 
 ## Version
 
+`2.7.0` : boutons Dupliquer, Supprimer et Supprimer une saison sous la liste des personnages ; fenêtre revenue à 900 par défaut (880 au minimum).
 `2.6.0` : profil enregistré ouvert en lecture seule ; bouton **Dupliquer** (copie pour le personnage actuel, à enregistrer), aussi au clic droit ; fenêtre plus large (1100 par défaut, 1050 au minimum).
 `2.5.0` : personnage du profil affiché à droite de l'en-tête de l'éditeur, non modifiable ; ligne « Personnage » retirée.
 `2.4.0` : liste des profils rangée par saison (celle du dernier enregistrement), puis par personnage ; saisons repliables.

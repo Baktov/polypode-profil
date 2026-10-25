@@ -27,9 +27,11 @@ end
 -- la fait confirmer. Un profil modifié par un autre client est rechargé s'il n'est pas en cours
 -- d'édition.
 
-local MIN_WIDTH, MIN_HEIGHT = 1050, 340 -- largeur : rangée de boutons du bas de l'éditeur
-local DEFAULT_WIDTH, DEFAULT_HEIGHT = 1100, 480
+local MIN_WIDTH, MIN_HEIGHT = 880, 340
+local DEFAULT_WIDTH, DEFAULT_HEIGHT = 900, 480
 local LIST_RATIO = 0.36 -- part de la largeur donnée à la liste
+local LIST_MIN_WIDTH = 320 -- rangée Dupliquer / Supprimer / Supprimer une saison sous la liste
+local BUTTON_ROW = 28 -- hauteur réservée sous la liste pour cette rangée
 
 local frame, listPanel, editor, nameBox, kindButton, captureButton, textBox, deleteButton
 local saveButton, duplicateButton
@@ -1039,7 +1041,7 @@ local function SetTooltip(widget, title, text)
 end
 
 local function LayoutPanels()
-	listPanel:SetWidth(math.max(200, frame:GetWidth() * LIST_RATIO))
+	listPanel:SetWidth(math.max(LIST_MIN_WIDTH, frame:GetWidth() * LIST_RATIO))
 end
 
 -- Liste déroulante Blizzard (WowStyle1DropdownTemplate : cadre et flèche qui signalent un choix),
@@ -1131,30 +1133,6 @@ local function BuildEditor()
 		L["Garde le nouveau profil (nom, genre, chaîne) sous le personnage affiché en haut à droite et l'envoie "
 			.. "à vos autres clients connectés. Un profil déjà enregistré ne se modifie pas : le dupliquer."])
 
-	duplicateButton = CreateButton(editor, L["Dupliquer"], 80, function()
-		if selectedID then
-			Duplicate(selectedID)
-		end
-	end)
-	duplicateButton:SetPoint("LEFT", saveButton, "RIGHT", 6, 0)
-	SetTooltip(duplicateButton, L["Dupliquer"],
-		L["Ouvre une copie du profil pour votre personnage actuel ; « Enregistrer » la garde sous lui."])
-
-	deleteButton = CreateButton(editor, L["Supprimer"], 80, function()
-		if selectedID then
-			AskDelete(selectedID)
-		end
-	end)
-	deleteButton:SetPoint("LEFT", duplicateButton, "RIGHT", 6, 0)
-
-	local seasonButton = CreateButton(editor, L["Supprimer une saison"], 140, function(self)
-		ShowSeasonDeleteMenu(self)
-	end)
-	seasonButton:SetPoint("LEFT", deleteButton, "RIGHT", 6, 0)
-	SetTooltip(seasonButton, L["Supprimer une saison"],
-		L["Liste les saisons de vos profils enregistrés ; en choisir une supprime (après confirmation) tous "
-			.. "les profils enregistrés pendant cette saison, sur tous vos clients."])
-
 	local selectButton = CreateButton(editor, L["Tout sélectionner"], 120, SelectAll)
 	selectButton:SetPoint("BOTTOMRIGHT", -10, 10)
 	SetTooltip(selectButton, L["Tout sélectionner"],
@@ -1237,7 +1215,32 @@ local function Build()
 
 	listPanel = P.CreatePanel(frame, L["Personnages"])
 	listPanel:SetPoint("TOPLEFT", 12, -36)
-	listPanel:SetPoint("BOTTOMLEFT", 12, 12)
+	listPanel:SetPoint("BOTTOMLEFT", 12, 12 + BUTTON_ROW)
+
+	-- Sous la liste : actions sur le profil ouvert (Dupliquer, Supprimer) et sur une saison.
+	duplicateButton = CreateButton(frame, L["Dupliquer"], 80, function()
+		if selectedID then
+			Duplicate(selectedID)
+		end
+	end)
+	duplicateButton:SetPoint("BOTTOMLEFT", 12, 12)
+	SetTooltip(duplicateButton, L["Dupliquer"],
+		L["Ouvre une copie du profil pour votre personnage actuel ; « Enregistrer » la garde sous lui."])
+
+	deleteButton = CreateButton(frame, L["Supprimer"], 80, function()
+		if selectedID then
+			AskDelete(selectedID)
+		end
+	end)
+	deleteButton:SetPoint("LEFT", duplicateButton, "RIGHT", 6, 0)
+
+	local seasonButton = CreateButton(frame, L["Supprimer une saison"], 140, function(self)
+		ShowSeasonDeleteMenu(self)
+	end)
+	seasonButton:SetPoint("LEFT", deleteButton, "RIGHT", 6, 0)
+	SetTooltip(seasonButton, L["Supprimer une saison"],
+		L["Liste les saisons de vos profils enregistrés ; en choisir une supprime (après confirmation) tous "
+			.. "les profils enregistrés pendant cette saison, sur tous vos clients."])
 
 	-- « Tout replier » / « Tout déplier », à droite du titre du cadre : replie les saisons (leurs
 	-- personnages gardent leur état), ou déplie tout.
