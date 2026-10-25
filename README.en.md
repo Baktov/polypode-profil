@@ -29,7 +29,9 @@ When disabled, Polypode works normally, with no "Profiles" button or `/poly prof
 ## Usage
 
 The **Profiles** button (title bar of the Polypode window) or `/poly profil` opens the window
-(**double-click** its title bar: back to the default size).
+(**double-click** its title bar: back to the default size). The **?** button, right of the title,
+opens the **help**: all profile types (even those whose addon is not loaded, marked as such),
+group by group, with the color codes, how to capture them, the list icon and what it does.
 
 - **On the left**, the profiles filed **by season, then under their character**. A profile's
   season is the one of its **last save** ("Midnight, season 2"; "Unknown season" for saves older

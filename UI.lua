@@ -1392,6 +1392,167 @@ local function BuildEditor()
 	end
 end
 
+-- AIDE ---------------------------------------------------------------------------------------
+-- Bouton « ? » de la barre de titre : fenêtre PolypodeProfilHelpFrame, liste défilante de tous
+-- les genres du menu « Nouveau » (même ceux dont l'addon n'est pas chargé), groupe par groupe,
+-- dans la couleur de leur famille, avec la légende des couleurs, la façon de capturer, l'action de
+-- l'icône (ROW_ACTIONS) et cette icône.
+
+local helpFrame, helpList
+local HELP_ICON_SIZE = 16
+
+-- Légende : une ligne par famille, dans sa couleur.
+local HELP_FAMILIES = {
+	{ key = "essential", text = L["Bleu : réglages essentiels de WoW"] },
+	{ key = "client", text = L["Vert : autres réglages du client"] },
+	{ key = "addon", text = L["Violet : addons"] },
+	{ key = "other", text = L["Blanc : autre"] },
+}
+
+local function HelpCapture(kind)
+	if kind.group == "paste" then
+		return L["chaîne à coller"]
+	elseif BETA_CAPTURE[kind.key] then
+		return L["capture en jeu (bêta) ou chaîne collée"]
+	end
+	return L["capture en jeu ou chaîne collée"]
+end
+
+local function HelpImport(kind)
+	local action = ROW_ACTIONS[kind.key]
+	return action and action.hint or L["copie manuelle (Tout sélectionner, Ctrl+C)"]
+end
+
+local function HelpItems()
+	local items = { { title = L["Codes couleur"] } }
+	for _, family in ipairs(HELP_FAMILIES) do
+		items[#items + 1] = { text = ns.KIND_FAMILIES[family.key].color .. family.text .. "|r" }
+	end
+	for _, group in ipairs(ns.KIND_GROUPS) do
+		items[#items + 1] = { title = group.label }
+		for _, kind in ipairs(ns.KINDS) do
+			if kind.group == group.key then
+				items[#items + 1] = { kind = kind, available = ns.KindAvailable(kind.key) }
+			end
+		end
+	end
+	return items
+end
+
+-- Icône de l'action d'un genre, comme dans la liste (atlas, icône de l'addon, sinon texture).
+local function SetHelpIcon(texture, kind, available)
+	local action = ROW_ACTIONS[kind.key]
+	if not action then
+		texture:Hide()
+		return
+	end
+	local ok, icon = pcall(function()
+		return action.iconFor and action.iconFor({ kind = kind.key, text = "" })
+	end)
+	if not (ok and icon) and action.atlas and HasAtlas(action.atlas .. "-up") then
+		texture:SetAtlas(action.atlas .. "-up")
+	else
+		texture:SetTexture(ok and icon or action.texture)
+	end
+	texture:SetDesaturated(not available)
+	texture:SetAlpha(available and 1 or 0.35)
+	texture:Show()
+end
+
+local function BuildHelp()
+	helpFrame = CreateFrame("Frame", "PolypodeProfilHelpFrame", UIParent, "BackdropTemplate")
+	helpFrame:SetSize(640, 480)
+	helpFrame:SetPoint("CENTER", 40, -20)
+	helpFrame:SetFrameStrata("DIALOG")
+	helpFrame:SetMovable(true)
+	helpFrame:EnableMouse(true)
+	helpFrame:RegisterForDrag("LeftButton")
+	helpFrame:SetScript("OnDragStart", helpFrame.StartMoving)
+	helpFrame:SetScript("OnDragStop", helpFrame.StopMovingOrSizing)
+	helpFrame:SetBackdrop({
+		bgFile = "Interface/Tooltips/UI-Tooltip-Background",
+		edgeFile = "Interface/Tooltips/UI-Tooltip-Border",
+		edgeSize = 16,
+		insets = { left = 4, right = 4, top = 4, bottom = 4 },
+	})
+	helpFrame:SetBackdropColor(0, 0, 0, 0.95)
+	helpFrame:Hide()
+	tinsert(UISpecialFrames, "PolypodeProfilHelpFrame") -- Échap ferme la fenêtre
+
+	local title = helpFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+	title:SetPoint("TOPLEFT", 12, -8)
+	title:SetText(L["Genres de profils"])
+	helpFrame.TitleText = title
+
+	local closeBtn = CreateFrame("Button", nil, helpFrame, "UIPanelCloseButton")
+	closeBtn:SetPoint("TOPRIGHT", -4, -4)
+	helpFrame.CloseButton = closeBtn
+
+	helpList = P.CreatePanel(helpFrame, L["Genres du menu « Nouveau », capture et icône de la liste"])
+	helpList:SetPoint("TOPLEFT", 12, -36)
+	helpList:SetPoint("BOTTOMRIGHT", -12, 12)
+	P.CreateScrollList(helpList, function(data)
+		if data.title then
+			return "|cffffd200" .. data.title .. "|r"
+		elseif data.text then
+			return data.text
+		end
+		local kind = data.kind
+		local text = ns.ColorByKind(kind.key, kind.label) .. Gray("  ·  " .. HelpCapture(kind) .. "  ·  " .. HelpImport(kind))
+		if not data.available then
+			text = text .. "  |cffff5555" .. L["non chargé sur ce personnage"] .. "|r"
+		end
+		return text
+	end, nil, {
+		tooltip = function(data)
+			if not data.kind then
+				return nil
+			end
+			local kind = data.kind
+			local lines = {
+				ns.ColorByKind(kind.key, kind.label),
+				L["Capture : %s"]:format(HelpCapture(kind)),
+				L["Icône de la liste : %s"]:format(HelpImport(kind)),
+			}
+			if not data.available then
+				lines[#lines + 1] = "|cffff5555" .. L["%s n'est pas chargé sur ce personnage."]:format(kind.label) .. "|r"
+			end
+			return lines
+		end,
+		-- Lignes recyclées : icône et retrait recalculés à chaque affichage.
+		decorate = function(row, data)
+			if not row.helpIcon then
+				row.helpIcon = row:CreateTexture(nil, "ARTWORK")
+				row.helpIcon:SetSize(HELP_ICON_SIZE, HELP_ICON_SIZE)
+				row.helpIcon:SetPoint("LEFT", CHAR_INDENT, 0)
+			end
+			if data.kind then
+				SetHelpIcon(row.helpIcon, data.kind, data.available)
+				row.text:SetPoint("LEFT", CHAR_INDENT + HELP_ICON_SIZE + 6, 0)
+			else
+				row.helpIcon:Hide()
+				row.text:SetPoint("LEFT", data.title and SEASON_INDENT or CHAR_INDENT, 0)
+			end
+		end,
+	})
+
+	P.SkinFrame(helpFrame)
+	P.SkinPanel(helpList)
+end
+
+-- Ouvre / ferme l'aide ; la liste est recalculée à chaque ouverture (addons chargés).
+local function ToggleHelp()
+	if not helpFrame then
+		BuildHelp()
+	end
+	if helpFrame:IsShown() then
+		helpFrame:Hide()
+		return
+	end
+	P.SetListData(helpList, HelpItems())
+	helpFrame:Show()
+end
+
 local function Build()
 	local settings = WindowSettings()
 	frame = CreateFrame("Frame", "PolypodeProfilFrame", UIParent, "BackdropTemplate")
@@ -1420,6 +1581,13 @@ local function Build()
 	title:SetPoint("TOPLEFT", 12, -8)
 	title:SetText(L["Profils"])
 	frame.TitleText = title
+
+	-- « ? » à droite du titre : aide sur les genres (ToggleHelp).
+	local helpButton = CreateButton(frame, "?", 22, ToggleHelp)
+	helpButton:SetHeight(20)
+	helpButton:SetPoint("LEFT", title, "RIGHT", 8, 0)
+	SetTooltip(helpButton, L["Aide"], L["Liste de tous les genres de profils (même ceux dont l'addon n'est pas "
+		.. "chargé), avec les codes couleur, la façon de les capturer et l'action de leur icône."])
 
 	local closeBtn = CreateFrame("Button", nil, frame, "UIPanelCloseButton")
 	closeBtn:SetPoint("TOPRIGHT", -4, -4)

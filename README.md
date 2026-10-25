@@ -30,7 +30,10 @@ Désactivé, Polypode fonctionne normalement, sans bouton « Profils » ni comma
 ## Utilisation
 
 Le bouton **Profils** (barre de titre de la fenêtre Polypode) ou `/poly profil` ouvre la fenêtre
-(**double-clic** sur sa barre de titre : retour à la taille par défaut).
+(**double-clic** sur sa barre de titre : retour à la taille par défaut). Le bouton **?**, à
+droite du titre, ouvre l'**aide** : tous les genres de profils (même ceux dont l'addon n'est pas
+chargé, signalés), groupe par groupe, avec les codes couleur, la façon de les capturer, l'icône
+de la liste et son action.
 
 - **À gauche**, les profils rangés **par saison, puis sous leur personnage**. La saison d'un
   profil est celle de son **dernier enregistrement** (« Midnight, saison 2 » ; « Saison inconnue »
@@ -312,6 +315,7 @@ other language).*
 
 ## Version
 
+`3.9.0` : bouton « ? » dans la barre de titre : aide listant tous les genres (codes couleur, capture, icône et action), même ceux dont l'addon n'est pas chargé.
 `3.8.0` : menu Nouveau sans les addons non chargés sur le personnage joué ; icône d'import grisée pour leurs profils.
 `3.7.0` : couleur par famille de genre (bleu : essentiels de WoW, vert : autres réglages du client, violet : addons, blanc : autre), dans le menu Nouveau et dans la liste des profils, triée par couleur.
 `3.6.0` : Chattynator et Platynator (capture bêta, import), Details! et TalentLoadoutManager (capture et import par leurs fonctions) ; Baganator, Chattynator et Platynator partagent le même code.
