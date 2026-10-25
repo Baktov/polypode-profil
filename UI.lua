@@ -27,11 +27,12 @@ end
 -- la fait confirmer. Un profil modifié par un autre client est rechargé s'il n'est pas en cours
 -- d'édition.
 
-local MIN_WIDTH, MIN_HEIGHT = 860, 340 -- largeur : rangée de boutons du bas de l'éditeur
-local DEFAULT_WIDTH, DEFAULT_HEIGHT = 900, 480
+local MIN_WIDTH, MIN_HEIGHT = 1050, 340 -- largeur : rangée de boutons du bas de l'éditeur
+local DEFAULT_WIDTH, DEFAULT_HEIGHT = 1100, 480
 local LIST_RATIO = 0.36 -- part de la largeur donnée à la liste
 
 local frame, listPanel, editor, nameBox, kindButton, captureButton, textBox, deleteButton
+local saveButton, duplicateButton
 local collapseAllButton -- « Tout replier » / « Tout déplier » du cadre Personnages
 local selectedID -- profil ouvert dans l'éditeur (nil = nouveau)
 local editKind = ns.DEFAULT_KIND
@@ -98,8 +99,10 @@ local function EditorText()
 	return textBox and textBox:GetInputText() or ""
 end
 
+-- Un profil enregistré s'ouvre en lecture seule (le dupliquer pour le reprendre) : seul un
+-- nouveau profil peut avoir une modification non enregistrée.
 local function IsDirty()
-	if not editor then
+	if not editor or selectedID then
 		return false
 	end
 	return Trim(nameBox:GetText()) ~= loaded.name or editKind ~= loaded.kind or Trim(EditorText()) ~= loaded.text
@@ -113,7 +116,7 @@ local function UpdateEditorHeader()
 	local profile = selectedID and ns.Get(selectedID)
 	local header
 	if profile then
-		header = profile.name .. Gray("  · " .. FormatDate(profile.updated))
+		header = profile.name .. Gray("  · " .. FormatDate(profile.updated) .. "  · " .. L["lecture seule"])
 	else
 		header = L["Nouveau profil"]
 	end
@@ -125,6 +128,8 @@ local function UpdateEditorHeader()
 		header = header .. "  |cffff9933" .. L["(non enregistré)"] .. "|r"
 	end
 	editor.header:SetText(header)
+	saveButton:SetEnabled(not profile)
+	duplicateButton:SetEnabled(profile ~= nil)
 	deleteButton:SetEnabled(profile ~= nil)
 end
 
@@ -171,6 +176,10 @@ local function Load(id, copy, char)
 	local source = profile or copy or {}
 	nameBox:SetText(source.name or "")
 	nameBox:SetCursorPosition(0)
+	nameBox:SetEnabled(not profile) -- profil enregistré : lecture seule
+	if kindButton.SetEnabled then
+		kindButton:SetEnabled(not profile)
+	end
 	textBox:SetText(source.text or "")
 	SetKind(source.kind or editKind) -- nouveau profil : le genre précédent reste proposé
 	SetChar(source.char or char)
@@ -289,13 +298,32 @@ local function Select(id)
 	end)
 end
 
+-- Enregistre le nouveau profil de l'éditeur (un profil enregistré, en lecture seule, ne
+-- s'enregistre pas : le dupliquer).
 local function SaveEditor()
-	local id, reason = ns.Save(selectedID, nameBox:GetText(), editKind, EditorText(), editChar)
+	if selectedID then
+		return
+	end
+	local id, reason = ns.Save(nil, nameBox:GetText(), editKind, EditorText(), editChar)
 	if not id then
 		Notify(reason)
 		return
 	end
 	Load(id)
+end
+
+-- Copie d'un profil pour le personnage joué : nouveau profil prérempli (même genre, même chaîne ;
+-- nom suivi de « (copie) » s'il reste au même personnage), à enregistrer sous lui.
+local function Duplicate(id)
+	local profile = ns.Get(id)
+	if not profile then
+		return
+	end
+	local char = P.GetCharKey()
+	ConfirmDiscard(function()
+		local name = profile.char == char and L["%s (copie)"]:format(profile.name) or profile.name
+		Load(nil, { name = name, kind = profile.kind, text = profile.text }, char)
+	end)
 end
 
 local function AskDelete(id)
@@ -626,10 +654,7 @@ local function ShowRowMenu(id)
 	MenuUtil.CreateContextMenu(frame, function(_, root)
 		root:CreateTitle(profile.name)
 		root:CreateButton(L["Dupliquer"], function()
-			ConfirmDiscard(function()
-				Load(nil, { name = L["%s (copie)"]:format(profile.name), kind = profile.kind, text = profile.text,
-					char = profile.char })
-			end)
+			Duplicate(id)
 		end)
 		root:CreateButton(L["Supprimer"], function()
 			AskDelete(id)
@@ -1100,17 +1125,27 @@ local function BuildEditor()
 	newButton:SetPoint("BOTTOMLEFT", 10, 10)
 	SetTooltip(newButton, L["Nouveau profil"], L["Vide l'éditeur pour coller (Ctrl+V) une nouvelle chaîne d'export."])
 
-	local saveButton = CreateButton(editor, L["Enregistrer"], 90, SaveEditor)
+	saveButton = CreateButton(editor, L["Enregistrer"], 90, SaveEditor)
 	saveButton:SetPoint("LEFT", newButton, "RIGHT", 6, 0)
 	SetTooltip(saveButton, L["Enregistrer"],
-		L["Garde le profil (nom, genre, chaîne) pour tous vos personnages et l'envoie à vos autres clients connectés."])
+		L["Garde le nouveau profil (nom, genre, chaîne) sous le personnage affiché en haut à droite et l'envoie "
+			.. "à vos autres clients connectés. Un profil déjà enregistré ne se modifie pas : le dupliquer."])
+
+	duplicateButton = CreateButton(editor, L["Dupliquer"], 80, function()
+		if selectedID then
+			Duplicate(selectedID)
+		end
+	end)
+	duplicateButton:SetPoint("LEFT", saveButton, "RIGHT", 6, 0)
+	SetTooltip(duplicateButton, L["Dupliquer"],
+		L["Ouvre une copie du profil pour votre personnage actuel ; « Enregistrer » la garde sous lui."])
 
 	deleteButton = CreateButton(editor, L["Supprimer"], 80, function()
 		if selectedID then
 			AskDelete(selectedID)
 		end
 	end)
-	deleteButton:SetPoint("LEFT", saveButton, "RIGHT", 6, 0)
+	deleteButton:SetPoint("LEFT", duplicateButton, "RIGHT", 6, 0)
 
 	local seasonButton = CreateButton(editor, L["Supprimer une saison"], 140, function(self)
 		ShowSeasonDeleteMenu(self)
@@ -1139,6 +1174,13 @@ local function BuildEditor()
 	if editBox.SetMaxBytes then
 		editBox:SetMaxBytes(0)
 	end
+	-- Profil enregistré (lecture seule) : une frappe est annulée ; sélection et Ctrl+C restent possibles.
+	editBox:HookScript("OnTextChanged", function(self, userInput)
+		local profile = userInput and selectedID and ns.Get(selectedID)
+		if profile and self:GetText() ~= profile.text then
+			self:SetText(profile.text)
+		end
+	end)
 	textBox:SetDefaultText(L["Collez ici (Ctrl+V) la chaîne d'export du mode Édition, des talents ou d'un addon."])
 	textBox:RegisterCallback("OnTextChanged", UpdateEditorHeader, editor)
 

@@ -44,7 +44,7 @@ The **Profiles** button (title bar of the Polypode window) or `/poly profil` ope
   - **Collapse all** button (right of the "Characters" title): collapses every season to only
     see their names; it becomes **Expand all** when everything is collapsed.
   - Profile (type then name, e.g. "Talents · Arcane raid"): left-click = open in the editor;
-    right-click = duplicate or delete; on hover: type, character, date, **season and game
+    right-click = duplicate (like the **Duplicate** button) or delete; the profile opens read-only; on hover: type, character, date, **season and game
     version** of the save (for example "Midnight, season 2 (12.1.0)"; "unknown" for saves older
     than 1.9.0) and size.
   - **Transmogrification** profile: a small icon before its name **opens the dressing room** on the
@@ -76,6 +76,13 @@ The **Profiles** button (title bar of the Polypode window) or `/poly profil` ope
   **Changing the type resets the editor**: name and string are cleared for a new profile of that
   type (same character); the profile that was open is not changed (confirmation asked if it had
   unsaved changes).
+  - A **saved profile opens read-only** ("read-only" in the header): name, type and string cannot
+    be changed (the string stays selectable for Ctrl+C) and **Save** is greyed out. Only a new
+    profile can be saved.
+  - **Duplicate** (between Save and Delete, or right-click on the profile) opens a copy of the
+    profile for your **current character**, shown at the top right (name followed by "(copy)" if
+    the profile was already theirs): **Save** keeps it under them. To change a profile: duplicate
+    it, edit the copy, save it, then delete the old one.
 
 ### Deleting all the profiles of a season
 

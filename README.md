@@ -46,7 +46,7 @@ Le bouton **Profils** (barre de titre de la fenêtre Polypode) ou `/poly profil`
   - Bouton **Tout replier** (à droite du titre « Personnages ») : replie toutes les saisons
     pour ne voir que leurs noms ; il devient **Tout déplier** quand tout est replié.
   - Profil (genre puis nom, par ex. « Talents · Arcane raid ») : clic gauche = ouvrir dans
-    l'éditeur ; clic droit = dupliquer ou supprimer ; au survol : genre, personnage, date,
+    l'éditeur (en lecture seule) ; clic droit = dupliquer (comme le bouton **Dupliquer**) ou supprimer ; au survol : genre, personnage, date,
     **saison et version du jeu** de la sauvegarde (par exemple « Midnight, saison 2 (12.1.0) » ;
     « inconnu » pour les sauvegardes antérieures à la 1.9.0) et taille.
   - Profil de **transmogrification** : une petite icône devant son nom **ouvre la cabine
@@ -78,6 +78,13 @@ Le bouton **Profils** (barre de titre de la fenêtre Polypode) ou `/poly profil`
   une zone qui défile. **Changer le genre réinitialise l'éditeur** : nom et chaîne sont effacés pour un
   nouveau profil de ce genre (même personnage) ; le profil qui était ouvert n'est pas modifié
   (confirmation demandée s'il avait des modifications non enregistrées).
+  - Un **profil enregistré s'ouvre en lecture seule** (« lecture seule » dans l'en-tête) : nom,
+    genre et chaîne ne se modifient pas (la chaîne reste sélectionnable pour Ctrl+C) et
+    **Enregistrer** est grisé. Seul un nouveau profil s'enregistre.
+  - **Dupliquer** (entre Enregistrer et Supprimer, ou clic droit sur le profil) ouvre une copie
+    du profil pour votre **personnage actuel**, affiché en haut à droite (nom suivi de
+    « (copie) » si le profil était déjà le sien) : **Enregistrer** la garde sous lui. Pour
+    changer un profil : le dupliquer, modifier la copie, l'enregistrer, puis supprimer l'ancien.
 
 ### Supprimer tous les profils d'une saison
 
@@ -238,6 +245,7 @@ other language).*
 
 ## Version
 
+`2.6.0` : profil enregistré ouvert en lecture seule ; bouton **Dupliquer** (copie pour le personnage actuel, à enregistrer), aussi au clic droit ; fenêtre plus large (1100 par défaut, 1050 au minimum).
 `2.5.0` : personnage du profil affiché à droite de l'en-tête de l'éditeur, non modifiable ; ligne « Personnage » retirée.
 `2.4.0` : liste des profils rangée par saison (celle du dernier enregistrement), puis par personnage ; saisons repliables.
 `2.3.0` : double-clic sur la barre de titre : retour à la taille par défaut (Polypode 2.12).
