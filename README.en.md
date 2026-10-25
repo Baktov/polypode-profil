@@ -28,7 +28,8 @@ When disabled, Polypode works normally, with no "Profiles" button or `/poly prof
 
 ## Usage
 
-The **Profiles** button (title bar of the Polypode window) or `/poly profil` opens the window.
+The **Profiles** button (title bar of the Polypode window) or `/poly profil` opens the window
+(**double-click** its title bar: back to the default size).
 
 - **On the left**, the profiles filed **under their character**, shown as in Polypode's "Available
   characters": name in class color, class, level, "(you)", logged-in first, logged-out faded, and

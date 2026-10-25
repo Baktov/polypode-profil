@@ -29,7 +29,8 @@ Désactivé, Polypode fonctionne normalement, sans bouton « Profils » ni comma
 
 ## Utilisation
 
-Le bouton **Profils** (barre de titre de la fenêtre Polypode) ou `/poly profil` ouvre la fenêtre.
+Le bouton **Profils** (barre de titre de la fenêtre Polypode) ou `/poly profil` ouvre la fenêtre
+(**double-clic** sur sa barre de titre : retour à la taille par défaut).
 
 - **À gauche**, les profils rangés **sous leur personnage**, affiché comme dans « Personnages
   disponibles » de Polypode : nom en couleur de classe, classe, niveau, « (vous) », connectés en
@@ -231,6 +232,7 @@ other language).*
 
 ## Version
 
+`2.3.0` : double-clic sur la barre de titre : retour à la taille par défaut (Polypode 2.12).
 `2.2.0` : Polypode Profil en anglais, allemand, espagnol, italien et portugais du Brésil, selon la langue choisie dans Polypode (Profiles, Profile, Perfiles, Profili, Perfis) ; les chaînes d'export gardent leur format (en-têtes et lignes en français), lisibles quelle que soit la langue. *Translated into English, German, Spanish, Italian and Brazilian Portuguese.*
 `2.1.1` : genre « MySlots » rétabli (ses profils ne sont plus supprimés) : « Barres d'action » en reprend moins que MySlot.
 `2.1.0` : genre « Barres d'action » (capture des barres 1 à 15 et de leurs macros, application par l'icône de la liste) ; genre « MySlots » retiré, ses profils supprimés.

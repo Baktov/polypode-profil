@@ -1247,6 +1247,14 @@ local function Build()
 		current.width, current.height = frame:GetSize()
 	end)
 	frame.resizeGrip = grip
+	-- Double-clic sur la barre de titre : taille par défaut (Polypode 2.12).
+	if P.EnableTitleDoubleClick then
+		P.EnableTitleDoubleClick(frame, function()
+			local current = WindowSettings()
+			current.width, current.height = DEFAULT_WIDTH, DEFAULT_HEIGHT
+			frame:SetSize(DEFAULT_WIDTH, DEFAULT_HEIGHT)
+		end)
+	end
 	frame:SetScript("OnSizeChanged", LayoutPanels)
 	LayoutPanels()
 
