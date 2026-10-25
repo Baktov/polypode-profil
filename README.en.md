@@ -40,7 +40,7 @@ The **Profiles** button (title bar of the Polypode window) or `/poly profil` ope
   character always shows in the current season, even with no profile.
   - Season header: left-click = collapse / expand the season (state kept).
   - Character header: left-click = collapse / expand its profiles of that season (state kept);
-    right-click = new profile for this character (saved in the current season).
+    right-click = **New** menu for this character (profile saved in the current season).
   - **Collapse all** button (right of the "Characters" title): collapses every season to only
     see their names; it becomes **Expand all** when everything is collapsed.
   - Profile (type then name, e.g. "Talents · Arcane raid"): left-click = open in the editor;
@@ -68,14 +68,11 @@ The **Profiles** button (title bar of the Polypode window) or `/poly profil` ope
   - **WoW options**, **Key bindings** and **Chat windows** profiles: a small icon before their name
     **applies** them to the current character, after confirmation (they replace the current
     setup); a report is shown.
-- **On the right**, the editor. Header: on the left the open profile (or "New profile"), on the
-  right its **character**, which cannot be changed: the one the profile was created under, or,
-  for a new profile, the current character (the header's one after a right-click "New profile
-  for this character"). Below: name, type (drop-down list) and the string itself, in a
-  scrolling box.
-  **Changing the type resets the editor**: name and string are cleared for a new profile of that
-  type (same character); the profile that was open is not changed (confirmation asked if it had
-  unsaved changes).
+- **On the right**, the editor. Header: on the left the **type** and the open profile (or "New
+  profile"), on the right its **character**; neither can be changed. The type is chosen in the
+  **New** menu (see "Creating a profile"); the character is the one the profile was created
+  under, or, for a new profile, the current character (the header's one after a right-click on a
+  character of the list). Below: the name and the string itself, in a scrolling box.
   - A **saved profile opens read-only** ("read-only" in the header): name, type and string cannot
     be changed (the string stays selectable for Ctrl+C) and **Save** is greyed out. Only a new
     profile can be saved.
@@ -90,17 +87,26 @@ The **Delete a season** button (under the character list, right of "Delete") lis
 during which your profiles were saved (with their count, "Unknown season" for saves older than
 1.9.0 and WoW Forever saves). Picking one deletes, after confirmation, every profile of that season, on all your clients.
 
-### Saving a string
+### Creating a profile
 
-1. In the addon (or Edit Mode, or talents), use its **Export** button and copy the string
-   (Ctrl+C).
-2. In "Profiles": **New**, paste the string (Ctrl+V) into the text box, give a name and choose the
-   type.
-3. **Save**.
+The **New** button (bottom of the editor, or right-click on a character of the list) opens the
+menu of types, in three groups:
 
-**Capture** (types "Edit Mode", "Talents", "Transmogrification", "Title", "Macro", "Equipment
-set", "Action bars", "WoW options", "Key bindings", "Chat windows", "Addon list" and "Simple Addon
-Manager") reads the string directly in game, without going through the clipboard:
+1. **Capture and apply in game**: Transmogrification, Title, Macro, Equipment set, Action bars,
+   WoW options, Key bindings, Chat windows, Addon list, Simple Addon Manager. The string is read
+   in game; in the list, the icon in front of the profile applies it (transmogrification is tried
+   on in the dressing room).
+2. **Capture, then copy the string**: Edit Mode, Talents. The string is read in game, then copied
+   (Select all, Ctrl+C) into the game's import window.
+3. **Paste a string (import / export)**: EllesmereUI, ElvUI, Baganator, MySlots, Other. The string
+   is pasted from the addon's **Export** button, then copied back into its import.
+
+A type of groups 1 and 2 opens a submenu: its captures (layouts, macros, sets...), then **Paste a
+string** (a string from elsewhere, for example talents found on a website). A type of group 3
+directly opens an empty profile. Either way, the editor gets a **new profile** of that type:
+give a name (or keep the suggested one), paste the string if needed (Ctrl+V), then **Save**.
+
+Captures read the string directly in game, without going through the clipboard:
 
 - Edit Mode: a menu lists your layouts (the active layout is marked);
 - Talents: the active talent loadout. The talent window (N) must have been opened at least once in

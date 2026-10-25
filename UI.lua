@@ -33,7 +33,7 @@ local LIST_RATIO = 0.36 -- part de la largeur donnée à la liste
 local LIST_MIN_WIDTH = 320 -- rangée Dupliquer / Supprimer / Supprimer une saison sous la liste
 local BUTTON_ROW = 28 -- hauteur réservée sous la liste pour cette rangée
 
-local frame, listPanel, editor, nameBox, kindButton, captureButton, textBox, deleteButton
+local frame, listPanel, editor, nameBox, textBox, deleteButton
 local saveButton, duplicateButton
 local collapseAllButton -- « Tout replier » / « Tout déplier » du cadre Personnages
 local selectedID -- profil ouvert dans l'éditeur (nil = nouveau)
@@ -110,17 +110,17 @@ local function IsDirty()
 	return Trim(nameBox:GetText()) ~= loaded.name or editKind ~= loaded.kind or Trim(EditorText()) ~= loaded.text
 end
 
--- En-tête de l'éditeur : profil ouvert, date, taille, modification en cours.
+-- En-tête de l'éditeur : genre, profil ouvert, date, taille, modification en cours.
 local function UpdateEditorHeader()
 	if not editor then
 		return
 	end
 	local profile = selectedID and ns.Get(selectedID)
-	local header
+	local header = Gray(ns.KindLabel(editKind) .. " · ")
 	if profile then
-		header = profile.name .. Gray("  · " .. FormatDate(profile.updated) .. "  · " .. L["lecture seule"])
+		header = header .. profile.name .. Gray("  · " .. FormatDate(profile.updated) .. "  · " .. L["lecture seule"])
 	else
-		header = L["Nouveau profil"]
+		header = header .. L["Nouveau profil"]
 	end
 	local size = #Trim(EditorText())
 	if size > 0 then
@@ -135,30 +135,10 @@ local function UpdateEditorHeader()
 	deleteButton:SetEnabled(profile ~= nil)
 end
 
--- Texte d'une liste déroulante (liste Blizzard : OverrideText, le texte ne suit pas la sélection ;
--- bouton de repli : SetText) et place disponible pour lui (sans la flèche).
-local function SetChoiceText(choice, text)
-	if choice.OverrideText then
-		choice:OverrideText(text)
-	else
-		choice:SetText(text)
-	end
-end
-
-local function ChoiceTextFits(choice)
-	local label = choice.Text or (choice.GetFontString and choice:GetFontString())
-	local margin = choice.OverrideText and 34 or 16
-	return not label or label:GetStringWidth() <= choice:GetWidth() - margin
-end
-
+-- Genre du profil, fixé au chargement (choisi dans le menu « Nouveau ») et affiché en tête de
+-- l'en-tête, sans pouvoir le changer.
 local function SetKind(kind)
 	editKind = ns.NormalizeKind(kind)
-	-- Libellé court (« Ensemble », « Simple AM »...) si le libellé complet ne tient pas.
-	SetChoiceText(kindButton, ns.KindLabel(editKind))
-	if not ChoiceTextFits(kindButton) then
-		SetChoiceText(kindButton, ns.KindShortLabel(editKind))
-	end
-	captureButton:SetShown(ns.CanCapture(editKind))
 	UpdateEditorHeader()
 end
 
@@ -179,11 +159,8 @@ local function Load(id, copy, char)
 	nameBox:SetText(source.name or "")
 	nameBox:SetCursorPosition(0)
 	nameBox:SetEnabled(not profile) -- profil enregistré : lecture seule
-	if kindButton.SetEnabled then
-		kindButton:SetEnabled(not profile)
-	end
 	textBox:SetText(source.text or "")
-	SetKind(source.kind or editKind) -- nouveau profil : le genre précédent reste proposé
+	SetKind(source.kind or editKind) -- sans genre donné : le genre précédent reste
 	SetChar(source.char or char)
 	if profile then
 		loaded.name, loaded.kind, loaded.text = Trim(profile.name), ns.NormalizeKind(profile.kind), Trim(profile.text)
@@ -344,229 +321,237 @@ local function SelectAll()
 	Notify(L["Chaîne sélectionnée : Ctrl+C pour la copier."])
 end
 
--- Chaîne capturée en jeu : remplace le texte ; le nom proposé n'est pris que si le nom est vide.
--- Chaîne capturée en jeu : toujours un nouveau profil (jamais le profil ouvert, qui serait écrasé
--- à l'enregistrement), du genre en cours, nommé name, rangé sous char (défaut : le personnage de
--- l'éditeur) ; confirmation si l'éditeur a une modification non enregistrée.
-local function ApplyCapture(text, name, char)
-	local kind, target = editKind, char or editChar
+-- NOUVEAU PROFIL -----------------------------------------------------------------------------
+
+-- Nouveau profil du genre kind dans l'éditeur, rangé sous char (défaut : le personnage joué),
+-- prérempli par une chaîne capturée (text, name) ou vide pour y coller une chaîne ; jamais le
+-- profil ouvert, qui reste tel quel. Confirmation si l'éditeur a une modification non enregistrée.
+local function StartNew(kind, char, text, name)
 	ConfirmDiscard(function()
-		Load(nil, { name = name, kind = kind, text = text }, target)
-		Notify(L["Chaîne capturée : « Enregistrer » pour la garder."])
+		Load(nil, { name = name, kind = kind, text = text }, char)
+		if text then
+			Notify(L["Chaîne capturée : « Enregistrer » pour la garder."])
+		else
+			textBox:SetFocus()
+			Notify(L["Collez la chaîne (Ctrl+V), puis « Enregistrer »."])
+		end
 	end)
 end
 
-local function Capture(button)
-	if editKind == "talents" then
-		local text, nameOrReason = ns.ExportTalents()
-		if text then
-			ApplyCapture(text, nameOrReason, P.GetCharKey()) -- talents du personnage joué
-		else
-			Notify(nameOrReason)
-		end
-	elseif editKind == "transmog" then
-		if not (MenuUtil and MenuUtil.CreateContextMenu) then
-			return
-		end
+-- Capture par une fonction d'export qui renvoie texte, nom (ou nil, raison) : done(texte, nom, own),
+-- own = rangée sous le personnage joué ; sinon la raison est affichée.
+local function Run(done, own, export, ...)
+	local text, nameOrReason = export(...)
+	if text then
+		done(text, nameOrReason, own)
+	else
+		Notify(nameOrReason)
+	end
+end
+
+-- Sous-menu de capture de chaque genre capturable : CAPTURES[genre](menu, done) ajoute ses entrées
+-- à menu (description MenuUtil) ; done(texte, nom, own) ouvre le nouveau profil (own = rangé sous
+-- le personnage joué : talents, titre, tenue actuelle, macro de personnage, ensemble, barres).
+local CAPTURES = {
+	transmog = function(menu, done)
+		menu:CreateButton(L["Apparence actuelle"], function()
+			ns.ExportCurrentAppearance(function(text, reason)
+				if text then
+					-- Tenue du personnage joué, datée : plusieurs captures restent distinctes.
+					done(text, L["Apparence actuelle (%s)"]:format(FormatDate(GetServerTime())), true)
+				else
+					Notify(reason)
+				end
+			end)
+		end)
 		local sets = ns.GetCustomSets()
-		MenuUtil.CreateContextMenu(button, function(_, root)
-			root:CreateTitle(L["Tenue à capturer"])
-			root:CreateButton(L["Apparence actuelle"], function()
-				ns.ExportCurrentAppearance(function(text, reason)
-					if text then
-						-- Tenue du personnage joué, datée : plusieurs captures restent distinctes.
-						ApplyCapture(text, L["Apparence actuelle (%s)"]:format(FormatDate(GetServerTime())), P.GetCharKey())
-					else
-						Notify(reason)
-					end
-				end)
-			end)
-			if #sets > 0 then
-				root:CreateDivider()
-				root:CreateTitle(L["Ensembles personnalisés"])
-				for _, set in ipairs(sets) do
-					root:CreateButton(set.name, function()
-						local text, reason = ns.ExportCustomSet(set.id)
-						if text then
-							ApplyCapture(text, set.name)
-						else
-							Notify(reason)
-						end
-					end)
-				end
-			end
-		end)
-	elseif editKind == "options" then
-		local categories = ns.GetOptionCategories()
-		if #categories == 0 or not (MenuUtil and MenuUtil.CreateContextMenu) then
-			Notify(L["Aucun réglage lisible (ouvrez une fois le panneau Options, puis recommencez)."])
-			return
-		end
-		local function CaptureOptions(categoryName)
-			local text, nameOrReason = ns.ExportOptions(categoryName)
-			if text then
-				ApplyCapture(text, nameOrReason)
-			else
-				Notify(nameOrReason)
-			end
-		end
-		MenuUtil.CreateContextMenu(button, function(_, root)
-			root:CreateTitle(L["Catégorie d'options à capturer"])
-			root:CreateButton(L["Toutes les catégories"], function()
-				CaptureOptions(nil)
-			end)
-			root:CreateDivider()
-			for _, category in ipairs(categories) do
-				root:CreateButton(category.name .. Gray(" (" .. category.count .. ")"), function()
-					CaptureOptions(category.name)
-				end)
-			end
-		end)
-	elseif editKind == "simpleaddonmanager" then
-		local names = ns.GetSAMProfiles()
-		if #names == 0 or not (MenuUtil and MenuUtil.CreateContextMenu) then
-			Notify(ns.HasSimpleAddonManager() and L["Aucun profil dans Simple Addon Manager."]
-				or L["Simple Addon Manager n'est pas chargé."])
-			return
-		end
-		MenuUtil.CreateContextMenu(button, function(_, root)
-			root:CreateTitle(L["Profil de Simple Addon Manager"])
-			-- Tous : enregistrés directement, un profil Polypode chacun (sans passer par l'éditeur).
-			root:CreateButton(L["Tous les profils (enregistrés chacun)"], function()
-				local saved = 0
-				for _, name in ipairs(names) do
-					local text = ns.ExportSAMProfile(name)
-					if text and ns.Save(nil, name, "simpleaddonmanager", text, P.GetCharKey()) then
-						saved = saved + 1
-					end
-				end
-				Notify(L["%d profil(s) de Simple Addon Manager enregistré(s)."]:format(saved))
-			end)
-			root:CreateDivider()
-			for _, name in ipairs(names) do
-				root:CreateButton(name, function()
-					local text, reason = ns.ExportSAMProfile(name)
-					if text then
-						ApplyCapture(text, name)
-					else
-						Notify(reason)
-					end
-				end)
-			end
-		end)
-	elseif editKind == "bindings" or editKind == "chat" or editKind == "addons" or editKind == "actionbars" then
-		local export = editKind == "bindings" and ns.ExportBindings or editKind == "chat" and ns.ExportChat
-			or editKind == "actionbars" and ns.ExportActionBars or ns.ExportAddons
-		local text, nameOrReason = export()
-		if text then
-			-- Barres d'action : celles du personnage joué.
-			ApplyCapture(text, nameOrReason, editKind == "actionbars" and P.GetCharKey() or nil)
-		else
-			Notify(nameOrReason)
-		end
-	elseif editKind == "equipset" then
-		local sets = ns.GetEquipmentSets()
-		if #sets == 0 or not (MenuUtil and MenuUtil.CreateContextMenu) then
-			Notify(L["Aucun ensemble d'équipement chez ce personnage."])
-			return
-		end
-		MenuUtil.CreateContextMenu(button, function(_, root)
-			root:CreateTitle(L["Ensemble à capturer"])
+		if #sets > 0 then
+			menu:CreateTitle(L["Ensembles personnalisés"])
 			for _, set in ipairs(sets) do
-				root:CreateButton(set.name .. (set.spec and Gray(" (" .. set.spec .. ")") or ""), function()
-					local text, nameOrReason = ns.ExportEquipmentSet(set.id)
+				menu:CreateButton(set.name, function()
+					local text, reason = ns.ExportCustomSet(set.id)
 					if text then
-						ApplyCapture(text, nameOrReason, P.GetCharKey()) -- ensemble du personnage joué
+						done(text, set.name)
 					else
-						Notify(nameOrReason)
+						Notify(reason)
 					end
 				end)
 			end
+		end
+	end,
+	title = function(menu, done)
+		menu:CreateButton(L["Titre porté"], function()
+			Run(done, true, ns.ExportTitle)
 		end)
-	elseif editKind == "macro" then
+	end,
+	macro = function(menu, done)
 		local macros = ns.GetMacros()
-		if #macros == 0 or not (MenuUtil and MenuUtil.CreateContextMenu) then
-			Notify(L["Aucune macro chez ce personnage."])
+		if #macros == 0 then
+			menu:CreateTitle(L["Aucune macro chez ce personnage."])
 			return
 		end
-		local function AddGroup(root, title, perCharacter)
+		local function AddGroup(title, perCharacter)
 			local first = true
 			for _, macro in ipairs(macros) do
 				if macro.perCharacter == perCharacter then
 					if first then
-						root:CreateTitle(title)
+						menu:CreateTitle(title)
 						first = false
 					end
 					local icon = macro.icon and ("|T" .. macro.icon .. ":16|t ") or ""
-					root:CreateButton(icon .. macro.name, function()
-						local text, nameOrReason = ns.ExportMacro(macro.index)
-						if text then
-							-- Macro propre au personnage : rangée sous le personnage joué.
-							ApplyCapture(text, nameOrReason, perCharacter and P.GetCharKey() or nil)
-						else
-							Notify(nameOrReason)
-						end
+					menu:CreateButton(icon .. macro.name, function()
+						Run(done, perCharacter, ns.ExportMacro, macro.index)
 					end)
 				end
 			end
 		end
-		MenuUtil.CreateContextMenu(button, function(_, root)
-			AddGroup(root, L["Macros générales"], false)
-			AddGroup(root, L["Macros de %s"]:format(P.GetDisplayName(P.GetCharKey())), true)
-		end)
-	elseif editKind == "title" then
-		local text, nameOrReason = ns.ExportTitle()
-		if text then
-			ApplyCapture(text, nameOrReason, P.GetCharKey()) -- titre du personnage joué
-		else
-			Notify(nameOrReason)
-		end
-	elseif editKind == "editmode" then
-		local layouts = ns.GetEditModeLayouts()
-		if #layouts == 0 or not (MenuUtil and MenuUtil.CreateContextMenu) then
-			Notify(L["Aucune disposition du mode Édition disponible."])
+		AddGroup(L["Macros générales"], false)
+		AddGroup(L["Macros de %s"]:format(P.GetDisplayName(P.GetCharKey())), true)
+	end,
+	equipset = function(menu, done)
+		local sets = ns.GetEquipmentSets()
+		if #sets == 0 then
+			menu:CreateTitle(L["Aucun ensemble d'équipement chez ce personnage."])
 			return
 		end
-		MenuUtil.CreateContextMenu(button, function(_, root)
-			root:CreateTitle(L["Disposition à capturer"])
-			for _, entry in ipairs(layouts) do
-				root:CreateButton(entry.name .. (entry.active and Gray(" " .. L["(active)"]) or ""), function()
-					local text, reason = ns.ExportEditModeLayout(entry.layout)
-					if text then
-						ApplyCapture(text, L["Mode Édition — %s"]:format(entry.name))
-					else
-						Notify(reason)
-					end
-				end)
-			end
+		for _, set in ipairs(sets) do
+			menu:CreateButton(set.name .. (set.spec and Gray(" (" .. set.spec .. ")") or ""), function()
+				Run(done, true, ns.ExportEquipmentSet, set.id)
+			end)
+		end
+	end,
+	actionbars = function(menu, done)
+		menu:CreateButton(L["Capturer"], function()
+			Run(done, true, ns.ExportActionBars)
 		end)
-	end
-end
+	end,
+	options = function(menu, done)
+		local categories = ns.GetOptionCategories()
+		if #categories == 0 then
+			menu:CreateTitle(L["Aucun réglage lisible (ouvrez une fois le panneau Options, puis recommencez)."])
+			return
+		end
+		menu:CreateButton(L["Toutes les catégories"], function()
+			Run(done, false, ns.ExportOptions, nil)
+		end)
+		menu:CreateDivider()
+		for _, category in ipairs(categories) do
+			menu:CreateButton(category.name .. Gray(" (" .. category.count .. ")"), function()
+				Run(done, false, ns.ExportOptions, category.name)
+			end)
+		end
+	end,
+	bindings = function(menu, done)
+		menu:CreateButton(L["Capturer"], function()
+			Run(done, false, ns.ExportBindings)
+		end)
+	end,
+	chat = function(menu, done)
+		menu:CreateButton(L["Capturer"], function()
+			Run(done, false, ns.ExportChat)
+		end)
+	end,
+	addons = function(menu, done)
+		menu:CreateButton(L["Capturer"], function()
+			Run(done, false, ns.ExportAddons)
+		end)
+	end,
+	simpleaddonmanager = function(menu, done)
+		local names = ns.GetSAMProfiles()
+		if #names == 0 then
+			menu:CreateTitle(ns.HasSimpleAddonManager() and L["Aucun profil dans Simple Addon Manager."]
+				or L["Simple Addon Manager n'est pas chargé."])
+			return
+		end
+		-- Tous : enregistrés directement, un profil Polypode chacun (sans passer par l'éditeur).
+		menu:CreateButton(L["Tous les profils (enregistrés chacun)"], function()
+			local saved = 0
+			for _, name in ipairs(names) do
+				local text = ns.ExportSAMProfile(name)
+				if text and ns.Save(nil, name, "simpleaddonmanager", text, P.GetCharKey()) then
+					saved = saved + 1
+				end
+			end
+			Notify(L["%d profil(s) de Simple Addon Manager enregistré(s)."]:format(saved))
+		end)
+		menu:CreateDivider()
+		for _, name in ipairs(names) do
+			menu:CreateButton(name, function()
+				local text, reason = ns.ExportSAMProfile(name)
+				if text then
+					done(text, name)
+				else
+					Notify(reason)
+				end
+			end)
+		end
+	end,
+	editmode = function(menu, done)
+		local layouts = ns.GetEditModeLayouts()
+		if #layouts == 0 then
+			menu:CreateTitle(L["Aucune disposition du mode Édition disponible."])
+			return
+		end
+		for _, entry in ipairs(layouts) do
+			menu:CreateButton(entry.name .. (entry.active and Gray(" " .. L["(active)"]) or ""), function()
+				local text, reason = ns.ExportEditModeLayout(entry.layout)
+				if text then
+					done(text, L["Mode Édition — %s"]:format(entry.name))
+				else
+					Notify(reason)
+				end
+			end)
+		end
+	end,
+	talents = function(menu, done)
+		menu:CreateButton(L["Configuration active"], function()
+			Run(done, true, ns.ExportTalents)
+		end)
+	end,
+}
 
--- Changer de genre réinitialise l'éditeur : nouveau profil vide (nom et chaîne effacés) de ce
--- genre, pour le même personnage ; le profil ouvert n'est pas modifié (confirmation si l'éditeur
--- a une modification non enregistrée).
-local function ChangeKind(kind)
-	if kind == editKind then
+-- Menu « Nouveau » : une section par groupe de genres (ns.KIND_GROUPS) ; genre capturable =
+-- sous-menu (captures en jeu, puis « Coller une chaîne »), genre à coller = nouveau profil vide.
+-- char : personnage du nouveau profil (défaut : le personnage joué).
+local function ShowNewMenu(owner, char)
+	if not (MenuUtil and MenuUtil.CreateContextMenu) then
+		StartNew(ns.DEFAULT_KIND, char)
 		return
 	end
-	local char = editChar
-	ConfirmDiscard(function()
-		editKind = kind
-		Load(nil, nil, char)
+	MenuUtil.CreateContextMenu(owner, function(_, root)
+		if char and char ~= P.GetCharKey() then
+			root:CreateTitle(L["Nouveau profil pour %s"]:format(CharName(char)))
+			root:CreateDivider()
+		end
+		for index, group in ipairs(ns.KIND_GROUPS) do
+			if index > 1 then
+				root:CreateDivider()
+			end
+			root:CreateTitle(group.label)
+			for _, kind in ipairs(ns.KINDS) do
+				if kind.group == group.key then
+					local fill = CAPTURES[kind.key]
+					if fill then
+						local menu = root:CreateButton(kind.label)
+						-- Lecture fragile (API absente sur un client) : le reste du menu s'affiche quand même.
+						if not pcall(fill, menu, function(text, name, own)
+							StartNew(kind.key, own and P.GetCharKey() or char, text, name)
+						end) then
+							menu:CreateTitle(L["Capture indisponible sur ce client."])
+						end
+						menu:CreateDivider()
+						menu:CreateButton(L["Coller une chaîne"], function()
+							StartNew(kind.key, char)
+						end)
+					else
+						root:CreateButton(kind.label, function()
+							StartNew(kind.key, char)
+						end)
+					end
+				end
+			end
+		end
 	end)
-end
-
--- Contenu de la liste déroulante des genres.
-local function KindMenu(root)
-	root:CreateTitle(L["Genre du profil"])
-	for _, kind in ipairs(ns.KINDS) do
-		root:CreateRadio(kind.label, function()
-			return editKind == kind.key
-		end, function()
-			ChangeKind(kind.key)
-		end)
-	end
 end
 
 
@@ -664,28 +649,14 @@ local function ShowRowMenu(id)
 	end)
 end
 
--- Nouveau profil rangé sous ce personnage ; il sera enregistré dans la saison en cours, dépliée
--- (avec le personnage) pour le voir apparaître.
-local function NewForChar(key)
-	ConfirmDiscard(function()
-		local season = ns.CurrentSeason() or UNKNOWN_SEASON
-		local collapsed = Collapsed()
-		collapsed[SeasonFoldKey(season)] = nil
-		collapsed[CharFoldKey(season, key)] = nil
-		Load(nil, nil, key)
-	end)
-end
-
+-- Clic droit sur un personnage : menu « Nouveau » pour lui ; le profil sera enregistré dans la
+-- saison en cours, dépliée (avec le personnage) pour le voir apparaître.
 local function ShowCharRowMenu(key)
-	if not (MenuUtil and MenuUtil.CreateContextMenu) then
-		return
-	end
-	MenuUtil.CreateContextMenu(frame, function(_, root)
-		root:CreateTitle(CharName(key))
-		root:CreateButton(L["Nouveau profil pour ce personnage"], function()
-			NewForChar(key)
-		end)
-	end)
+	local season = ns.CurrentSeason() or UNKNOWN_SEASON
+	local collapsed = Collapsed()
+	collapsed[SeasonFoldKey(season)] = nil
+	collapsed[CharFoldKey(season, key)] = nil
+	ShowNewMenu(frame, key)
 end
 
 -- ICÔNE D'ACTION devant certains profils (genre → action sur la chaîne du profil) :
@@ -1044,71 +1015,27 @@ local function LayoutPanels()
 	listPanel:SetWidth(math.max(LIST_MIN_WIDTH, frame:GetWidth() * LIST_RATIO))
 end
 
--- Liste déroulante Blizzard (WowStyle1DropdownTemplate : cadre et flèche qui signalent un choix),
--- menu construit à chaque ouverture par generator(root) ; à défaut (client sans ce modèle), bouton
--- qui ouvre le même menu, avec une flèche « v » à droite.
-local function CreateChoice(parent, width, generator)
-	local ok, dropdown = pcall(CreateFrame, "DropdownButton", nil, parent, "WowStyle1DropdownTemplate")
-	if ok and dropdown and dropdown.SetupMenu and dropdown.OverrideText then
-		dropdown:SetSize(width, 24)
-		dropdown:SetupMenu(function(_, root)
-			generator(root)
-		end)
-		if P.SkinDropdown then -- Polypode 0.51.3 : skin EllesmereUI / ElvUI
-			P.SkinDropdown(dropdown, width)
-		end
-		return dropdown
-	end
-	local button = CreateButton(parent, "", width, function(self)
-		if MenuUtil and MenuUtil.CreateContextMenu then
-			MenuUtil.CreateContextMenu(self, function(_, root)
-				generator(root)
-			end)
-		end
-	end)
-	local arrow = button:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-	arrow:SetPoint("RIGHT", -6, 0)
-	arrow:SetText("v")
-	return button
-end
-
 local function BuildEditor()
 	editor = P.CreatePanel(frame, "")
 	editor:SetPoint("TOPLEFT", listPanel, "TOPRIGHT", 8, 0)
 	editor:SetPoint("BOTTOMRIGHT", -12, 12)
 
-	-- En-tête : profil ouvert à gauche, son personnage à droite (texte seul).
+	-- En-tête : genre et profil ouvert à gauche, son personnage à droite (texte seul).
 	editor.charText = editor:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 	editor.charText:SetPoint("TOPRIGHT", -10, -8)
 	editor.charText:SetJustifyH("RIGHT")
 	editor.charText:SetWordWrap(false)
 	editor.header:SetPoint("RIGHT", editor.charText, "LEFT", -10, 0)
 
-	-- Ligne du nom : « Nom » [champ] [genre] [Capturer]
+	-- Ligne du nom : « Nom » [champ]
 	local nameLabel = editor:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 	nameLabel:SetPoint("TOPLEFT", 10, -34)
 	nameLabel:SetText(L["Nom"])
 
-	captureButton = CreateButton(editor, L["Capturer"], 80, function(self)
-		Capture(self)
-	end)
-	captureButton:SetPoint("TOPRIGHT", -10, -29)
-	SetTooltip(captureButton, L["Capturer"],
-		L["Relève la chaîne en jeu : une disposition du mode Édition (menu), les talents de la configuration "
-			.. "active (la fenêtre des talents doit avoir été ouverte une fois), ou une tenue (apparence actuelle "
-			.. "ou ensemble personnalisé : chaîne « /customset », à coller dans la discussion pour l'essayer), "
-			.. "le titre porté (chaîne « /settitle »), un ensemble d'équipement (menu, avec sa spécialisation), les barres d'action (et leurs macros), les options de WoW (menu par catégorie), les raccourcis clavier ou les fenêtres de discussion. "
-			.. "Chaque capture ouvre un nouveau profil, nommé d'après la disposition, les talents, le titre ou l'ensemble "
-			.. "(« Apparence actuelle » datée) : le profil ouvert n'est jamais écrasé."])
-
-	kindButton = CreateChoice(editor, 130, KindMenu)
-	kindButton:SetPoint("RIGHT", captureButton, "LEFT", -6, 0)
-	SetTooltip(kindButton, L["Genre"], L["Mode Édition, talents ou addon d'où vient la chaîne (range la liste)."])
-
 	nameBox = CreateFrame("EditBox", nil, editor, "InputBoxTemplate")
 	nameBox:SetHeight(20)
 	nameBox:SetPoint("LEFT", nameLabel, "RIGHT", 12, 0)
-	nameBox:SetPoint("RIGHT", kindButton, "LEFT", -10, 0)
+	nameBox:SetPoint("RIGHT", -10, 0)
 	nameBox:SetAutoFocus(false)
 	nameBox:SetMaxLetters(80)
 	nameBox:SetScript("OnTextChanged", UpdateEditorHeader)
@@ -1119,13 +1046,14 @@ local function BuildEditor()
 	end
 
 	-- Boutons du bas.
-	local newButton = CreateButton(editor, L["Nouveau"], 80, function()
-		ConfirmDiscard(function()
-			Load(nil)
-		end)
+	local newButton = CreateButton(editor, L["Nouveau"], 80, function(self)
+		ShowNewMenu(self)
 	end)
 	newButton:SetPoint("BOTTOMLEFT", 10, 10)
-	SetTooltip(newButton, L["Nouveau profil"], L["Vide l'éditeur pour coller (Ctrl+V) une nouvelle chaîne d'export."])
+	SetTooltip(newButton, L["Nouveau profil"],
+		L["Menu des genres, en trois groupes : capturés en jeu et appliqués par l'icône de la liste, capturés "
+			.. "en jeu puis copiés, ou collés (import / export d'un addon). Choisir une capture ou « Coller une "
+			.. "chaîne » ouvre un nouveau profil de ce genre, pour votre personnage actuel."])
 
 	saveButton = CreateButton(editor, L["Enregistrer"], 90, SaveEditor)
 	saveButton:SetPoint("LEFT", newButton, "RIGHT", 6, 0)

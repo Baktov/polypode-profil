@@ -42,7 +42,7 @@ Le bouton **Profils** (barre de titre de la fenêtre Polypode) ou `/poly profil`
   actuel apparaît toujours dans la saison en cours, même sans profil.
   - En-tête de saison : clic gauche = replier / déplier la saison (état gardé).
   - En-tête de personnage : clic gauche = replier / déplier ses profils de cette saison (état
-    gardé) ; clic droit = nouveau profil pour ce personnage (enregistré dans la saison en cours).
+    gardé) ; clic droit = menu **Nouveau** pour ce personnage (profil enregistré dans la saison en cours).
   - Bouton **Tout replier** (à droite du titre « Personnages ») : replie toutes les saisons
     pour ne voir que leurs noms ; il devient **Tout déplier** quand tout est replié.
   - Profil (genre puis nom, par ex. « Talents · Arcane raid ») : clic gauche = ouvrir dans
@@ -71,13 +71,12 @@ Le bouton **Profils** (barre de titre de la fenêtre Polypode) ou `/poly profil`
   - Profils d'**options de WoW**, de **raccourcis clavier** et de **fenêtres de discussion** :
     une petite icône devant leur nom les **applique** au personnage joué, après confirmation
     (ils remplacent la configuration actuelle) ; un compte rendu s'affiche.
-- **À droite**, l'éditeur. En-tête : à gauche le profil ouvert (ou « Nouveau profil »), à droite
-  son **personnage**, non modifiable : celui sous lequel le profil a été créé, ou, pour un
-  nouveau profil, le personnage joué (celui de l'en-tête après un clic droit « Nouveau profil
-  pour ce personnage »). Dessous : nom, genre (liste déroulante) et la chaîne elle-même, dans
-  une zone qui défile. **Changer le genre réinitialise l'éditeur** : nom et chaîne sont effacés pour un
-  nouveau profil de ce genre (même personnage) ; le profil qui était ouvert n'est pas modifié
-  (confirmation demandée s'il avait des modifications non enregistrées).
+- **À droite**, l'éditeur. En-tête : à gauche le **genre** et le profil ouvert (ou « Nouveau
+  profil »), à droite son **personnage** ; ni l'un ni l'autre ne se modifie. Le genre est choisi
+  dans le menu **Nouveau** (voir « Créer un profil ») ; le personnage est celui sous lequel le
+  profil a été créé, ou, pour un nouveau profil, le personnage joué (celui de l'en-tête après un
+  clic droit sur un personnage de la liste). Dessous : le nom et la chaîne elle-même, dans une
+  zone qui défile.
   - Un **profil enregistré s'ouvre en lecture seule** (« lecture seule » dans l'en-tête) : nom,
     genre et chaîne ne se modifient pas (la chaîne reste sélectionnable pour Ctrl+C) et
     **Enregistrer** est grisé. Seul un nouveau profil s'enregistre.
@@ -93,16 +92,27 @@ saisons pendant lesquelles vos profils ont été enregistrés (avec leur nombre,
 pour les sauvegardes antérieures à la 1.9.0 et celles de WoW Forever). En choisir une supprime, après confirmation, tous
 les profils de cette saison, sur tous vos clients.
 
-### Enregistrer une chaîne
+### Créer un profil
 
-1. Dans l'addon (ou le mode Édition, ou les talents), utiliser son bouton **Exporter** et copier
-   la chaîne (Ctrl+C).
-2. Dans « Profils » : **Nouveau**, coller la chaîne (Ctrl+V) dans la zone de texte, donner un nom
-   et choisir le genre.
-3. **Enregistrer**.
+Le bouton **Nouveau** (en bas de l'éditeur, ou clic droit sur un personnage de la liste) ouvre le
+menu des genres, en trois groupes :
 
-**Capturer** (genres « Mode Édition », « Talents », « Transmogrification », « Titre », « Macro », « Ensemble d'équipement », « Barres d'action », « Options de WoW », « Raccourcis clavier », « Fenêtres de discussion », « Liste des addons » et « Simple Addon Manager ») relève la chaîne directement en jeu, sans
-passer par le presse-papiers :
+1. **Capturer et appliquer en jeu** : Transmogrification, Titre, Macro, Ensemble d'équipement,
+   Barres d'action, Options de WoW, Raccourcis clavier, Fenêtres de discussion, Liste des addons,
+   Simple Addon Manager. La chaîne est relevée en jeu ; dans la liste, l'icône devant le profil
+   l'applique (la transmogrification, elle, s'essaie dans la cabine d'essayage).
+2. **Capturer, puis copier la chaîne** : Mode Édition, Talents. La chaîne est relevée en jeu, puis
+   copiée (Tout sélectionner, Ctrl+C) dans la fenêtre d'import du jeu.
+3. **Coller une chaîne (import / export)** : EllesmereUI, ElvUI, Baganator, MySlots, Autre. La
+   chaîne est collée depuis le bouton **Exporter** de l'addon, puis recopiée dans son import.
+
+Un genre des groupes 1 et 2 ouvre un sous-menu : ses captures (dispositions, macros,
+ensembles...), puis **Coller une chaîne** (une chaîne venue d'ailleurs, par exemple des talents
+trouvés sur un site). Un genre du groupe 3 ouvre directement un profil vide. Dans tous les cas,
+l'éditeur reçoit un **nouveau profil** de ce genre : donner un nom (ou garder celui proposé),
+coller la chaîne si besoin (Ctrl+V), puis **Enregistrer**.
+
+Les captures relèvent la chaîne directement en jeu, sans passer par le presse-papiers :
 
 - Mode Édition : un menu liste vos dispositions (la disposition active est signalée) ;
 - Talents : la configuration de talents active. La fenêtre des talents (N) doit avoir été
@@ -158,6 +168,8 @@ d'après la disposition, la configuration de talents ou l'ensemble personnalisé
 actuelle est nommée « Apparence actuelle (date heure) ». Vous pouvez donc garder plusieurs
 tenues, dispositions ou configurations côte à côte. Talents et apparence actuelle sont rangés
 sous le personnage joué. Il reste à **Enregistrer** (le nom peut être modifié avant).
+
+Le genre d'un profil ne change plus après coup : pour un autre genre, faire un autre **Nouveau**.
 
 ### Réutiliser une chaîne
 
@@ -245,6 +257,7 @@ other language).*
 
 ## Version
 
+`3.0.0` : menu **Nouveau** en trois groupes (capturer et appliquer, capturer puis copier, coller une chaîne), avec les captures de chaque genre et « Coller une chaîne » ; liste déroulante du genre et bouton Capturer retirés, genre affiché dans l'en-tête ; clic droit sur un personnage = même menu.
 `2.7.0` : boutons Dupliquer, Supprimer et Supprimer une saison sous la liste des personnages ; fenêtre revenue à 900 par défaut (880 au minimum).
 `2.6.0` : profil enregistré ouvert en lecture seule ; bouton **Dupliquer** (copie pour le personnage actuel, à enregistrer), aussi au clic droit ; fenêtre plus large (1100 par défaut, 1050 au minimum).
 `2.5.0` : personnage du profil affiché à droite de l'en-tête de l'éditeur, non modifiable ; ligne « Personnage » retirée.

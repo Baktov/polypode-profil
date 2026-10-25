@@ -29,26 +29,34 @@ local L = ns.L
 -- Texte et nom encodés en ASCII (%XX pour « % », « | », retours à la ligne et octets non ASCII) :
 -- un fragment peut couper n'importe où sans casser un caractère.
 
--- Genres de profil, dans l'ordre d'affichage. capture = le texte peut être relevé en jeu.
+-- Groupes de genres, sections du menu « Nouveau » : apply = capturé en jeu et appliqué par
+-- l'icône de la ligne ; copy = capturé en jeu, chaîne à copier ; paste = chaîne collée et copiée
+-- (import / export d'un addon).
+ns.KIND_GROUPS = {
+	{ key = "apply", label = L["Capturer et appliquer en jeu"] },
+	{ key = "copy", label = L["Capturer, puis copier la chaîne"] },
+	{ key = "paste", label = L["Coller une chaîne (import / export)"] },
+}
+
+-- Genres de profil, dans l'ordre d'affichage (groupe par groupe).
 ns.KINDS = {
-	{ key = "editmode", label = L["Mode Édition"], capture = true },
-	{ key = "talents", label = L["Talents"], capture = true },
-	-- short : libellé du bouton de genre quand le libellé complet n'y tient pas.
-	{ key = "transmog", label = L["Transmogrification"], short = L["Transmo"], capture = true },
-	{ key = "title", label = L["Titre"], capture = true },
-	{ key = "macro", label = L["Macro"], capture = true }, -- Macro.lua
-	{ key = "equipset", label = L["Ensemble d'équipement"], short = L["Ensemble"], capture = true }, -- Equipement.lua
-	{ key = "options", label = L["Options de WoW"], capture = true }, -- Options.lua
-	{ key = "actionbars", label = L["Barres d'action"], short = L["Barres"], capture = true }, -- Barres.lua
-	{ key = "bindings", label = L["Raccourcis clavier"], short = L["Raccourcis"], capture = true }, -- Options.lua
-	{ key = "chat", label = L["Fenêtres de discussion"], short = L["Discussion"], capture = true }, -- Discussion.lua
-	{ key = "addons", label = L["Liste des addons"], short = L["Addons"], capture = true }, -- Addons.lua
-	{ key = "ellesmereui", label = "EllesmereUI" },
-	{ key = "elvui", label = "ElvUI" },
-	{ key = "baganator", label = "Baganator" },
-	{ key = "myslots", label = "MySlots" },
-	{ key = "simpleaddonmanager", label = "Simple Addon Manager", short = "Simple AM", capture = true }, -- Addons.lua
-	{ key = "other", label = L["Autre"] },
+	{ key = "transmog", label = L["Transmogrification"], group = "apply" },
+	{ key = "title", label = L["Titre"], group = "apply" },
+	{ key = "macro", label = L["Macro"], group = "apply" }, -- Macro.lua
+	{ key = "equipset", label = L["Ensemble d'équipement"], group = "apply" }, -- Equipement.lua
+	{ key = "actionbars", label = L["Barres d'action"], group = "apply" }, -- Barres.lua
+	{ key = "options", label = L["Options de WoW"], group = "apply" }, -- Options.lua
+	{ key = "bindings", label = L["Raccourcis clavier"], group = "apply" }, -- Options.lua
+	{ key = "chat", label = L["Fenêtres de discussion"], group = "apply" }, -- Discussion.lua
+	{ key = "addons", label = L["Liste des addons"], group = "apply" }, -- Addons.lua
+	{ key = "simpleaddonmanager", label = "Simple Addon Manager", group = "apply" }, -- Addons.lua
+	{ key = "editmode", label = L["Mode Édition"], group = "copy" },
+	{ key = "talents", label = L["Talents"], group = "copy" },
+	{ key = "ellesmereui", label = "EllesmereUI", group = "paste" },
+	{ key = "elvui", label = "ElvUI", group = "paste" },
+	{ key = "baganator", label = "Baganator", group = "paste" },
+	{ key = "myslots", label = "MySlots", group = "paste" },
+	{ key = "other", label = L["Autre"], group = "paste" },
 }
 ns.DEFAULT_KIND = "other"
 
@@ -66,18 +74,13 @@ function ns.KindLabel(kind)
 	return ns.KINDS[KIND_INDEX[ns.NormalizeKind(kind)]].label
 end
 
--- Libellé court (bouton de genre, quand le libellé complet n'y tient pas), sinon le libellé.
-function ns.KindShortLabel(kind)
-	local entry = ns.KINDS[KIND_INDEX[ns.NormalizeKind(kind)]]
-	return entry.short or entry.label
-end
-
 function ns.KindOrder(kind)
 	return KIND_INDEX[ns.NormalizeKind(kind)]
 end
 
-function ns.CanCapture(kind)
-	return ns.KINDS[KIND_INDEX[ns.NormalizeKind(kind)]].capture or false
+-- Groupe du genre : "apply", "copy" ou "paste" (ns.KIND_GROUPS).
+function ns.KindGroup(kind)
+	return ns.KINDS[KIND_INDEX[ns.NormalizeKind(kind)]].group
 end
 
 local store -- PolypodeProfilDB.profiles
