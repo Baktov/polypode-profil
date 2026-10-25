@@ -20,7 +20,7 @@ end
 --     déconnectés estompés) ; en-tête de personnage : clic gauche = replier / déplier, clic droit
 --     = nouveau profil pour lui ; profil (genre puis nom) : clic gauche = ouvrir dans l'éditeur,
 --     clic droit = menu (dupliquer, supprimer) ; détail au survol ;
---   * à droite, l'éditeur : nom, genre (menu), personnage (menu du roster), chaîne d'export
+--   * à droite, l'éditeur : personnage du profil (en-tête, à droite, non modifiable), nom, genre (menu), chaîne d'export
 --     (zone défilante, Ctrl+V pour coller) ; « Capturer » relève la chaîne en jeu (mode Édition, talents) ; « Tout
 --     sélectionner » prépare la copie (Ctrl+C) vers la fenêtre d'import de l'addon.
 -- Une modification non enregistrée est signalée dans l'en-tête de l'éditeur ; changer de profil
@@ -31,7 +31,7 @@ local MIN_WIDTH, MIN_HEIGHT = 860, 340 -- largeur : rangée de boutons du bas de
 local DEFAULT_WIDTH, DEFAULT_HEIGHT = 900, 480
 local LIST_RATIO = 0.36 -- part de la largeur donnée à la liste
 
-local frame, listPanel, editor, nameBox, kindButton, captureButton, charButton, textBox, deleteButton
+local frame, listPanel, editor, nameBox, kindButton, captureButton, textBox, deleteButton
 local collapseAllButton -- « Tout replier » / « Tout déplier » du cadre Personnages
 local selectedID -- profil ouvert dans l'éditeur (nil = nouveau)
 local editKind = ns.DEFAULT_KIND
@@ -102,8 +102,7 @@ local function IsDirty()
 	if not editor then
 		return false
 	end
-	return Trim(nameBox:GetText()) ~= loaded.name or editKind ~= loaded.kind or editChar ~= loaded.char
-		or Trim(EditorText()) ~= loaded.text
+	return Trim(nameBox:GetText()) ~= loaded.name or editKind ~= loaded.kind or Trim(EditorText()) ~= loaded.text
 end
 
 -- En-tête de l'éditeur : profil ouvert, date, taille, modification en cours.
@@ -156,9 +155,11 @@ local function SetKind(kind)
 	UpdateEditorHeader()
 end
 
+-- Personnage du profil, fixé au chargement (profil ouvert : le sien ; nouveau : le personnage
+-- joué ou celui demandé) et affiché à droite de l'en-tête, sans pouvoir le changer.
 local function SetChar(key)
 	editChar = key or P.GetCharKey()
-	SetChoiceText(charButton, FormatChar(editChar))
+	editor.charText:SetText(FormatChar(editChar))
 	UpdateEditorHeader()
 end
 
@@ -175,9 +176,8 @@ local function Load(id, copy, char)
 	SetChar(source.char or char)
 	if profile then
 		loaded.name, loaded.kind, loaded.text = Trim(profile.name), ns.NormalizeKind(profile.kind), Trim(profile.text)
-		loaded.char = editChar
 	else
-		loaded.name, loaded.kind, loaded.text, loaded.char = "", editKind, "", editChar
+		loaded.name, loaded.kind, loaded.text = "", editKind, ""
 	end
 	UpdateEditorHeader()
 	if ns.Refresh then
@@ -535,26 +535,6 @@ local function KindMenu(root)
 			return editKind == kind.key
 		end, function()
 			ChangeKind(kind.key)
-		end)
-	end
-end
-
--- Personnage du profil : menu des personnages du roster (connectés en tête), plus le personnage
--- actuel du profil s'il n'y est plus.
-local function CharMenu(root)
-	if not (P.SortedKeyItems and P.GetRoster) then
-		return
-	end
-	local set = P.GetRoster()
-	if editChar then
-		set[editChar] = set[editChar] or true
-	end
-	root:CreateTitle(L["Personnage du profil"])
-	for _, item in ipairs(P.SortedKeyItems(set, IsConnected)) do
-		root:CreateRadio(FormatChar(item.key), function()
-			return editChar == item.key
-		end, function()
-			SetChar(item.key)
 		end)
 	end
 end
@@ -1070,6 +1050,13 @@ local function BuildEditor()
 	editor:SetPoint("TOPLEFT", listPanel, "TOPRIGHT", 8, 0)
 	editor:SetPoint("BOTTOMRIGHT", -12, 12)
 
+	-- En-tête : profil ouvert à gauche, son personnage à droite (texte seul).
+	editor.charText = editor:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+	editor.charText:SetPoint("TOPRIGHT", -10, -8)
+	editor.charText:SetJustifyH("RIGHT")
+	editor.charText:SetWordWrap(false)
+	editor.header:SetPoint("RIGHT", editor.charText, "LEFT", -10, 0)
+
 	-- Ligne du nom : « Nom » [champ] [genre] [Capturer]
 	local nameLabel = editor:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 	nameLabel:SetPoint("TOPLEFT", 10, -34)
@@ -1103,16 +1090,6 @@ local function BuildEditor()
 	if P.SkinEditBox then
 		P.SkinEditBox(nameBox)
 	end
-
-	-- Ligne du personnage : « Personnage » [menu du roster]
-	local charLabel = editor:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-	charLabel:SetPoint("TOPLEFT", nameLabel, "BOTTOMLEFT", 0, -16)
-	charLabel:SetText(L["Personnage"])
-
-	charButton = CreateChoice(editor, 200, CharMenu)
-	charButton:SetPoint("LEFT", charLabel, "RIGHT", 12, 0)
-	charButton:SetPoint("RIGHT", -10, 0)
-	SetTooltip(charButton, L["Personnage"], L["Personnage sous lequel le profil est rangé dans la liste."])
 
 	-- Boutons du bas.
 	local newButton = CreateButton(editor, L["Nouveau"], 80, function()
@@ -1151,7 +1128,7 @@ local function BuildEditor()
 
 	-- Zone de texte défilante (Ctrl+V pour coller une chaîne).
 	local textPanel = P.CreatePanel(editor, "")
-	textPanel:SetPoint("TOPLEFT", 8, -88)
+	textPanel:SetPoint("TOPLEFT", 8, -62)
 	textPanel:SetPoint("BOTTOMRIGHT", -8, 40)
 
 	textBox = CreateFrame("Frame", nil, textPanel, "ScrollingEditBoxTemplate")

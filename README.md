@@ -71,10 +71,11 @@ Le bouton **Profils** (barre de titre de la fenêtre Polypode) ou `/poly profil`
   - Profils d'**options de WoW**, de **raccourcis clavier** et de **fenêtres de discussion** :
     une petite icône devant leur nom les **applique** au personnage joué, après confirmation
     (ils remplacent la configuration actuelle) ; un compte rendu s'affiche.
-- **À droite**, l'éditeur : nom, genre (liste déroulante), **personnage** (liste déroulante : les
-  personnages de votre roster, connectés en tête ; par défaut le personnage joué) et la chaîne
-  elle-même, dans une zone qui défile. Changer le personnage range le profil ailleurs dans la
-  liste. **Changer le genre réinitialise l'éditeur** : nom et chaîne sont effacés pour un
+- **À droite**, l'éditeur. En-tête : à gauche le profil ouvert (ou « Nouveau profil »), à droite
+  son **personnage**, non modifiable : celui sous lequel le profil a été créé, ou, pour un
+  nouveau profil, le personnage joué (celui de l'en-tête après un clic droit « Nouveau profil
+  pour ce personnage »). Dessous : nom, genre (liste déroulante) et la chaîne elle-même, dans
+  une zone qui défile. **Changer le genre réinitialise l'éditeur** : nom et chaîne sont effacés pour un
   nouveau profil de ce genre (même personnage) ; le profil qui était ouvert n'est pas modifié
   (confirmation demandée s'il avait des modifications non enregistrées).
 
@@ -237,6 +238,7 @@ other language).*
 
 ## Version
 
+`2.5.0` : personnage du profil affiché à droite de l'en-tête de l'éditeur, non modifiable ; ligne « Personnage » retirée.
 `2.4.0` : liste des profils rangée par saison (celle du dernier enregistrement), puis par personnage ; saisons repliables.
 `2.3.0` : double-clic sur la barre de titre : retour à la taille par défaut (Polypode 2.12).
 `2.2.0` : Polypode Profil en anglais, allemand, espagnol, italien et portugais du Brésil, selon la langue choisie dans Polypode (Profiles, Profile, Perfiles, Profili, Perfis) ; les chaînes d'export gardent leur format (en-têtes et lignes en français), lisibles quelle que soit la langue. *Translated into English, German, Spanish, Italian and Brazilian Portuguese.*

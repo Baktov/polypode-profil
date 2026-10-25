@@ -68,9 +68,11 @@ The **Profiles** button (title bar of the Polypode window) or `/poly profil` ope
   - **WoW options**, **Key bindings** and **Chat windows** profiles: a small icon before their name
     **applies** them to the current character, after confirmation (they replace the current
     setup); a report is shown.
-- **On the right**, the editor: name, type (drop-down list), **character** (drop-down list: the
-  characters of your roster, logged-in first; by default the current character) and the string
-  itself, in a scrolling box. Changing the character files the profile elsewhere in the list.
+- **On the right**, the editor. Header: on the left the open profile (or "New profile"), on the
+  right its **character**, which cannot be changed: the one the profile was created under, or,
+  for a new profile, the current character (the header's one after a right-click "New profile
+  for this character"). Below: name, type (drop-down list) and the string itself, in a
+  scrolling box.
   **Changing the type resets the editor**: name and string are cleared for a new profile of that
   type (same character); the profile that was open is not changed (confirmation asked if it had
   unsaved changes).
