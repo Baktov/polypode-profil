@@ -182,6 +182,12 @@ P.AddTranslations(ns.L, "enUS", {
 	["Transmogrification indisponible sur ce client."] = "Transmogrification unavailable on this client.",
 	["Apparence du personnage illisible pour l'instant, réessayez."] = "Character appearance unreadable for now, try again.",
 	["%d profil(s) rangé(s) sous ce personnage"] = "%d profile(s) filed under this character",
+	["Import du mode Édition indisponible sur ce client."] = "Edit Mode import unavailable on this client.",
+	["Ouvrez d'abord le mode Édition (Échap, Mode Édition), puis recliquez."] = "First open Edit Mode (Esc, Edit Mode), then click again.",
+	["La fenêtre d'import du mode Édition n'a pas pu s'ouvrir."] = "Edit Mode's import window could not open.",
+	["Vérifiez le nom, puis « Importer » ; un /reload ensuite est conseillé (bêta)."] = "Check the name, then \"Import\"; a /reload afterwards is advised (beta).",
+	["Ouvrez d'abord la fenêtre des talents (N), puis recliquez."] = "First open the talent window (N), then click again.",
+	["La fenêtre d'import des talents n'a pas pu s'ouvrir."] = "The talent import window could not open.",
 	-- UI.lua
 	["Nouveau profil"] = "New profile",
 	["%d caractères"] = "%d characters",
@@ -314,4 +320,10 @@ P.AddTranslations(ns.L, "enUS", {
 	["importer dans Baganator"] = "import into Baganator",
 	["Capturer (bêta)"] = "Capture (beta)",
 	["Coller une chaîne (fiable)"] = "Paste a string (reliable)",
+	["Importer dans le mode Édition (bêta)"] = "Import into Edit Mode (beta)",
+	["Mode Édition ouvert : ouvre sa fenêtre d'import avec la chaîne et le nom déjà remplis ; cliquez vous-même sur « Importer ». Un /reload ensuite est conseillé. Hors combat."] = "Edit Mode open: opens its import window with the string and the name already filled in; click \"Import\" yourself. A /reload afterwards is advised. Out of combat.",
+	["ouvrir l'import du mode Édition (bêta)"] = "open Edit Mode's import (beta)",
+	["Importer dans les talents (bêta)"] = "Import into talents (beta)",
+	["Fenêtre des talents ouverte : ouvre sa fenêtre d'import avec la chaîne et le nom déjà remplis ; cliquez vous-même sur « Importer ». Un /reload ensuite est conseillé. Hors combat."] = "Talent window open: opens its import window with the string and the name already filled in; click \"Import\" yourself. A /reload afterwards is advised. Out of combat.",
+	["ouvrir l'import des talents (bêta)"] = "open the talent import (beta)",
 })

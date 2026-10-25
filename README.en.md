@@ -113,7 +113,11 @@ spot them):
    in game; in the list, the icon in front of the profile applies it (transmogrification is tried
    on in the dressing room, or applied at the transmogrifier).
 2. **Capture, then copy the string**: Edit Mode, Talents. The string is read in game, then copied
-   (Select all, Ctrl+C) into the game's import window.
+   (Select all, Ctrl+C) into the game's import window. **Beta**: the profile's icon opens that
+   import window already filled in (string and name, the part after the last "—"); all that is
+   left is to click "Import". Edit Mode, or the talent window (N), must first be opened by you (the
+   addon never opens them, so as not to risk tainting them and getting actions blocked by the
+   game); a **/reload** afterwards is advised.
 3. **Paste a string (import / export)**: MySlots, Other. The string is pasted from the addon's
    **Export** button, then copied back into its import (MySlots offers no export or import usable
    by another addon).

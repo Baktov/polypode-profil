@@ -182,6 +182,12 @@ P.AddTranslations(ns.L, "deDE", {
 	["Transmogrification indisponible sur ce client."] = "Transmogrifikation auf diesem Client nicht verfügbar.",
 	["Apparence du personnage illisible pour l'instant, réessayez."] = "Aussehen des Charakters derzeit nicht lesbar, erneut versuchen.",
 	["%d profil(s) rangé(s) sous ce personnage"] = "%d Profil(e) unter diesem Charakter abgelegt",
+	["Import du mode Édition indisponible sur ce client."] = "Import des Bearbeitungsmodus auf diesem Client nicht verfügbar.",
+	["Ouvrez d'abord le mode Édition (Échap, Mode Édition), puis recliquez."] = "Öffnen Sie zuerst den Bearbeitungsmodus (Esc, Bearbeitungsmodus), dann erneut Klick.",
+	["La fenêtre d'import du mode Édition n'a pas pu s'ouvrir."] = "Das Importfenster des Bearbeitungsmodus konnte sich nicht öffnen.",
+	["Vérifiez le nom, puis « Importer » ; un /reload ensuite est conseillé (bêta)."] = "Namen prüfen, dann »Importieren«; danach wird ein /reload empfohlen (Beta).",
+	["Ouvrez d'abord la fenêtre des talents (N), puis recliquez."] = "Öffnen Sie zuerst das Talentfenster (N), dann erneut Klick.",
+	["La fenêtre d'import des talents n'a pas pu s'ouvrir."] = "Das Talent-Importfenster konnte sich nicht öffnen.",
 	-- UI.lua
 	["Nouveau profil"] = "Neues Profil",
 	["%d caractères"] = "%d Zeichen",
@@ -314,4 +320,10 @@ P.AddTranslations(ns.L, "deDE", {
 	["importer dans Baganator"] = "in Baganator importieren",
 	["Capturer (bêta)"] = "Erfassen (Beta)",
 	["Coller une chaîne (fiable)"] = "Zeichenfolge einfügen (zuverlässig)",
+	["Importer dans le mode Édition (bêta)"] = "In den Bearbeitungsmodus importieren (Beta)",
+	["Mode Édition ouvert : ouvre sa fenêtre d'import avec la chaîne et le nom déjà remplis ; cliquez vous-même sur « Importer ». Un /reload ensuite est conseillé. Hors combat."] = "Bearbeitungsmodus offen: öffnet sein Importfenster mit bereits ausgefüllter Zeichenfolge und Namen; Klick auf »Importieren« selbst. Danach wird ein /reload empfohlen. Außerhalb des Kampfes.",
+	["ouvrir l'import du mode Édition (bêta)"] = "Import des Bearbeitungsmodus öffnen (Beta)",
+	["Importer dans les talents (bêta)"] = "In die Talente importieren (Beta)",
+	["Fenêtre des talents ouverte : ouvre sa fenêtre d'import avec la chaîne et le nom déjà remplis ; cliquez vous-même sur « Importer ». Un /reload ensuite est conseillé. Hors combat."] = "Talentfenster offen: öffnet sein Importfenster mit bereits ausgefüllter Zeichenfolge und Namen; Klick auf »Importieren« selbst. Danach wird ein /reload empfohlen. Außerhalb des Kampfes.",
+	["ouvrir l'import des talents (bêta)"] = "Talent-Import öffnen (Beta)",
 })

@@ -946,6 +946,27 @@ local ROW_ACTIONS = {
 			return ns.ImportEllesmereUI(profile.text)
 		end,
 	},
+	-- Mode Édition et talents (bêta) : fenêtre d'import de Blizzard pré-remplie, le joueur importe.
+	editmode = {
+		texture = "Interface\\Icons\\INV_Misc_Wrench_01",
+		title = L["Importer dans le mode Édition (bêta)"],
+		tooltip = L["Mode Édition ouvert : ouvre sa fenêtre d'import avec la chaîne et le nom déjà remplis ; "
+			.. "cliquez vous-même sur « Importer ». Un /reload ensuite est conseillé. Hors combat."],
+		hint = L["ouvrir l'import du mode Édition (bêta)"],
+		run = function(profile)
+			return ns.OpenEditModeImport(profile.text, profile.name)
+		end,
+	},
+	talents = {
+		texture = "Interface\\Icons\\INV_Misc_Book_09",
+		title = L["Importer dans les talents (bêta)"],
+		tooltip = L["Fenêtre des talents ouverte : ouvre sa fenêtre d'import avec la chaîne et le nom déjà "
+			.. "remplis ; cliquez vous-même sur « Importer ». Un /reload ensuite est conseillé. Hors combat."],
+		hint = L["ouvrir l'import des talents (bêta)"],
+		run = function(profile)
+			return ns.OpenTalentsImport(profile.text, profile.name)
+		end,
+	},
 	baganator = {
 		texture = "Interface\\Icons\\INV_Misc_Bag_08", -- repli : l'icône de Baganator (## IconTexture)
 		iconFor = function()

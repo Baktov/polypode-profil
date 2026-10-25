@@ -285,6 +285,59 @@ function ns.ExportTalents()
 	return text, name
 end
 
+-- IMPORT PRÉ-REMPLI (BÊTA) : mode Édition et talents n'ont pas d'import sûr pour un addon (leurs
+-- fenêtres, appelées par un addon, peuvent être « souillées » et bloquer ensuite des actions). On
+-- ouvre seulement la fenêtre d'import de Blizzard, chaîne et nom déjà remplis : c'est le clic du
+-- joueur sur « Importer » qui importe. La fenêtre du mode Édition / des talents doit avoir été
+-- ouverte par le joueur (jamais par l'addon) ; un /reload ensuite efface toute trace.
+
+-- Nom proposé : la partie après le dernier « — » du nom du profil (« Mode Édition — Raid » → « Raid »).
+local function ImportName(name)
+	name = tostring(name or "")
+	return strtrim(name:match(".*—%s*(.-)$") or name)
+end
+
+function ns.OpenEditModeImport(text, name)
+	if InCombatLockdown() then
+		return nil, L["Impossible en combat."]
+	end
+	local dialog = EditModeImportLayoutDialog
+	if not (dialog and dialog.ShowImportLayoutDialog and dialog.GetImportEditBox and dialog.GetEditBox) then
+		return nil, L["Import du mode Édition indisponible sur ce client."]
+	elseif not (EditModeManagerFrame and EditModeManagerFrame:IsShown()) then
+		return nil, L["Ouvrez d'abord le mode Édition (Échap, Mode Édition), puis recliquez."]
+	end
+	local ok = pcall(function()
+		dialog:ShowImportLayoutDialog()
+		dialog:GetImportEditBox():SetText(text)
+		-- La fenêtre efface le nom à chaque chaîne lue : le nom se pose après la chaîne.
+		dialog:GetEditBox():SetText(ImportName(name))
+	end)
+	if not ok then
+		return nil, L["La fenêtre d'import du mode Édition n'a pas pu s'ouvrir."]
+	end
+	return true, L["Vérifiez le nom, puis « Importer » ; un /reload ensuite est conseillé (bêta)."]
+end
+
+function ns.OpenTalentsImport(text, name)
+	if InCombatLockdown() then
+		return nil, L["Impossible en combat."]
+	end
+	local dialog = ClassTalentLoadoutImportDialog
+	if not (PlayerSpellsFrame and PlayerSpellsFrame:IsShown() and dialog and dialog.ShowDialog) then
+		return nil, L["Ouvrez d'abord la fenêtre des talents (N), puis recliquez."]
+	end
+	local ok = pcall(function()
+		dialog:ShowDialog()
+		dialog.ImportControl:GetEditBox():SetText(text)
+		dialog.NameControl:GetEditBox():SetText(ImportName(name))
+	end)
+	if not ok then
+		return nil, L["La fenêtre d'import des talents n'a pas pu s'ouvrir."]
+	end
+	return true, L["Vérifiez le nom, puis « Importer » ; un /reload ensuite est conseillé (bêta)."]
+end
+
 -- TRANSMOGRIFICATION : chaîne « /customset v1 ... » de Blizzard (« Copier dans le presse-papiers »
 -- de la cabine d'essayage) ; collée dans la discussion, elle ouvre la cabine d'essayage avec la
 -- tenue. Format recopié de TransmogUtil.CreateCustomSetSlashCommand (Blizzard_TransmogShared,

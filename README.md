@@ -119,7 +119,11 @@ en bleu foncé, pour les repérer) :
    l'applique (la transmogrification s'essaie dans la cabine d'essayage, ou s'applique chez le
    transmogrificateur).
 2. **Capturer, puis copier la chaîne** : Mode Édition, Talents. La chaîne est relevée en jeu, puis
-   copiée (Tout sélectionner, Ctrl+C) dans la fenêtre d'import du jeu.
+   copiée (Tout sélectionner, Ctrl+C) dans la fenêtre d'import du jeu. **Bêta** : l'icône du
+   profil ouvre cette fenêtre d'import déjà remplie (chaîne et nom, la partie après le dernier
+   « — ») ; il reste à cliquer sur « Importer ». Le mode Édition, ou la fenêtre des talents (N),
+   doit d'abord être ouvert par vous (l'addon ne les ouvre jamais, pour ne pas risquer de les
+   « souiller » et de faire bloquer des actions par le jeu) ; un **/reload** ensuite est conseillé.
 3. **Coller une chaîne (import / export)** : MySlots, Autre. La chaîne est collée depuis le
    bouton **Exporter** de l'addon, puis recopiée dans son import (MySlots n'offre ni export ni
    import utilisables par un autre addon).
@@ -292,6 +296,7 @@ other language).*
 
 ## Version
 
+`3.5.0` : mode Édition et talents (bêta) : l'icône ouvre la fenêtre d'import de Blizzard déjà remplie (mode Édition ou fenêtre des talents ouverts par le joueur), « Importer » reste au joueur.
 `3.4.0` : Baganator : « Capturer (bêta) » de ses profils (export recopié de Baganator) et « Coller une chaîne (fiable) ».
 `3.3.0` : Baganator importé par sa fonction d'import (nouveau profil au nom libre, ou catégories) ; sa chaîne reste collée.
 `3.2.0` : ElvUI et EllesmereUI capturés et importés par leurs propres fonctions : profils, réglages du personnage, du compte et filtres d'ElvUI, export complet d'EllesmereUI ; l'import crée un nouveau profil dans l'addon.
