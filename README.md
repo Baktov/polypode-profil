@@ -72,6 +72,13 @@ Le bouton **Profils** (barre de titre de la fenêtre Polypode) ou `/poly profil`
     Entrée ; sur WoW Forever, taper /reload).
   - Profil de **Simple Addon Manager** : une petite icône l'**importe** dans Simple Addon
     Manager (après confirmation), puis ouvre sa propre boîte « charger le profil et recharger ».
+  - Profil **ElvUI** : une petite icône (celle d'ElvUI) l'**importe** dans ElvUI, après
+    confirmation. Un profil y devient un **nouveau profil** (son nom, suffixé « (2) »... s'il est
+    pris), activé ; des réglages du personnage (*private*), du compte (*global*) ou des filtres
+    d'auras **remplacent** ceux en place (ElvUI propose de recharger pour ceux du personnage).
+  - Profil **EllesmereUI** : une petite icône (celle d'EllesmereUI) ouvre la **page d'import
+    d'EllesmereUI** sur la chaîne : un profil y arrive sous un **nouveau nom** ; un **export
+    complet** remplace les réglages du compte (EllesmereUI demande confirmation et recharge).
   - Profils d'**options de WoW**, de **raccourcis clavier** et de **fenêtres de discussion** :
     une petite icône devant leur nom les **applique** au personnage joué, après confirmation
     (ils remplacent la configuration actuelle) ; un compte rendu s'affiche.
@@ -104,15 +111,18 @@ en bleu foncé, pour les repérer) :
 
 1. **Capturer et appliquer en jeu** : Transmogrification, Titre, Macro, Ensemble d'équipement,
    Barres d'action, Options de WoW, Raccourcis clavier, Fenêtres de discussion, Liste des addons,
-   Simple Addon Manager. La chaîne est relevée en jeu ; dans la liste, l'icône devant le profil
+   Simple Addon Manager, EllesmereUI, ElvUI. La chaîne est relevée en jeu ; dans la liste, l'icône devant le profil
    l'applique (la transmogrification s'essaie dans la cabine d'essayage, ou s'applique chez le
    transmogrificateur).
 2. **Capturer, puis copier la chaîne** : Mode Édition, Talents. La chaîne est relevée en jeu, puis
    copiée (Tout sélectionner, Ctrl+C) dans la fenêtre d'import du jeu.
-3. **Coller une chaîne (import / export)** : EllesmereUI, ElvUI, Baganator, MySlots, Autre. La
-   chaîne est collée depuis le bouton **Exporter** de l'addon, puis recopiée dans son import. Le
-   nom commence par celui de l'addon (« ElvUI — … », proposé à compléter, ajouté à
-   l'enregistrement s'il manque), sauf pour « Autre ».
+3. **Coller une chaîne (import / export)** : Baganator, MySlots, Autre. La chaîne est collée
+   depuis le bouton **Exporter** de l'addon, puis recopiée dans son import (ces addons n'offrent
+   pas d'export ni d'import utilisables par un autre addon).
+
+Le nom d'un profil d'addon (EllesmereUI, ElvUI, Baganator, MySlots) commence par celui de l'addon
+(« ElvUI — … », proposé à compléter quand on colle une chaîne, ajouté à l'enregistrement s'il
+manque).
 
 Un genre des groupes 1 et 2 ouvre un sous-menu : ses captures (dispositions, macros,
 ensembles...), puis **Coller une chaîne** (une chaîne venue d'ailleurs, par exemple des talents
@@ -158,6 +168,13 @@ Les captures relèvent la chaîne directement en jeu, sans passer par le presse-
   Addon Manager lui-même (la chaîne de son bouton « Exporter », profils dépendants compris).
   « Tous les profils » les enregistre tous d'un coup, un profil Polypode chacun. Simple Addon
   Manager doit être chargé.
+- ElvUI : un menu liste ses **profils** (l'actif est signalé), puis les **réglages du personnage**
+  (*private*, rangés sous le personnage joué), les **réglages du compte** (*global*) et les
+  **filtres d'auras**. Chaque chaîne est celle du bouton « Exporter » d'ElvUI (par sa fonction
+  d'export) ; l'infobulle du profil en rappelle le contenu.
+- EllesmereUI : un menu liste ses **profils** (l'actif est signalé), puis l'**export complet**
+  (réglages du compte et profil actif, comme son onglet « Full Export »). L'infobulle du profil
+  indique s'il s'agit d'un profil ou d'un export complet.
 - Titre : le titre porté par le personnage joué, en chaîne Blizzard `/settitle Nom` (collée
   dans la discussion, elle change de titre ; sans nom, elle le retire). Attention, la commande
   de Blizzard prend le premier titre connu qui *commence* par ce nom ; l'icône de la liste
@@ -265,6 +282,7 @@ other language).*
 
 ## Version
 
+`3.2.0` : ElvUI et EllesmereUI capturés et importés par leurs propres fonctions : profils, réglages du personnage, du compte et filtres d'ElvUI, export complet d'EllesmereUI ; l'import crée un nouveau profil dans l'addon.
 `3.1.2` : menu Nouveau : Barres d'action, Options de WoW, Raccourcis clavier et Mode Édition en bleu foncé.
 `3.1.1` : menu Nouveau et sous-menus (macros, options...) limités à la moitié de l'écran, avec ascenseur.
 `3.1.0` : transmogrification appliquée chez le transmogrificateur (même icône, par un ensemble personnalisé, validée par « Appliquer » de Blizzard) ; nom d'un profil enregistré affiché en simple texte ; profils EllesmereUI, ElvUI, Baganator et MySlots nommés « Addon — nom ».

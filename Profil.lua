@@ -50,12 +50,13 @@ ns.KINDS = {
 	{ key = "chat", label = L["Fenêtres de discussion"], group = "apply" }, -- Discussion.lua
 	{ key = "addons", label = L["Liste des addons"], group = "apply" }, -- Addons.lua
 	{ key = "simpleaddonmanager", label = "Simple Addon Manager", group = "apply" }, -- Addons.lua
+	-- prefix : profil d'un addon, nommé « Addon — nom ».
+	{ key = "ellesmereui", label = "EllesmereUI", group = "apply", prefix = true }, -- Interfaces.lua
+	{ key = "elvui", label = "ElvUI", group = "apply", prefix = true }, -- Interfaces.lua
 	{ key = "editmode", label = L["Mode Édition"], group = "copy" },
 	{ key = "talents", label = L["Talents"], group = "copy" },
-	{ key = "ellesmereui", label = "EllesmereUI", group = "paste" },
-	{ key = "elvui", label = "ElvUI", group = "paste" },
-	{ key = "baganator", label = "Baganator", group = "paste" },
-	{ key = "myslots", label = "MySlots", group = "paste" },
+	{ key = "baganator", label = "Baganator", group = "paste", prefix = true },
+	{ key = "myslots", label = "MySlots", group = "paste", prefix = true },
 	{ key = "other", label = L["Autre"], group = "paste" },
 }
 ns.DEFAULT_KIND = "other"
@@ -76,6 +77,12 @@ end
 
 function ns.KindOrder(kind)
 	return KIND_INDEX[ns.NormalizeKind(kind)]
+end
+
+-- Préfixe du nom d'un profil d'addon (libellé du genre), ou nil.
+function ns.KindNamePrefix(kind)
+	local entry = ns.KINDS[KIND_INDEX[ns.NormalizeKind(kind)]]
+	return entry.prefix and entry.label or nil
 end
 
 -- Groupe du genre : "apply", "copy" ou "paste" (ns.KIND_GROUPS).

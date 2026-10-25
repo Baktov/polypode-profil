@@ -68,6 +68,13 @@ The **Profiles** button (title bar of the Polypode window) or `/poly profil` ope
     Forever, type /reload).
   - **Simple Addon Manager** profile: a small icon **imports** it into Simple Addon Manager (after
     confirmation), then opens its own "load the profile and reload" box.
+  - **ElvUI** profile: a small icon (ElvUI's) **imports** it into ElvUI, after confirmation. A
+    profile becomes a **new profile** there (its name, suffixed "(2)"... if taken), activated;
+    character (*private*), account (*global*) or aura filter settings **replace** the current
+    ones (ElvUI offers to reload for the character's).
+  - **EllesmereUI** profile: a small icon (EllesmereUI's) opens **EllesmereUI's import page** on
+    the string: a profile arrives there under a **new name**; a **full export** replaces the
+    account's settings (EllesmereUI asks for confirmation and reloads).
   - **WoW options**, **Key bindings** and **Chat windows** profiles: a small icon before their name
     **applies** them to the current character, after confirmation (they replace the current
     setup); a report is shown.
@@ -97,15 +104,18 @@ menu of types, in three groups (Action bars, WoW options, Key bindings and Edit 
 spot them):
 
 1. **Capture and apply in game**: Transmogrification, Title, Macro, Equipment set, Action bars,
-   WoW options, Key bindings, Chat windows, Addon list, Simple Addon Manager. The string is read
+   WoW options, Key bindings, Chat windows, Addon list, Simple Addon Manager, EllesmereUI, ElvUI.
+   The string is read
    in game; in the list, the icon in front of the profile applies it (transmogrification is tried
    on in the dressing room, or applied at the transmogrifier).
 2. **Capture, then copy the string**: Edit Mode, Talents. The string is read in game, then copied
    (Select all, Ctrl+C) into the game's import window.
-3. **Paste a string (import / export)**: EllesmereUI, ElvUI, Baganator, MySlots, Other. The string
-   is pasted from the addon's **Export** button, then copied back into its import. The name starts
-   with the addon's ("ElvUI — …", suggested to complete, added on saving if missing), except for
-   "Other".
+3. **Paste a string (import / export)**: Baganator, MySlots, Other. The string is pasted from the
+   addon's **Export** button, then copied back into its import (these addons offer no export or
+   import usable by another addon).
+
+The name of an addon profile (EllesmereUI, ElvUI, Baganator, MySlots) starts with the addon's
+("ElvUI — …", suggested to complete when pasting a string, added on saving if missing).
 
 A type of groups 1 and 2 opens a submenu: its captures (layouts, macros, sets...), then **Paste a
 string** (a string from elsewhere, for example talents found on a website); a long menu (macros...) scrolls, limited to half the screen. A type of group 3
@@ -144,6 +154,13 @@ Captures read the string directly in game, without going through the clipboard:
 - Simple Addon Manager: a menu lists its profiles; each one is captured by Simple Addon Manager's
   own export (the string of its "Export" button, dependent profiles included). "All profiles" saves
   them all at once, one Polypode profile each. Simple Addon Manager must be loaded.
+- ElvUI: a menu lists its **profiles** (the active one is marked), then the **character settings**
+  (*private*, filed under the current character), the **account settings** (*global*) and the
+  **aura filters**. Each string is the one of ElvUI's "Export" button (through its export
+  function); the profile's tooltip recalls its content.
+- EllesmereUI: a menu lists its **profiles** (the active one is marked), then the **full export**
+  (account settings and active profile, like its "Full Export" tab). The profile's tooltip tells
+  whether it is a profile or a full export.
 - Title: the title worn by the current character, as a Blizzard `/settitle Name` string (pasted in
   the chat, it changes the title; without a name, it removes it). Beware, Blizzard's command takes
   the first known title that *starts* with this name; the list icon looks for the exact name.

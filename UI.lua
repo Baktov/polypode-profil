@@ -281,14 +281,13 @@ local function Select(id)
 	end)
 end
 
--- Nom d'un profil à coller (groupe « paste », sauf « Autre ») : préfixé par le nom de l'addon,
--- « ElvUI — nom » (rien d'autre que le préfixe = le nom de l'addon seul) ; autres genres : inchangé.
+-- Nom d'un profil d'addon (genres « prefix » : EllesmereUI, ElvUI, Baganator, MySlots) : préfixé
+-- par le nom de l'addon, « ElvUI — nom » (rien d'autre que le préfixe = le nom de l'addon seul) ;
+-- autres genres : inchangé.
 local NAME_SEPARATOR = " — "
 
 local function NamePrefix(kind)
-	if ns.KindGroup(kind) == "paste" and ns.NormalizeKind(kind) ~= ns.DEFAULT_KIND then
-		return ns.KindLabel(kind)
-	end
+	return ns.KindNamePrefix(kind)
 end
 
 local function PrefixedName(kind, name)
@@ -518,6 +517,47 @@ local CAPTURES = {
 				end
 			end)
 		end
+	end,
+	elvui = function(menu, done)
+		if not ns.HasElvUI() then
+			menu:CreateTitle(L["ElvUI n'est pas chargé."])
+			return
+		end
+		-- Profils nommés (partagés), puis réglages du personnage, du compte et filtres d'auras.
+		local names, active = ns.GetElvUIProfiles()
+		menu:CreateTitle(L["Profils"])
+		for _, name in ipairs(names) do
+			menu:CreateButton(name .. (name == active and Gray(" " .. L["(actif)"]) or ""), function()
+				Run(done, false, ns.ExportElvUI, "profile", name)
+			end)
+		end
+		menu:CreateDivider()
+		menu:CreateButton(L["Réglages du personnage (private)"], function()
+			Run(done, true, ns.ExportElvUI, "private")
+		end)
+		menu:CreateButton(L["Réglages du compte (global)"], function()
+			Run(done, false, ns.ExportElvUI, "global")
+		end)
+		menu:CreateButton(L["Filtres d'auras (filters)"], function()
+			Run(done, false, ns.ExportElvUI, "filters")
+		end)
+	end,
+	ellesmereui = function(menu, done)
+		if not ns.HasEllesmereUI() then
+			menu:CreateTitle(L["EllesmereUI n'est pas chargé."])
+			return
+		end
+		local names, active = ns.GetEllesmereUIProfiles()
+		menu:CreateTitle(L["Profils"])
+		for _, name in ipairs(names) do
+			menu:CreateButton(name .. (name == active and Gray(" " .. L["(actif)"]) or ""), function()
+				Run(done, false, ns.ExportEllesmereUI, name)
+			end)
+		end
+		menu:CreateDivider()
+		menu:CreateButton(L["Export complet (compte et profil actif)"], function()
+			Run(done, false, ns.ExportEllesmereUIFull)
+		end)
 	end,
 	editmode = function(menu, done)
 		local layouts = ns.GetEditModeLayouts()
@@ -854,6 +894,40 @@ local ROW_ACTIONS = {
 			return ns.ImportSAMProfile(profile.text)
 		end,
 	},
+	elvui = {
+		texture = "Interface\\Icons\\INV_Misc_Gear_08", -- repli : l'icône d'ElvUI (## IconTexture)
+		iconFor = function()
+			return ns.AddonIcon("ElvUI")
+		end,
+		title = L["Importer dans ElvUI"],
+		tooltip = L["Profil : crée un nouveau profil ElvUI (nom libre) et l'active. Réglages du personnage, "
+			.. "du compte ou filtres d'auras : les remplacent (ElvUI propose de recharger pour ceux du "
+			.. "personnage). Hors combat."],
+		hint = L["importer dans ElvUI"],
+		confirm = function(profile)
+			return ns.ElvUIConfirm(profile)
+		end,
+		run = function(profile)
+			return ns.ImportElvUI(profile.text)
+		end,
+	},
+	ellesmereui = {
+		texture = "Interface\\Icons\\INV_Misc_Gear_07", -- repli : l'icône d'EllesmereUI (## IconTexture)
+		iconFor = function()
+			return ns.AddonIcon("EllesmereUI")
+		end,
+		title = L["Importer dans EllesmereUI"],
+		tooltip = L["Ouvre la page d'import d'EllesmereUI sur cette chaîne : un profil y arrive sous un nouveau "
+			.. "nom ; un export complet remplace les réglages du compte (EllesmereUI demande confirmation "
+			.. "et recharge). Hors combat."],
+		hint = L["importer dans EllesmereUI"],
+		confirm = function(profile)
+			return ns.EllesmereUIConfirm(profile)
+		end,
+		run = function(profile)
+			return ns.ImportEllesmereUI(profile.text)
+		end,
+	},
 }
 
 -- Rechargement proposé (Entrée ou clic sur « Recharger ») ; sur WoW Forever, où l'addon ne peut
@@ -881,6 +955,12 @@ end
 
 -- Lignes de détail de l'infobulle d'un profil, par genre.
 local KIND_DETAILS = {
+	elvui = function(text)
+		return ns.ElvUIDetails(text)
+	end,
+	ellesmereui = function(text)
+		return ns.EllesmereUIDetails(text)
+	end,
 	macro = function(text)
 		return ns.MacroDetails(text)
 	end,
