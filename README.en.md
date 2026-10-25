@@ -118,8 +118,11 @@ spot them):
    **Export** button, then copied back into its import (MySlots offers no export or import usable
    by another addon).
 
-Baganator has no export usable by another addon: its string is **pasted** (Baganator's "Export"
-button, profile or categories), but the list icon **imports** it.
+Baganator has no export usable by another addon. Its submenu therefore offers **Capture (beta)**:
+its profiles (the active one is marked), exported by copying how its "Export" button works; if a
+Baganator update changes that format, the captured string might no longer import. **Paste a string
+(reliable)** stays the safe way (Baganator's "Export" button, profile or categories). Either way,
+the list icon **imports** it.
 
 The name of an addon profile (EllesmereUI, ElvUI, Baganator, MySlots) starts with the addon's
 ("ElvUI — …", suggested to complete when pasting a string, added on saving if missing).

@@ -167,6 +167,57 @@ function ns.HasBaganator()
 		and type(Baganator.API.ImportString) == "function"
 end
 
+-- CAPTURE (BÊTA) : recopie de l'export de profil de Baganator (CustomiseDialog/Main.lua, bouton
+-- Exporter, et Config.DumpCurrentProfile), faute de fonction publique : profil copié depuis
+-- BAGANATOR_CONFIG.Profiles, sans les réglages propres au personnage, marqué addon / version /
+-- kind, clés de MapKeysForExport en texte, puis « BGR!1! » + base64(compression(CBOR)). À revoir
+-- si Baganator change son export (le menu le signale « bêta »).
+local BAGANATOR_CHARACTER_KEYS = { "sort_ignore_slots_count_2", "sort_ignore_bank_slots_count",
+	"currencies_tracked", "currencies_tracked_imported" } -- Config.IsCharacterSpecific
+local BAGANATOR_STRING_KEYS = { "hide_special_container" } -- Config.MapKeysForExport
+
+-- Profils Baganator (noms triés) et profil actif du personnage.
+function ns.GetBaganatorProfiles()
+	local names = {}
+	for name in pairs(type(BAGANATOR_CONFIG) == "table" and BAGANATOR_CONFIG.Profiles or {}) do
+		names[#names + 1] = name
+	end
+	table.sort(names, function(a, b)
+		return a:lower() < b:lower()
+	end)
+	return names, BAGANATOR_CURRENT_PROFILE
+end
+
+-- Chaîne d'un profil Baganator : texte, nom proposé, ou nil, raison.
+function ns.ExportBaganator(name)
+	local encoding = C_EncodingUtil
+	local profile = type(BAGANATOR_CONFIG) == "table" and BAGANATOR_CONFIG.Profiles and BAGANATOR_CONFIG.Profiles[name]
+	if not (encoding and encoding.SerializeCBOR and type(profile) == "table") then
+		return nil, L["Baganator n'a pas pu exporter ce profil."]
+	end
+	local export = CopyTable(profile)
+	for _, key in ipairs(BAGANATOR_CHARACTER_KEYS) do
+		export[key] = nil
+	end
+	export.addon, export.version, export.kind = "Baganator", 3, "profile"
+	for _, key in ipairs(BAGANATOR_STRING_KEYS) do
+		if type(export[key]) == "table" then
+			local mapped = {}
+			for k, v in pairs(export[key]) do
+				mapped[tostring(k)] = v
+			end
+			export[key] = mapped
+		end
+	end
+	local ok, text = pcall(function()
+		return "BGR!1!" .. encoding.EncodeBase64(encoding.CompressString(encoding.SerializeCBOR(export)))
+	end)
+	if not (ok and text) then
+		return nil, L["Baganator n'a pas pu exporter ce profil."]
+	end
+	return text, "Baganator — " .. name
+end
+
 -- Contenu d'une chaîne Baganator : "profile", "categories", ou nil (illisible).
 local function BaganatorContent(text)
 	local encoding = C_EncodingUtil

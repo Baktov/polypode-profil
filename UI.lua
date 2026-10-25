@@ -559,6 +559,20 @@ local CAPTURES = {
 			Run(done, false, ns.ExportEllesmereUIFull)
 		end)
 	end,
+	-- Baganator : capture recopiée de son export (pas de fonction publique), signalée « bêta ».
+	baganator = function(menu, done)
+		local names, active = ns.GetBaganatorProfiles()
+		if #names == 0 then
+			menu:CreateTitle(L["Baganator n'est pas chargé."])
+			return
+		end
+		menu:CreateTitle(L["Capturer (bêta)"])
+		for _, name in ipairs(names) do
+			menu:CreateButton(name .. (name == active and Gray(" " .. L["(actif)"]) or ""), function()
+				Run(done, false, ns.ExportBaganator, name)
+			end)
+		end
+	end,
 	editmode = function(menu, done)
 		local layouts = ns.GetEditModeLayouts()
 		if #layouts == 0 then
@@ -584,6 +598,9 @@ local CAPTURES = {
 }
 
 local MENU_MAX_SCREEN_RATIO = 0.5 -- hauteur maximale d'un menu, en part de l'écran
+
+-- Genres dont la capture recopie un format privé de l'addon (fragile) : « Capturer (bêta) ».
+local BETA_CAPTURE = { baganator = true }
 
 -- Genres mis en avant dans le menu « Nouveau » (libellé en bleu foncé).
 local MENU_EMPHASIS_COLOR = "|cff3a6fd8"
@@ -632,7 +649,8 @@ local function ShowNewMenu(owner, char)
 							menu:CreateTitle(L["Capture indisponible sur ce client."])
 						end
 						menu:CreateDivider()
-						menu:CreateButton(L["Coller une chaîne"], function()
+						-- Capture « bêta » : le collage, lui, est sûr.
+						menu:CreateButton(BETA_CAPTURE[kind.key] and L["Coller une chaîne (fiable)"] or L["Coller une chaîne"], function()
 							StartNew(kind.key, char)
 						end)
 					else

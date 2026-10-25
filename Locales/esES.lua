@@ -109,6 +109,7 @@ P.AddTranslations(ns.L, "esES", {
 	["Chaîne refusée par Baganator."] = "Cadena rechazada por Baganator.",
 	["Catégories importées dans Baganator."] = "Categorías importadas en Baganator.",
 	["Nouveau profil Baganator « %s », activé."] = "Nuevo perfil de Baganator «%s», activado.",
+	["Baganator n'a pas pu exporter ce profil."] = "Baganator no pudo exportar este perfil.",
 	-- Macro.lua
 	["Macro introuvable."] = "Macro no encontrada.",
 	["Macro « %s » (propre au personnage)"] = "Macro «%s» (del personaje)",
@@ -311,4 +312,6 @@ P.AddTranslations(ns.L, "esES", {
 	["Importer dans Baganator"] = "Importar en Baganator",
 	["Profil : crée un nouveau profil Baganator (nom libre) et l'active. Catégories : les importe. Hors combat."] = "Perfil: crea un nuevo perfil de Baganator (nombre libre) y lo activa. Categorías: las importa. Fuera de combate.",
 	["importer dans Baganator"] = "importar en Baganator",
+	["Capturer (bêta)"] = "Capturar (beta)",
+	["Coller une chaîne (fiable)"] = "Pegar una cadena (fiable)",
 })
