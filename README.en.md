@@ -31,13 +31,17 @@ When disabled, Polypode works normally, with no "Profiles" button or `/poly prof
 The **Profiles** button (title bar of the Polypode window) or `/poly profil` opens the window
 (**double-click** its title bar: back to the default size).
 
-- **On the left**, the profiles filed **under their character**, shown as in Polypode's "Available
-  characters": name in class color, class, level, "(you)", logged-in first, logged-out faded, and
-  the same tooltip (logged in or not, teams). Your current character always shows, even with no
-  profile.
-  - Character header: left-click = collapse / expand its profiles (state kept); right-click = new
-    profile for this character.
-  - **Collapse all** button (right of the "Characters" title): collapses every character to only
+- **On the left**, the profiles filed **by season, then under their character**. A profile's
+  season is the one of its **last save** ("Midnight, season 2"; "Unknown season" for saves older
+  than 1.9.0 and on WoW Forever); the current season comes first, then the others from newest to
+  oldest. The same character shows in every season where it has profiles. It is shown as in
+  Polypode's "Available characters": name in class color, class, level, "(you)", logged-in
+  first, logged-out faded, and the same tooltip (logged in or not, teams). Your current
+  character always shows in the current season, even with no profile.
+  - Season header: left-click = collapse / expand the season (state kept).
+  - Character header: left-click = collapse / expand its profiles of that season (state kept);
+    right-click = new profile for this character (saved in the current season).
+  - **Collapse all** button (right of the "Characters" title): collapses every season to only
     see their names; it becomes **Expand all** when everything is collapsed.
   - Profile (type then name, e.g. "Talents · Arcane raid"): left-click = open in the editor;
     right-click = duplicate or delete; on hover: type, character, date, **season and game
@@ -75,7 +79,7 @@ The **Profiles** button (title bar of the Polypode window) or `/poly profil` ope
 
 The **Delete a season** button (right of "Delete", at the bottom of the editor) lists the seasons
 during which your profiles were saved (with their count, "Unknown season" for saves older than
-1.9.0). Picking one deletes, after confirmation, every profile of that season, on all your clients.
+1.9.0 and WoW Forever saves). Picking one deletes, after confirmation, every profile of that season, on all your clients.
 
 ### Saving a string
 

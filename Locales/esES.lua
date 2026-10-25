@@ -145,7 +145,7 @@ P.AddTranslations(ns.L, "esES", {
 	["%d caractères"] = "%d caracteres",
 	["(non enregistré)"] = "(sin guardar)",
 	["Le profil en cours d'édition n'est pas enregistré. Abandonner les modifications ?"] = "El perfil en edición no está guardado. ¿Descartar los cambios?",
-	["Saison inconnue (sauvegardes anciennes)"] = "Temporada desconocida (guardados antiguos)",
+	["Saison inconnue"] = "Temporada desconocida",
 	["Supprimer les %s profil(s) enregistrés pendant « %s » ?\n(sur tous vos clients)"] = "¿Eliminar los %s perfil(es) guardados durante «%s»?\n(en todos tus clientes)",
 	["Supprimer"] = "Eliminar",
 	["%d profil(s) supprimé(s) : %s."] = "%d perfil(es) eliminado(s): %s.",
@@ -257,7 +257,8 @@ P.AddTranslations(ns.L, "esES", {
 	["Tout replier"] = "Plegar todo",
 	["Tout déplier"] = "Desplegar todo",
 	["Tout replier / déplier"] = "Plegar / desplegar todo",
-	["Replie tous les personnages pour ne voir que leurs noms, ou les déplie tous."] = "Pliega todos los personajes para ver solo sus nombres, o los despliega todos.",
+	["Replie toutes les saisons pour ne voir que leurs noms, ou déplie tout."] = "Pliega todas las temporadas para ver solo sus nombres, o lo despliega todo.",
+	["Profils rangés selon la saison de leur dernier enregistrement."] = "Perfiles agrupados según la temporada de su último guardado.",
 	["Chaînes d'export du mode Édition, des talents et des addons (EllesmereUI, ElvUI, Baganator, MySlots, Simple Addon Manager...), gardées pour tous vos personnages."] = "Cadenas de exportación del modo de edición, de los talentos y de los accesorios (EllesmereUI, ElvUI, Baganator, MySlots, Simple Addon Manager...), guardadas para todos tus personajes.",
 	["profils (chaînes d'export du mode Édition, des talents, des addons)"] = "perfiles (cadenas de exportación del modo de edición, de los talentos, de los accesorios)",
 })

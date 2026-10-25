@@ -211,7 +211,7 @@ StaticPopupDialogs["POLYPODE_PROFIL_DISCARD"] = {
 local UNKNOWN_SEASON = ""
 
 local function SeasonLabel(season)
-	return season == UNKNOWN_SEASON and L["Saison inconnue (sauvegardes anciennes)"] or season
+	return season == UNKNOWN_SEASON and L["Saison inconnue"] or season
 end
 
 -- { { season, ids = { ... } }, ... } triées par nom de saison, inconnue en dernier.
@@ -562,35 +562,76 @@ end
 
 -- LISTE --------------------------------------------------------------------------------------
 
--- Un en-tête par personnage (le personnage joué et ceux qui ont des profils ; connectés en tête,
--- puis ordre alphabétique, comme « Personnages disponibles »), suivi de ses profils (genre puis
--- nom, ordre de ns.GetProfiles) s'il n'est pas replié.
+-- Clés de repli (PolypodeProfilDB.collapsed) : une saison, un personnage dans une saison.
+local function SeasonFoldKey(season)
+	return "S:" .. season
+end
+
+local function CharFoldKey(season, key)
+	return "C:" .. season .. "|" .. key
+end
+
+-- Arbre saison → personnage → profils. Saison d'un profil = profile.season, celle de son dernier
+-- enregistrement ("" = inconnue). Saison en cours d'abord, puis de la plus récente à la plus
+-- ancienne (dernier enregistrement), inconnue en dernier. Dans une saison : un en-tête par
+-- personnage (connectés en tête, puis ordre alphabétique, comme « Personnages disponibles »),
+-- suivi de ses profils (genre puis nom, ordre de ns.GetProfiles). Le personnage joué figure
+-- toujours dans la saison en cours, même sans profil. Un en-tête replié cache ce qu'il contient.
 local function BuildItems()
-	local byChar = { [P.GetCharKey()] = {} }
-	for _, entry in ipairs(ns.GetProfiles()) do
-		local key = entry.profile.char or "?"
-		byChar[key] = byChar[key] or {}
-		table.insert(byChar[key], entry)
+	local current = ns.CurrentSeason() or UNKNOWN_SEASON
+	local bySeason, groups = {}, {}
+	local function Group(season)
+		if not bySeason[season] then
+			bySeason[season] = { season = season, byChar = {}, count = 0, latest = 0 }
+			groups[#groups + 1] = bySeason[season]
+		end
+		return bySeason[season]
 	end
+	Group(current).byChar[P.GetCharKey()] = {}
+	for _, entry in ipairs(ns.GetProfiles()) do
+		local group = Group(entry.profile.season or UNKNOWN_SEASON)
+		local key = entry.profile.char or "?"
+		group.byChar[key] = group.byChar[key] or {}
+		table.insert(group.byChar[key], entry)
+		group.count = group.count + 1
+		group.latest = math.max(group.latest, tonumber(entry.profile.updated) or 0)
+	end
+	local function Rank(group)
+		return group.season == current and 0 or group.season == UNKNOWN_SEASON and 2 or 1
+	end
+	table.sort(groups, function(a, b)
+		if Rank(a) ~= Rank(b) then
+			return Rank(a) < Rank(b)
+		end
+		return a.latest > b.latest
+	end)
+
 	local collapsed = Collapsed()
 	local items = {}
-	for _, item in ipairs(P.SortedKeyItems(byChar, IsConnected)) do
-		local key = item.key
-		items[#items + 1] = { header = true, key = key, online = item.first, count = #byChar[key],
-			collapsed = collapsed[key] or false }
-		if not collapsed[key] then
-			for _, entry in ipairs(byChar[key]) do
-				items[#items + 1] = entry
+	for _, group in ipairs(groups) do
+		local seasonFold = SeasonFoldKey(group.season)
+		items[#items + 1] = { header = true, isSeason = true, season = group.season, fold = seasonFold,
+			count = group.count, collapsed = collapsed[seasonFold] or false }
+		if not collapsed[seasonFold] then
+			for _, item in ipairs(P.SortedKeyItems(group.byChar, IsConnected)) do
+				local key, fold = item.key, CharFoldKey(group.season, item.key)
+				items[#items + 1] = { header = true, key = key, fold = fold, online = item.first,
+					count = #group.byChar[key], collapsed = collapsed[fold] or false }
+				if not collapsed[fold] then
+					for _, entry in ipairs(group.byChar[key]) do
+						items[#items + 1] = entry
+					end
+				end
 			end
 		end
 	end
 	return items
 end
 
--- Vrai si tous les personnages de la liste sont repliés (bouton « Tout déplier »).
+-- Vrai si toutes les saisons de la liste sont repliées (bouton « Tout déplier »).
 local function AllCollapsed()
 	for _, item in ipairs(BuildItems()) do
-		if item.header and not item.collapsed then
+		if item.isSeason and not item.collapsed then
 			return false
 		end
 	end
@@ -616,10 +657,14 @@ local function ShowRowMenu(id)
 	end)
 end
 
--- Nouveau profil rangé sous ce personnage (déplié pour le voir apparaître).
+-- Nouveau profil rangé sous ce personnage ; il sera enregistré dans la saison en cours, dépliée
+-- (avec le personnage) pour le voir apparaître.
 local function NewForChar(key)
 	ConfirmDiscard(function()
-		Collapsed()[key] = nil
+		local season = ns.CurrentSeason() or UNKNOWN_SEASON
+		local collapsed = Collapsed()
+		collapsed[SeasonFoldKey(season)] = nil
+		collapsed[CharFoldKey(season, key)] = nil
 		Load(nil, nil, key)
 	end)
 end
@@ -645,6 +690,8 @@ end
 --     configuration actuelle).
 -- run(profil) renvoie ok, message (compte rendu affiché, sinon done) ou nil, raison.
 local ACTION_SIZE = 16
+-- Retraits de la liste : saison, personnage, profil (icône d'action puis texte).
+local SEASON_INDENT, CHAR_INDENT, PROFILE_INDENT = 4, 14, 24
 local ShowReload -- boîte de rechargement, définie après ROW_ACTIONS
 local ROW_ACTIONS = {
 	transmog = {
@@ -850,6 +897,14 @@ StaticPopupDialogs["POLYPODE_PROFIL_APPLY"] = {
 }
 
 local function RowTooltip(data)
+	if data.isSeason then
+		return {
+			SeasonLabel(data.season),
+			L["%d profil(s)"]:format(data.count),
+			Gray(L["Profils rangés selon la saison de leur dernier enregistrement."]),
+			data.collapsed and L["Clic gauche : déplier"] or L["Clic gauche : replier"],
+		}
+	end
 	if data.header then
 		-- Mêmes indications que « Personnages disponibles » (P.CharacterTooltip : nom, équipes).
 		local hints = {
@@ -921,7 +976,7 @@ local function ActionButton(row)
 	end
 	local button = CreateFrame("Button", nil, row)
 	button:SetSize(ACTION_SIZE, ACTION_SIZE)
-	button:SetPoint("LEFT", 14, 0)
+	button:SetPoint("LEFT", PROFILE_INDENT, 0)
 	button:SetFrameLevel(row:GetFrameLevel() + 2)
 	-- Lignes recyclées : l'icône agit sur la donnée courante de la ligne.
 	button:SetScript("OnClick", function(self)
@@ -1165,15 +1220,16 @@ local function Build()
 	listPanel:SetPoint("TOPLEFT", 12, -36)
 	listPanel:SetPoint("BOTTOMLEFT", 12, 12)
 
-	-- « Tout replier » / « Tout déplier », à droite du titre du cadre : condense la liste.
+	-- « Tout replier » / « Tout déplier », à droite du titre du cadre : replie les saisons (leurs
+	-- personnages gardent leur état), ou déplie tout.
 	collapseAllButton = CreateButton(listPanel, L["Tout replier"], 90, function()
 		local collapsed = Collapsed()
 		if AllCollapsed() then
 			wipe(collapsed)
 		else
 			for _, item in ipairs(BuildItems()) do
-				if item.header then
-					collapsed[item.key] = true
+				if item.isSeason then
+					collapsed[item.fold] = true
 				end
 			end
 		end
@@ -1183,21 +1239,25 @@ local function Build()
 	collapseAllButton:SetPoint("TOPRIGHT", -6, -4)
 	listPanel.header:SetPoint("RIGHT", collapseAllButton, "LEFT", -6, 0)
 	SetTooltip(collapseAllButton, L["Tout replier / déplier"],
-		L["Replie tous les personnages pour ne voir que leurs noms, ou les déplie tous."])
+		L["Replie toutes les saisons pour ne voir que leurs noms, ou déplie tout."])
 	P.CreateScrollList(listPanel, function(data)
-		if data.header then
+		local fold = data.header and ("|cffffd200" .. (data.collapsed and "+" or "-") .. "|r ")
+		if data.isSeason then
+			return fold .. "|cffffffff" .. SeasonLabel(data.season) .. "|r" .. Gray(" (" .. data.count .. ")")
+		elseif data.header then
 			-- Personnage comme dans « Personnages disponibles », précédé du repli, suivi du nombre.
-			return "|cffffd200" .. (data.collapsed and "+" or "-") .. "|r " .. FormatChar(data.key)
-				.. Gray(" (" .. data.count .. ")")
+			return fold .. FormatChar(data.key) .. Gray(" (" .. data.count .. ")")
 		end
 		return Gray(ns.KindLabel(data.profile.kind) .. " · ") .. data.profile.name -- décalé par decorate
 	end, nil, {
 		onClick = function(data, button)
 			if data.header then
 				if button == "RightButton" then
-					ShowCharRowMenu(data.key)
+					if not data.isSeason then
+						ShowCharRowMenu(data.key)
+					end
 				else
-					Collapsed()[data.key] = not data.collapsed or nil
+					Collapsed()[data.fold] = not data.collapsed or nil
 					ns.Refresh()
 				end
 			elseif button == "RightButton" then
@@ -1211,11 +1271,12 @@ local function Build()
 		end,
 		tooltip = RowTooltip,
 		-- Personnages déconnectés estompés, comme dans « Personnages disponibles ».
-		-- Profils en retrait sous leur personnage (place de l'icône « essayer » des profils de
-		-- transmogrification) ; lignes recyclées : retrait et icône recalculés à chaque affichage.
+		-- Personnages en retrait sous leur saison, profils sous leur personnage (après la place de
+		-- l'icône d'action) ; lignes recyclées : retrait et icône recalculés à chaque affichage.
 		decorate = function(row, data)
-			row:SetAlpha((data.header and not data.online) and 0.55 or 1)
-			row.text:SetPoint("LEFT", data.header and 4 or (14 + ACTION_SIZE + 4), 0)
+			row:SetAlpha((data.header and not data.isSeason and not data.online) and 0.55 or 1)
+			row.text:SetPoint("LEFT", data.isSeason and SEASON_INDENT or data.header and CHAR_INDENT
+				or (PROFILE_INDENT + ACTION_SIZE + 4), 0)
 			local action = not data.header and ROW_ACTIONS[ns.NormalizeKind(data.profile.kind)]
 			if action then
 				local button = ActionButton(row)

@@ -117,6 +117,11 @@ local function GameContext()
 	return season, build
 end
 
+-- Saison en cours (« Midnight, saison 2 »), ou nil si le jeu ne la donne pas (WoW Forever).
+function ns.CurrentSeason()
+	return (GameContext())
+end
+
 -- Texte « saison (version) » d'un profil pour l'infobulle, ou nil (sauvegarde antérieure à 1.9.0).
 function ns.GameContextText(profile)
 	if not (profile.season or profile.build) then

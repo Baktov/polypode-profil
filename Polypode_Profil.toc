@@ -10,7 +10,7 @@
 ## Notes: Profiles for Polypode: saves the export strings of Edit Mode, talents, transmogrification, title, equipment sets, macros, action bars, WoW options, key bindings, chat windows, the addon list and addons (EllesmereUI, ElvUI, Baganator, MySlots, Simple Addon Manager...).
 ## Notes-frFR: Profils pour Polypode : sauvegarde des chaînes d'export du mode Édition, des talents, de la transmogrification, du titre, des ensembles d'équipement, des macros, des barres d'action, des options de WoW, des raccourcis, des fenêtres de discussion, de la liste des addons et des addons (EllesmereUI, ElvUI, Baganator, MySlots, Simple Addon Manager...).
 ## Author: Baktov
-## Version: 2.3.0
+## Version: 2.4.0
 ## Dependencies: Polypode
 ## SavedVariables: PolypodeProfilDB
 ## Category: Polypode

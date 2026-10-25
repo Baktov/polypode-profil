@@ -145,7 +145,7 @@ P.AddTranslations(ns.L, "itIT", {
 	["%d caractères"] = "%d caratteri",
 	["(non enregistré)"] = "(non salvato)",
 	["Le profil en cours d'édition n'est pas enregistré. Abandonner les modifications ?"] = "Il profilo in modifica non è salvato. Abbandonare le modifiche?",
-	["Saison inconnue (sauvegardes anciennes)"] = "Stagione sconosciuta (salvataggi vecchi)",
+	["Saison inconnue"] = "Stagione sconosciuta",
 	["Supprimer les %s profil(s) enregistrés pendant « %s » ?\n(sur tous vos clients)"] = "Eliminare i %s profilo/i salvati durante «%s»?\n(su tutti i tuoi client)",
 	["Supprimer"] = "Elimina",
 	["%d profil(s) supprimé(s) : %s."] = "%d profilo/i eliminato/i: %s.",
@@ -257,7 +257,8 @@ P.AddTranslations(ns.L, "itIT", {
 	["Tout replier"] = "Comprimi tutto",
 	["Tout déplier"] = "Espandi tutto",
 	["Tout replier / déplier"] = "Comprimi / espandi tutto",
-	["Replie tous les personnages pour ne voir que leurs noms, ou les déplie tous."] = "Comprime tutti i personaggi per vedere solo i loro nomi, oppure li espande tutti.",
+	["Replie toutes les saisons pour ne voir que leurs noms, ou déplie tout."] = "Comprime tutte le stagioni per vedere solo i loro nomi, oppure espande tutto.",
+	["Profils rangés selon la saison de leur dernier enregistrement."] = "Profili raggruppati secondo la stagione del loro ultimo salvataggio.",
 	["Chaînes d'export du mode Édition, des talents et des addons (EllesmereUI, ElvUI, Baganator, MySlots, Simple Addon Manager...), gardées pour tous vos personnages."] = "Stringhe d'esportazione della Modalità Modifica, dei talenti e degli AddOn (EllesmereUI, ElvUI, Baganator, MySlots, Simple Addon Manager...), conservate per tutti i tuoi personaggi.",
 	["profils (chaînes d'export du mode Édition, des talents, des addons)"] = "profili (stringhe d'esportazione della Modalità Modifica, dei talenti, degli AddOn)",
 })

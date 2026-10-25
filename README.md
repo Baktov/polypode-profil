@@ -32,13 +32,18 @@ Désactivé, Polypode fonctionne normalement, sans bouton « Profils » ni comma
 Le bouton **Profils** (barre de titre de la fenêtre Polypode) ou `/poly profil` ouvre la fenêtre
 (**double-clic** sur sa barre de titre : retour à la taille par défaut).
 
-- **À gauche**, les profils rangés **sous leur personnage**, affiché comme dans « Personnages
-  disponibles » de Polypode : nom en couleur de classe, classe, niveau, « (vous) », connectés en
-  tête, déconnectés estompés, et la même infobulle (connecté ou non, équipes). Votre personnage
-  actuel apparaît toujours, même sans profil.
-  - En-tête de personnage : clic gauche = replier / déplier ses profils (état gardé) ; clic
-    droit = nouveau profil pour ce personnage.
-  - Bouton **Tout replier** (à droite du titre « Personnages ») : replie tous les personnages
+- **À gauche**, les profils rangés **par saison, puis sous leur personnage**. La saison d'un
+  profil est celle de son **dernier enregistrement** (« Midnight, saison 2 » ; « Saison inconnue »
+  pour les sauvegardes antérieures à la 1.9.0 et sur WoW Forever) ; la saison en cours vient en
+  tête, puis les autres de la plus récente à la plus ancienne. Un même personnage apparaît dans
+  chaque saison où il a des profils. Il est affiché comme dans « Personnages disponibles » de
+  Polypode : nom en couleur de classe, classe, niveau, « (vous) », connectés en tête,
+  déconnectés estompés, et la même infobulle (connecté ou non, équipes). Votre personnage
+  actuel apparaît toujours dans la saison en cours, même sans profil.
+  - En-tête de saison : clic gauche = replier / déplier la saison (état gardé).
+  - En-tête de personnage : clic gauche = replier / déplier ses profils de cette saison (état
+    gardé) ; clic droit = nouveau profil pour ce personnage (enregistré dans la saison en cours).
+  - Bouton **Tout replier** (à droite du titre « Personnages ») : replie toutes les saisons
     pour ne voir que leurs noms ; il devient **Tout déplier** quand tout est replié.
   - Profil (genre puis nom, par ex. « Talents · Arcane raid ») : clic gauche = ouvrir dans
     l'éditeur ; clic droit = dupliquer ou supprimer ; au survol : genre, personnage, date,
@@ -77,7 +82,7 @@ Le bouton **Profils** (barre de titre de la fenêtre Polypode) ou `/poly profil`
 
 Le bouton **Supprimer une saison** (à droite de « Supprimer », en bas de l'éditeur) liste les
 saisons pendant lesquelles vos profils ont été enregistrés (avec leur nombre, « Saison inconnue »
-pour les sauvegardes antérieures à la 1.9.0). En choisir une supprime, après confirmation, tous
+pour les sauvegardes antérieures à la 1.9.0 et celles de WoW Forever). En choisir une supprime, après confirmation, tous
 les profils de cette saison, sur tous vos clients.
 
 ### Enregistrer une chaîne
@@ -232,6 +237,7 @@ other language).*
 
 ## Version
 
+`2.4.0` : liste des profils rangée par saison (celle du dernier enregistrement), puis par personnage ; saisons repliables.
 `2.3.0` : double-clic sur la barre de titre : retour à la taille par défaut (Polypode 2.12).
 `2.2.0` : Polypode Profil en anglais, allemand, espagnol, italien et portugais du Brésil, selon la langue choisie dans Polypode (Profiles, Profile, Perfiles, Profili, Perfis) ; les chaînes d'export gardent leur format (en-têtes et lignes en français), lisibles quelle que soit la langue. *Translated into English, German, Spanish, Italian and Brazilian Portuguese.*
 `2.1.1` : genre « MySlots » rétabli (ses profils ne sont plus supprimés) : « Barres d'action » en reprend moins que MySlot.
