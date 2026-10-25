@@ -112,7 +112,9 @@ The **New** button (bottom of the editor, or right-click on a character of the l
 menu of types, in three groups. In the menu as in the profile list, each type has a color, and
 types are sorted by color: **blue** for WoW's essential settings (Action bars, WoW options, Key
 bindings, Edit Mode), **green** for the other client settings (Transmogrification, Title, Macro,
-Equipment set, Chat windows, Addon list, Talents), **purple** for addons, **white** for "Other":
+Equipment set, Chat windows, Addon list, Talents), **purple** for addons, **white** for "Other". An
+addon not loaded on the current character does not show in the menu; in the list, its profiles'
+icon is greyed out (a click says so):
 
 1. **Capture and apply in game**: Transmogrification, Title, Macro, Equipment set, Action bars,
    WoW options, Key bindings, Chat windows, Addon list, Simple Addon Manager, EllesmereUI, ElvUI,

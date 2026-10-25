@@ -28,6 +28,49 @@ local function UniqueName(base, existing)
 	return ("%s (%d)"):format(base, index)
 end
 
+-- DISPONIBILITÉ : genre d'addon utilisable sur ce personnage (addon chargé, fonctions présentes).
+-- Les genres du client WoW sont toujours disponibles. Fonctions résolues à l'appel (définies
+-- plus bas ou dans Addons.lua).
+local KIND_AVAILABLE = {
+	simpleaddonmanager = function()
+		return ns.HasSimpleAddonManager()
+	end,
+	ellesmereui = function()
+		return ns.HasEllesmereUI()
+	end,
+	elvui = function()
+		return ns.HasElvUI()
+	end,
+	baganator = function()
+		return ns.HasPlusmouse("baganator")
+	end,
+	chattynator = function()
+		return ns.HasPlusmouse("chattynator")
+	end,
+	platynator = function()
+		return ns.HasPlusmouse("platynator")
+	end,
+	details = function()
+		return ns.HasDetails()
+	end,
+	tlm = function()
+		return ns.HasTLM()
+	end,
+	myslots = function()
+		local isLoaded = C_AddOns and C_AddOns.IsAddOnLoaded
+		return isLoaded and isLoaded("Myslot") or false
+	end,
+}
+
+function ns.KindAvailable(kind)
+	local check = KIND_AVAILABLE[ns.NormalizeKind(kind)]
+	if not check then
+		return true
+	end
+	local ok, available = pcall(check)
+	return ok and available and true or false
+end
+
 -- ELVUI --------------------------------------------------------------------------------------
 -- Module « Distributor » d'ElvUI (Game/Shared/General/Distributor.lua) : ExportProfile(type, clé,
 -- "text") donne la chaîne de son bouton Exporter ; Decode la relit (type, clé, données) ;

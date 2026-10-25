@@ -668,7 +668,8 @@ local function ShowNewMenu(owner, char)
 			end
 			root:CreateTitle(group.label)
 			for _, kind in ipairs(ns.KINDS) do
-				if kind.group == group.key then
+				-- Genre d'un addon non chargé sur ce personnage : absent du menu.
+				if kind.group == group.key and ns.KindAvailable(kind.key) then
 					local fill = CAPTURES[kind.key]
 					if fill then
 						local menu = root:CreateButton(MenuKindLabel(kind))
@@ -1194,21 +1195,27 @@ end
 
 -- Habille l'icône selon l'action (atlas avec états survol / appui, sinon texture de repli) ;
 -- action.iconFor(profil) donne une icône propre au profil (macro : la sienne).
+-- Addon du genre absent sur ce personnage (ns.KindAvailable) : icône grisée et estompée.
 local function SetActionIcon(button, action, profile)
 	local texture = action.iconFor and action.iconFor(profile) or action.texture
-	if button.action == action and button.actionTexture == texture then
-		return
+	button.available = ns.KindAvailable(profile.kind)
+	if button.action ~= action or button.actionTexture ~= texture then
+		button.action, button.actionTexture = action, texture
+		if not action.iconFor and action.atlas and HasAtlas(action.atlas .. "-up") then
+			button:SetNormalAtlas(action.atlas .. "-up")
+			button:SetHighlightAtlas(action.atlas .. "-highlight")
+			button:SetPushedAtlas(action.atlas .. "-down")
+		else
+			button:SetNormalTexture(texture)
+			button:SetHighlightTexture(texture, "ADD")
+			button:SetPushedTexture(texture)
+		end
 	end
-	button.action, button.actionTexture = action, texture
-	if not action.iconFor and action.atlas and HasAtlas(action.atlas .. "-up") then
-		button:SetNormalAtlas(action.atlas .. "-up")
-		button:SetHighlightAtlas(action.atlas .. "-highlight")
-		button:SetPushedAtlas(action.atlas .. "-down")
-	else
-		button:SetNormalTexture(texture)
-		button:SetHighlightTexture(texture, "ADD")
-		button:SetPushedTexture(texture)
+	local normal = button:GetNormalTexture()
+	if normal then
+		normal:SetDesaturated(not button.available)
 	end
+	button:SetAlpha(button.available and 1 or 0.35)
 end
 
 local function ActionButton(row)
@@ -1223,6 +1230,9 @@ local function ActionButton(row)
 	button:SetScript("OnClick", function(self)
 		local data = self:GetParent().data
 		if not (self.action and data and data.profile) then
+			return
+		elseif not self.available then
+			Notify(L["%s n'est pas chargé sur ce personnage."]:format(ns.KindLabel(data.profile.kind)))
 			return
 		end
 		local confirm = self.action.confirm
@@ -1243,6 +1253,11 @@ local function ActionButton(row)
 		GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
 		GameTooltip:AddLine(self.action.title)
 		GameTooltip:AddLine(self.action.tooltip, 1, 1, 1, true)
+		local data = self:GetParent().data
+		if not self.available and data and data.profile then
+			GameTooltip:AddLine(L["%s n'est pas chargé sur ce personnage."]:format(ns.KindLabel(data.profile.kind)),
+				1, 0.3, 0.3, true)
+		end
 		ShowTooltip()
 	end)
 	button:SetScript("OnLeave", GameTooltip_Hide)

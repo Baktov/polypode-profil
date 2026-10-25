@@ -332,4 +332,5 @@ P.AddTranslations(ns.L, "itIT", {
 	["importer dans %s"] = "importare in %s",
 	["Ajoute cette configuration de talents à TalentLoadoutManager, sans l'appliquer ; on la charge ensuite depuis TLM. La fenêtre des talents de Blizzard n'est pas touchée. Hors combat."] = "Aggiunge questa configurazione dei talenti a TalentLoadoutManager, senza applicarla; poi la si carica da TLM. La finestra dei talenti di Blizzard non viene toccata. Fuori dal combattimento.",
 	["Profil : crée un nouveau profil %s (nom libre) et l'active ; autre contenu (catégories, style) : l'importe. Hors combat."] = "Profilo: crea un nuovo profilo %s (nome libero) e lo attiva; altro contenuto (categorie, stile): lo importa. Fuori dal combattimento.",
+	["%s n'est pas chargé sur ce personnage."] = "%s non è caricato su questo personaggio.",
 })
