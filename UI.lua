@@ -559,17 +559,33 @@ local CAPTURES = {
 			Run(done, false, ns.ExportEllesmereUIFull)
 		end)
 	end,
-	-- Baganator : capture recopiée de son export (pas de fonction publique), signalée « bêta ».
-	baganator = function(menu, done)
-		local names, active = ns.GetBaganatorProfiles()
-		if #names == 0 then
-			menu:CreateTitle(L["Baganator n'est pas chargé."])
+	details = function(menu, done)
+		if not ns.HasDetails() then
+			menu:CreateTitle(L["%s n'est pas chargé."]:format("Details!"))
 			return
 		end
-		menu:CreateTitle(L["Capturer (bêta)"])
+		local names, active = ns.GetDetailsProfiles()
+		menu:CreateTitle(L["Profils"])
 		for _, name in ipairs(names) do
 			menu:CreateButton(name .. (name == active and Gray(" " .. L["(actif)"]) or ""), function()
-				Run(done, false, ns.ExportBaganator, name)
+				Run(done, false, ns.ExportDetails, name)
+			end)
+		end
+	end,
+	tlm = function(menu, done)
+		if not ns.HasTLM() then
+			menu:CreateTitle(L["%s n'est pas chargé."]:format("TalentLoadoutManager"))
+			return
+		end
+		local loadouts = ns.GetTLMLoadouts()
+		if #loadouts == 0 then
+			menu:CreateTitle(L["Aucune configuration pour cette spécialisation."])
+			return
+		end
+		menu:CreateTitle(L["Configurations de la spécialisation"])
+		for _, loadout in ipairs(loadouts) do
+			menu:CreateButton(loadout.name, function()
+				Run(done, true, ns.ExportTLM, loadout.id, loadout.name)
 			end)
 		end
 	end,
@@ -597,10 +613,27 @@ local CAPTURES = {
 	end,
 }
 
+-- Baganator, Chattynator, Platynator : capture recopiée de leur export (pas de fonction publique).
+for _, kind in ipairs({ "baganator", "chattynator", "platynator" }) do
+	CAPTURES[kind] = function(menu, done)
+		local names, active = ns.GetPlusmouseProfiles(kind)
+		if #names == 0 then
+			menu:CreateTitle(L["%s n'est pas chargé."]:format(ns.KindLabel(kind)))
+			return
+		end
+		menu:CreateTitle(L["Capturer (bêta)"])
+		for _, name in ipairs(names) do
+			menu:CreateButton(name .. (name == active and Gray(" " .. L["(actif)"]) or ""), function()
+				Run(done, false, ns.ExportPlusmouse, kind, name)
+			end)
+		end
+	end
+end
+
 local MENU_MAX_SCREEN_RATIO = 0.5 -- hauteur maximale d'un menu, en part de l'écran
 
 -- Genres dont la capture recopie un format privé de l'addon (fragile) : « Capturer (bêta) ».
-local BETA_CAPTURE = { baganator = true }
+local BETA_CAPTURE = { baganator = true, chattynator = true, platynator = true }
 
 -- Genres mis en avant dans le menu « Nouveau » (libellé en bleu foncé).
 local MENU_EMPHASIS_COLOR = "|cff3a6fd8"
@@ -967,23 +1000,53 @@ local ROW_ACTIONS = {
 			return ns.OpenTalentsImport(profile.text, profile.name)
 		end,
 	},
-	baganator = {
-		texture = "Interface\\Icons\\INV_Misc_Bag_08", -- repli : l'icône de Baganator (## IconTexture)
+	details = {
+		texture = "Interface\\Icons\\INV_Misc_Spyglass_02", -- repli : l'icône de Details! (## IconTexture)
 		iconFor = function()
-			return ns.AddonIcon("Baganator")
+			return ns.AddonIcon("Details")
 		end,
-		title = L["Importer dans Baganator"],
-		tooltip = L["Profil : crée un nouveau profil Baganator (nom libre) et l'active. Catégories : les "
-			.. "importe. Hors combat."],
-		hint = L["importer dans Baganator"],
-		confirm = function(profile)
-			return ns.BaganatorConfirm(profile)
-		end,
+		title = L["Importer dans %s"]:format("Details!"),
+		tooltip = L["Crée un nouveau profil %s (nom libre) et l'active. Hors combat."]:format("Details!"),
+		hint = L["importer dans %s"]:format("Details!"),
+		confirm = L["Un nouveau profil %s va être créé, puis activé."]:format("Details!"),
 		run = function(profile)
-			return ns.ImportBaganator(profile.text, profile.name)
+			return ns.ImportDetails(profile.text, profile.name)
+		end,
+	},
+	tlm = {
+		texture = "Interface\\Icons\\INV_Misc_Book_11", -- repli : l'icône de TalentLoadoutManager (## IconTexture)
+		iconFor = function()
+			return ns.AddonIcon("TalentLoadoutManager")
+		end,
+		title = L["Importer dans %s"]:format("TalentLoadoutManager"),
+		tooltip = L["Ajoute cette configuration de talents à TalentLoadoutManager, sans l'appliquer ; on la "
+			.. "charge ensuite depuis TLM. La fenêtre des talents de Blizzard n'est pas touchée. Hors combat."],
+		hint = L["importer dans %s"]:format("TalentLoadoutManager"),
+		run = function(profile)
+			return ns.ImportTLM(profile.text, profile.name)
 		end,
 	},
 }
+
+-- Baganator, Chattynator, Platynator : même action, par l'import public de chaque addon.
+for kind, addon in pairs({ baganator = "Baganator", chattynator = "Chattynator", platynator = "Platynator" }) do
+	ROW_ACTIONS[kind] = {
+		texture = "Interface\\Icons\\INV_Misc_Gear_02", -- repli : l'icône de l'addon (## IconTexture)
+		iconFor = function()
+			return ns.AddonIcon(addon)
+		end,
+		title = L["Importer dans %s"]:format(addon),
+		tooltip = L["Profil : crée un nouveau profil %s (nom libre) et l'active ; autre contenu (catégories, "
+			.. "style) : l'importe. Hors combat."]:format(addon),
+		hint = L["importer dans %s"]:format(addon),
+		confirm = function(profile)
+			return ns.PlusmouseConfirm(kind, profile)
+		end,
+		run = function(profile)
+			return ns.ImportPlusmouse(kind, profile.text, profile.name)
+		end,
+	}
+end
 
 -- Rechargement proposé (Entrée ou clic sur « Recharger ») ; sur WoW Forever, où l'addon ne peut
 -- pas recharger, un message demande de taper /reload.
@@ -1017,7 +1080,13 @@ local KIND_DETAILS = {
 		return ns.EllesmereUIDetails(text)
 	end,
 	baganator = function(text)
-		return ns.BaganatorDetails(text)
+		return ns.PlusmouseDetails("baganator", text)
+	end,
+	chattynator = function(text)
+		return ns.PlusmouseDetails("chattynator", text)
+	end,
+	platynator = function(text)
+		return ns.PlusmouseDetails("platynator", text)
 	end,
 	macro = function(text)
 		return ns.MacroDetails(text)

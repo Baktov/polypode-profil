@@ -75,9 +75,15 @@ The **Profiles** button (title bar of the Polypode window) or `/poly profil` ope
   - **EllesmereUI** profile: a small icon (EllesmereUI's) opens **EllesmereUI's import page** on
     the string: a profile arrives there under a **new name**; a **full export** replaces the
     account's settings (EllesmereUI asks for confirmation and reloads).
-  - **Baganator** profile: a small icon (Baganator's) **imports** it into Baganator (through its
-    import function), after confirmation: a profile becomes a **new profile** there (the profile's
-    name without "Baganator — ", suffixed "(2)"... if taken), activated; categories are imported.
+  - **Baganator**, **Chattynator**, **Platynator** profiles: a small icon (the addon's) **imports**
+    it into the addon (through its import function), after confirmation: a profile becomes a **new
+    profile** there (the profile's name without "Addon — ", suffixed "(2)"... if taken), activated;
+    other content (Baganator categories, Platynator style) is imported.
+  - **Details!** profile: a small icon **imports** it into Details! as a **new profile** (free
+    name), activated.
+  - **TalentLoadoutManager** profile: a small icon **adds** the talent loadout to
+    TalentLoadoutManager, **without applying it** (you then load it from TLM); Blizzard's talent
+    window is not touched, so no risk of blocked actions (unlike the beta talent import).
   - **WoW options**, **Key bindings** and **Chat windows** profiles: a small icon before their name
     **applies** them to the current character, after confirmation (they replace the current
     setup); a report is shown.
@@ -108,7 +114,7 @@ spot them):
 
 1. **Capture and apply in game**: Transmogrification, Title, Macro, Equipment set, Action bars,
    WoW options, Key bindings, Chat windows, Addon list, Simple Addon Manager, EllesmereUI, ElvUI,
-   Baganator.
+   Baganator, Chattynator, Platynator, Details!, TalentLoadoutManager.
    The string is read
    in game; in the list, the icon in front of the profile applies it (transmogrification is tried
    on in the dressing room, or applied at the transmogrifier).
@@ -122,11 +128,14 @@ spot them):
    **Export** button, then copied back into its import (MySlots offers no export or import usable
    by another addon).
 
-Baganator has no export usable by another addon. Its submenu therefore offers **Capture (beta)**:
-its profiles (the active one is marked), exported by copying how its "Export" button works; if a
-Baganator update changes that format, the captured string might no longer import. **Paste a string
-(reliable)** stays the safe way (Baganator's "Export" button, profile or categories). Either way,
-the list icon **imports** it.
+Baganator, Chattynator and Platynator (same author) have no export usable by another addon. Their
+submenu therefore offers **Capture (beta)**: their profiles (the active one is marked), exported by
+copying how their "Export" button works; if an addon update changes that format, the captured string
+might no longer import. **Paste a string (reliable)** stays the safe way (the addon's "Export"
+button: profile, categories or style). Either way, the list icon **imports** it.
+
+Details! (its profile export) and TalentLoadoutManager (the loadouts of the current specialization,
+Blizzard talent string) are captured through their own functions.
 
 The name of an addon profile (EllesmereUI, ElvUI, Baganator, MySlots) starts with the addon's
 ("ElvUI — …", suggested to complete when pasting a string, added on saving if missing).

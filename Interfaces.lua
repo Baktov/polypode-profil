@@ -1,4 +1,4 @@
--- Polypode Profil: Interfaces — profils ElvUI, EllesmereUI et Baganator (capture et import par leurs fonctions publiques)
+-- Polypode Profil: Interfaces — profils d'addons (ElvUI, EllesmereUI, Baganator, Chattynator, Platynator, Details!, TalentLoadoutManager)
 
 local P = Polypode
 local _, ns = ...
@@ -156,51 +156,107 @@ function ns.ImportElvUI(text)
 	return true, L["%s d'ElvUI importés."]:format(ElvTypeLabel(dataType))
 end
 
--- BAGANATOR ----------------------------------------------------------------------------------
--- Pas d'export public : la chaîne est collée depuis son bouton Exporter. Import public :
--- Baganator.API.ImportString(chaîne, nom) (API/Main.lua), qui écrase un profil du même nom ; on
--- lui passe un nom libre parmi BAGANATOR_CONFIG.Profiles pour toujours créer un nouveau profil.
--- La chaîne (« BGR!1! » + base64 + compression + CBOR, ou JSON) est un profil ou des catégories.
+-- BAGANATOR, CHATTYNATOR, PLATYNATOR ---------------------------------------------------------
+-- Trois addons du même auteur (plusmouse), même schéma : import public
+-- <Addon>.API.ImportString(chaîne, nom) (API/Main.lua), qui écrase un profil du même nom (on lui
+-- passe un nom libre parmi <CONFIG>.Profiles pour toujours créer un nouveau profil) ; pas d'export
+-- public. CAPTURE (BÊTA) : recopie de leur bouton Exporter (CustomiseDialog/Main.lua et
+-- Config.DumpCurrentProfile) : profil copié depuis <CONFIG>.Profiles, sans les réglages propres au
+-- personnage, marqué addon / version / kind, puis « PRÉFIXE » + base64(compression(CBOR)) par
+-- C_EncodingUtil. À revoir si l'un d'eux change son export (le menu le signale « bêta »).
 
-function ns.HasBaganator()
-	return type(Baganator) == "table" and type(Baganator.API) == "table"
-		and type(Baganator.API.ImportString) == "function"
+-- Chattynator : comme Core.RemoveTemporaryWindows, onglets temporaires retirés (et fenêtres
+-- devenues vides), champs d'onglet complétés.
+local function RemoveTemporaryWindows(windows)
+	if type(windows) ~= "table" then
+		return
+	end
+	for index = #windows, 1, -1 do
+		local window = windows[index]
+		local tabs = {}
+		for _, tab in ipairs(type(window) == "table" and window.tabs or {}) do
+			if not tab.isTemporary then
+				tab.filters = tab.filters or {}
+				tab.whispersTemp = {}
+				tab.addons = tab.addons or {}
+				tabs[#tabs + 1] = tab
+			end
+		end
+		if type(window) == "table" then
+			window.tabs = tabs
+		end
+		if #tabs == 0 then
+			table.remove(windows, index)
+		end
+	end
 end
 
--- CAPTURE (BÊTA) : recopie de l'export de profil de Baganator (CustomiseDialog/Main.lua, bouton
--- Exporter, et Config.DumpCurrentProfile), faute de fonction publique : profil copié depuis
--- BAGANATOR_CONFIG.Profiles, sans les réglages propres au personnage, marqué addon / version /
--- kind, clés de MapKeysForExport en texte, puis « BGR!1! » + base64(compression(CBOR)). À revoir
--- si Baganator change son export (le menu le signale « bêta »).
-local BAGANATOR_CHARACTER_KEYS = { "sort_ignore_slots_count_2", "sort_ignore_bank_slots_count",
-	"currencies_tracked", "currencies_tracked_imported" } -- Config.IsCharacterSpecific
-local BAGANATOR_STRING_KEYS = { "hide_special_container" } -- Config.MapKeysForExport
+-- Par genre : addon (global), table de réglages, profil actif, préfixe et version de la chaîne,
+-- réglages propres au personnage (Config.IsCharacterSpecific), clés passées en texte
+-- (Config.MapKeysForExport), préparation propre à l'addon, libellé des contenus autres qu'un profil.
+local PLUSMOUSE = {
+	baganator = {
+		addon = "Baganator", config = "BAGANATOR_CONFIG", current = "BAGANATOR_CURRENT_PROFILE",
+		prefix = "BGR!1!", version = 3,
+		characterKeys = { "sort_ignore_slots_count_2", "sort_ignore_bank_slots_count",
+			"currencies_tracked", "currencies_tracked_imported" },
+		stringKeys = { "hide_special_container" },
+	},
+	chattynator = {
+		addon = "Chattynator", config = "CHATTYNATOR_CONFIG", current = "CHATTYNATOR_CURRENT_PROFILE",
+		prefix = "CHATTY!1!", version = 1,
+		prepare = function(export)
+			RemoveTemporaryWindows(export.windows)
+		end,
+	},
+	platynator = {
+		addon = "Platynator", config = "PLATYNATOR_CONFIG", current = "PLATYNATOR_CURRENT_PROFILE",
+		prefix = "PLATY!1!", version = 1,
+	},
+}
 
--- Profils Baganator (noms triés) et profil actif du personnage.
-function ns.GetBaganatorProfiles()
-	local names = {}
-	for name in pairs(type(BAGANATOR_CONFIG) == "table" and BAGANATOR_CONFIG.Profiles or {}) do
+local function PlusmouseSpec(kind)
+	return PLUSMOUSE[kind]
+end
+
+function ns.HasPlusmouse(kind)
+	local spec = PlusmouseSpec(kind)
+	local global = spec and _G[spec.addon]
+	return type(global) == "table" and type(global.API) == "table" and type(global.API.ImportString) == "function"
+end
+
+local function PlusmouseProfiles(spec)
+	local config = _G[spec.config]
+	return type(config) == "table" and type(config.Profiles) == "table" and config.Profiles or nil
+end
+
+-- Profils de l'addon (noms triés) et profil actif du personnage.
+function ns.GetPlusmouseProfiles(kind)
+	local spec, names = PlusmouseSpec(kind), {}
+	for name in pairs(spec and PlusmouseProfiles(spec) or {}) do
 		names[#names + 1] = name
 	end
 	table.sort(names, function(a, b)
 		return a:lower() < b:lower()
 	end)
-	return names, BAGANATOR_CURRENT_PROFILE
+	return names, spec and _G[spec.current]
 end
 
--- Chaîne d'un profil Baganator : texte, nom proposé, ou nil, raison.
-function ns.ExportBaganator(name)
+-- Chaîne d'un profil (capture bêta) : texte, nom proposé, ou nil, raison.
+function ns.ExportPlusmouse(kind, name)
+	local spec = PlusmouseSpec(kind)
 	local encoding = C_EncodingUtil
-	local profile = type(BAGANATOR_CONFIG) == "table" and BAGANATOR_CONFIG.Profiles and BAGANATOR_CONFIG.Profiles[name]
+	local profiles = spec and PlusmouseProfiles(spec)
+	local profile = profiles and profiles[name]
 	if not (encoding and encoding.SerializeCBOR and type(profile) == "table") then
-		return nil, L["Baganator n'a pas pu exporter ce profil."]
+		return nil, L["%s n'a pas pu exporter ce profil."]:format(spec and spec.addon or "?")
 	end
 	local export = CopyTable(profile)
-	for _, key in ipairs(BAGANATOR_CHARACTER_KEYS) do
+	for _, key in ipairs(spec.characterKeys or {}) do
 		export[key] = nil
 	end
-	export.addon, export.version, export.kind = "Baganator", 3, "profile"
-	for _, key in ipairs(BAGANATOR_STRING_KEYS) do
+	export.addon, export.version, export.kind = spec.addon, spec.version, "profile"
+	for _, key in ipairs(spec.stringKeys or {}) do
 		if type(export[key]) == "table" then
 			local mapped = {}
 			for k, v in pairs(export[key]) do
@@ -210,16 +266,20 @@ function ns.ExportBaganator(name)
 		end
 	end
 	local ok, text = pcall(function()
-		return "BGR!1!" .. encoding.EncodeBase64(encoding.CompressString(encoding.SerializeCBOR(export)))
+		if spec.prepare then
+			spec.prepare(export)
+		end
+		return spec.prefix .. encoding.EncodeBase64(encoding.CompressString(encoding.SerializeCBOR(export)))
 	end)
 	if not (ok and text) then
-		return nil, L["Baganator n'a pas pu exporter ce profil."]
+		return nil, L["%s n'a pas pu exporter ce profil."]:format(spec.addon)
 	end
-	return text, "Baganator — " .. name
+	return text, spec.addon .. " — " .. name
 end
 
--- Contenu d'une chaîne Baganator : "profile", "categories", ou nil (illisible).
-local function BaganatorContent(text)
+-- Contenu d'une chaîne : "profile", un autre genre de l'addon (catégories de Baganator, style de
+-- Platynator...), ou nil (illisible).
+local function PlusmouseContent(spec, text)
 	local encoding = C_EncodingUtil
 	if not encoding then
 		return
@@ -228,54 +288,179 @@ local function BaganatorContent(text)
 	local ok, data
 	if text:sub(1, 1) == "{" then
 		ok, data = pcall(encoding.DeserializeJSON, text)
-	elseif text:match("^BGR!1!") then
+	elseif text:sub(1, #spec.prefix) == spec.prefix then
 		ok, data = pcall(function()
-			return encoding.DeserializeCBOR(encoding.DecompressString(encoding.DecodeBase64(text:sub(7))))
+			return encoding.DeserializeCBOR(encoding.DecompressString(encoding.DecodeBase64(text:sub(#spec.prefix + 1))))
 		end)
 	end
 	if not (ok and type(data) == "table") then
 		return
 	end
-	-- Versions 1 et 2 du format : catégories seulement (ImportData de Baganator).
-	return (data.kind == "profile") and "profile" or "categories"
+	-- Baganator, versions 1 et 2 du format : catégories seulement (son ImportData).
+	return data.kind or "categories"
 end
 
-function ns.BaganatorDetails(text)
-	local content = BaganatorContent(text)
+local function ContentLabel(content)
+	if content == "profile" then
+		return L["profil"]
+	elseif content == "categories" then
+		return L["catégories"]
+	elseif content == "style" then
+		return L["style"]
+	end
+	return tostring(content)
+end
+
+function ns.PlusmouseDetails(kind, text)
+	local spec = PlusmouseSpec(kind)
+	local content = spec and PlusmouseContent(spec, text)
 	if not content then
-		return { L["Chaîne Baganator illisible."] }
+		return { L["Chaîne %s illisible."]:format(spec and spec.addon or "?") }
 	end
-	return { L["Contenu : %s"]:format(content == "profile" and L["profil"] or L["catégories"]) }
+	return { L["Contenu : %s"]:format(ContentLabel(content)) }
 end
 
-function ns.BaganatorConfirm(profile)
-	if BaganatorContent(profile.text) == "categories" then
-		return L["Ces catégories vont être importées dans Baganator."]
+function ns.PlusmouseConfirm(kind, profile)
+	local spec = PlusmouseSpec(kind)
+	local content = spec and PlusmouseContent(spec, profile.text)
+	if content and content ~= "profile" then
+		return L["Contenu « %s » : il va être importé dans %s."]:format(ContentLabel(content), spec.addon)
 	end
-	return L["Un nouveau profil Baganator va être créé, puis activé."]
+	return L["Un nouveau profil %s va être créé, puis activé."]:format(spec and spec.addon or "?")
 end
 
--- Import : nom du profil Polypode sans le préfixe « Baganator — », rendu libre dans Baganator.
-function ns.ImportBaganator(text, name)
-	if not ns.HasBaganator() then
-		return nil, L["Baganator n'est pas chargé."]
+-- Import : nom du profil Polypode sans le préfixe « Addon — », rendu libre dans l'addon.
+function ns.ImportPlusmouse(kind, text, name)
+	local spec = PlusmouseSpec(kind)
+	if not (spec and ns.HasPlusmouse(kind)) then
+		return nil, L["%s n'est pas chargé."]:format(spec and spec.addon or "?")
 	elseif InCombatLockdown() then
 		return nil, L["Impossible en combat."]
 	end
-	local content = BaganatorContent(text)
+	local content = PlusmouseContent(spec, text)
 	if not content then
-		return nil, L["Chaîne refusée par Baganator."]
+		return nil, L["Chaîne refusée par %s."]:format(spec.addon)
 	end
-	local base = strtrim((tostring(name or ""):gsub("^Baganator%s*—%s*", "")))
-	local profiles = type(BAGANATOR_CONFIG) == "table" and BAGANATOR_CONFIG.Profiles or nil
-	local profileName = UniqueName(base ~= "" and base or "Polypode", profiles)
-	if not pcall(Baganator.API.ImportString, text, profileName) then
-		return nil, L["Chaîne refusée par Baganator."]
+	local base = strtrim((tostring(name or ""):gsub("^" .. spec.addon .. "%s*—%s*", "")))
+	local profileName = UniqueName(base ~= "" and base or "Polypode", PlusmouseProfiles(spec))
+	if not pcall(_G[spec.addon].API.ImportString, text, profileName) then
+		return nil, L["Chaîne refusée par %s."]:format(spec.addon)
 	end
-	if content == "categories" then
-		return true, L["Catégories importées dans Baganator."]
+	if content ~= "profile" then
+		return true, L["Contenu « %s » importé dans %s."]:format(ContentLabel(content), spec.addon)
 	end
-	return true, L["Nouveau profil Baganator « %s », activé."]:format(profileName)
+	return true, L["Nouveau profil %s « %s », activé."]:format(spec.addon, profileName)
+end
+
+-- DETAILS! -----------------------------------------------------------------------------------
+-- functions/profiles.lua : Details:GetProfileList, GetCurrentProfileName, ExportCurrentProfile(nom)
+-- (chaîne de son export), ImportProfile(chaîne, nom, false, false, false) : nouveau profil, activé.
+
+function ns.HasDetails()
+	return type(Details) == "table" and type(Details.ExportCurrentProfile) == "function"
+		and type(Details.ImportProfile) == "function" and type(Details.GetProfileList) == "function"
+end
+
+function ns.GetDetailsProfiles()
+	local names = {}
+	if ns.HasDetails() then
+		local ok, list = pcall(Details.GetProfileList, Details)
+		for _, name in ipairs(ok and list or {}) do
+			names[#names + 1] = name
+		end
+	end
+	table.sort(names, function(a, b)
+		return a:lower() < b:lower()
+	end)
+	local ok, active = pcall(function()
+		return Details:GetCurrentProfileName()
+	end)
+	return names, ok and active or nil
+end
+
+function ns.ExportDetails(name)
+	local ok, text = pcall(Details.ExportCurrentProfile, Details, name)
+	if not (ok and type(text) == "string" and text ~= "") then
+		return nil, L["%s n'a pas pu exporter ce profil."]:format("Details!")
+	end
+	return text, "Details! — " .. name
+end
+
+function ns.ImportDetails(text, name)
+	if not ns.HasDetails() then
+		return nil, L["%s n'est pas chargé."]:format("Details!")
+	elseif InCombatLockdown() then
+		return nil, L["Impossible en combat."]
+	end
+	local existing = {}
+	for _, profileName in ipairs((ns.GetDetailsProfiles())) do
+		existing[profileName] = true
+	end
+	local base = strtrim((tostring(name or ""):gsub("^Details!%s*—%s*", "")))
+	local profileName = UniqueName(#base >= 2 and base or "Polypode", existing)
+	local ok, imported = pcall(Details.ImportProfile, Details, text, profileName, false, false, false)
+	if not (ok and imported) then
+		return nil, L["Chaîne refusée par %s."]:format("Details!")
+	end
+	return true, L["Nouveau profil %s « %s », activé."]:format("Details!", profileName)
+end
+
+-- TALENTLOADOUTMANAGER -----------------------------------------------------------------------
+-- core/ManagerApi.lua, API publique : GlobalAPI:GetLoadouts() (spécialisation en cours),
+-- GetExportString(id) (chaîne de talents de Blizzard), ImportCustomLoadout(chaîne, nom) : nouvelle
+-- configuration dans TLM, sans rien appliquer (on la charge ensuite depuis TLM) ; la fenêtre des
+-- talents de Blizzard n'est pas touchée.
+
+local function TLMGlobal()
+	local api = type(TalentLoadoutManagerAPI) == "table" and TalentLoadoutManagerAPI.GlobalAPI
+	if type(api) == "table" and api.GetLoadouts and api.GetExportString and api.ImportCustomLoadout then
+		return api
+	end
+end
+
+function ns.HasTLM()
+	return TLMGlobal() ~= nil
+end
+
+-- Configurations de la spécialisation en cours : { { id, name } }.
+function ns.GetTLMLoadouts()
+	local api, list = TLMGlobal(), {}
+	local ok, loadouts = pcall(function()
+		return api:GetLoadouts()
+	end)
+	for _, info in ipairs(ok and loadouts or {}) do
+		list[#list + 1] = { id = info.id, name = info.displayName or info.name or tostring(info.id) }
+	end
+	return list
+end
+
+function ns.ExportTLM(id, name)
+	local api = TLMGlobal()
+	local ok, text = pcall(function()
+		return api:GetExportString(id)
+	end)
+	if not (ok and type(text) == "string" and text ~= "") then
+		return nil, L["%s n'a pas pu exporter ce profil."]:format("TalentLoadoutManager")
+	end
+	return text, "TalentLoadoutManager — " .. tostring(name)
+end
+
+function ns.ImportTLM(text, name)
+	local api = TLMGlobal()
+	if not api then
+		return nil, L["%s n'est pas chargé."]:format("TalentLoadoutManager")
+	elseif InCombatLockdown() then
+		return nil, L["Impossible en combat."]
+	end
+	local loadoutName = strtrim((tostring(name or ""):gsub("^TalentLoadoutManager%s*—%s*", "")))
+	local ok, info, reason = pcall(function()
+		return api:ImportCustomLoadout(text, loadoutName ~= "" and loadoutName or "Polypode")
+	end)
+	if not (ok and info) then
+		return nil, L["Chaîne refusée par %s."]:format("TalentLoadoutManager") .. (reason and (" " .. tostring(reason)) or "")
+	end
+	return true, L["Configuration « %s » ajoutée à TalentLoadoutManager : chargez-la depuis TLM."]:format(
+		info.displayName or info.name or loadoutName)
 end
 
 -- ELLESMEREUI --------------------------------------------------------------------------------

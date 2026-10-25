@@ -53,7 +53,11 @@ ns.KINDS = {
 	-- prefix : profil d'un addon, nommé « Addon — nom ».
 	{ key = "ellesmereui", label = "EllesmereUI", group = "apply", prefix = true }, -- Interfaces.lua
 	{ key = "elvui", label = "ElvUI", group = "apply", prefix = true }, -- Interfaces.lua
-	{ key = "baganator", label = "Baganator", group = "apply", prefix = true }, -- Interfaces.lua (collé, importé)
+	{ key = "baganator", label = "Baganator", group = "apply", prefix = true }, -- Interfaces.lua (capture bêta)
+	{ key = "chattynator", label = "Chattynator", group = "apply", prefix = true }, -- Interfaces.lua (capture bêta)
+	{ key = "platynator", label = "Platynator", group = "apply", prefix = true }, -- Interfaces.lua (capture bêta)
+	{ key = "details", label = "Details!", group = "apply", prefix = true }, -- Interfaces.lua
+	{ key = "tlm", label = "TalentLoadoutManager", group = "apply", prefix = true }, -- Interfaces.lua
 	{ key = "editmode", label = L["Mode Édition"], group = "copy" },
 	{ key = "talents", label = L["Talents"], group = "copy" },
 	{ key = "myslots", label = "MySlots", group = "paste", prefix = true },

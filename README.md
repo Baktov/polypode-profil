@@ -79,10 +79,16 @@ Le bouton **Profils** (barre de titre de la fenêtre Polypode) ou `/poly profil`
   - Profil **EllesmereUI** : une petite icône (celle d'EllesmereUI) ouvre la **page d'import
     d'EllesmereUI** sur la chaîne : un profil y arrive sous un **nouveau nom** ; un **export
     complet** remplace les réglages du compte (EllesmereUI demande confirmation et recharge).
-  - Profil **Baganator** : une petite icône (celle de Baganator) l'**importe** dans Baganator
-    (par sa fonction d'import), après confirmation : un profil y devient un **nouveau profil**
-    (le nom du profil sans « Baganator — », suffixé « (2) »... s'il est pris), activé ; des
-    catégories y sont importées.
+  - Profils **Baganator**, **Chattynator**, **Platynator** : une petite icône (celle de l'addon)
+    l'**importe** dans l'addon (par sa fonction d'import), après confirmation : un profil y devient
+    un **nouveau profil** (le nom du profil sans « Addon — », suffixé « (2) »... s'il est pris),
+    activé ; un autre contenu (catégories de Baganator, style de Platynator) y est importé.
+  - Profil **Details!** : une petite icône l'**importe** dans Details! comme **nouveau profil**
+    (nom libre), activé.
+  - Profil **TalentLoadoutManager** : une petite icône **ajoute** la configuration de talents à
+    TalentLoadoutManager, **sans l'appliquer** (on la charge ensuite depuis TLM) ; la fenêtre des
+    talents de Blizzard n'est pas touchée, donc pas de risque de blocage (contrairement à l'import
+    bêta des talents).
   - Profils d'**options de WoW**, de **raccourcis clavier** et de **fenêtres de discussion** :
     une petite icône devant leur nom les **applique** au personnage joué, après confirmation
     (ils remplacent la configuration actuelle) ; un compte rendu s'affiche.
@@ -115,7 +121,8 @@ en bleu foncé, pour les repérer) :
 
 1. **Capturer et appliquer en jeu** : Transmogrification, Titre, Macro, Ensemble d'équipement,
    Barres d'action, Options de WoW, Raccourcis clavier, Fenêtres de discussion, Liste des addons,
-   Simple Addon Manager, EllesmereUI, ElvUI, Baganator. La chaîne est relevée en jeu ; dans la liste, l'icône devant le profil
+   Simple Addon Manager, EllesmereUI, ElvUI, Baganator, Chattynator, Platynator, Details!,
+   TalentLoadoutManager. La chaîne est relevée en jeu ; dans la liste, l'icône devant le profil
    l'applique (la transmogrification s'essaie dans la cabine d'essayage, ou s'applique chez le
    transmogrificateur).
 2. **Capturer, puis copier la chaîne** : Mode Édition, Talents. La chaîne est relevée en jeu, puis
@@ -128,11 +135,15 @@ en bleu foncé, pour les repérer) :
    bouton **Exporter** de l'addon, puis recopiée dans son import (MySlots n'offre ni export ni
    import utilisables par un autre addon).
 
-Baganator n'a pas d'export utilisable par un autre addon. Son sous-menu propose donc **Capturer
-(bêta)** : ses profils (l'actif est signalé), exportés en recopiant la façon de faire de son bouton
-« Exporter » ; si une mise à jour de Baganator change ce format, la chaîne capturée pourrait ne plus
-s'importer. **Coller une chaîne (fiable)** reste le moyen sûr (bouton « Exporter » de Baganator,
-profil ou catégories). Dans les deux cas, l'icône de la liste l'**importe**.
+Baganator, Chattynator et Platynator (même auteur) n'ont pas d'export utilisable par un autre
+addon. Leur sous-menu propose donc **Capturer (bêta)** : leurs profils (l'actif est signalé),
+exportés en recopiant la façon de faire de leur bouton « Exporter » ; si une mise à jour de l'addon
+change ce format, la chaîne capturée pourrait ne plus s'importer. **Coller une chaîne (fiable)**
+reste le moyen sûr (bouton « Exporter » de l'addon : profil, catégories ou style). Dans les deux
+cas, l'icône de la liste l'**importe**.
+
+Details! (son export de profil) et TalentLoadoutManager (les configurations de la spécialisation en
+cours, chaîne de talents de Blizzard) se capturent par leurs propres fonctions.
 
 Le nom d'un profil d'addon (EllesmereUI, ElvUI, Baganator, MySlots) commence par celui de l'addon
 (« ElvUI — … », proposé à compléter quand on colle une chaîne, ajouté à l'enregistrement s'il
@@ -296,6 +307,7 @@ other language).*
 
 ## Version
 
+`3.6.0` : Chattynator et Platynator (capture bêta, import), Details! et TalentLoadoutManager (capture et import par leurs fonctions) ; Baganator, Chattynator et Platynator partagent le même code.
 `3.5.0` : mode Édition et talents (bêta) : l'icône ouvre la fenêtre d'import de Blizzard déjà remplie (mode Édition ou fenêtre des talents ouverts par le joueur), « Importer » reste au joueur.
 `3.4.0` : Baganator : « Capturer (bêta) » de ses profils (export recopié de Baganator) et « Coller une chaîne (fiable) ».
 `3.3.0` : Baganator importé par sa fonction d'import (nouveau profil au nom libre, ou catégories) ; sa chaîne reste collée.
