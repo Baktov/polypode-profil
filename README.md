@@ -116,8 +116,11 @@ les profils de cette saison, sur tous vos clients.
 ### Créer un profil
 
 Le bouton **Nouveau** (en bas de l'éditeur, ou clic droit sur un personnage de la liste) ouvre le
-menu des genres, en trois groupes (Barres d'action, Options de WoW, Raccourcis clavier et Mode Édition
-en bleu foncé, pour les repérer) :
+menu des genres, en trois groupes. Dans le menu comme dans la liste des profils, chaque genre a
+une couleur, et les genres sont triés par couleur : **bleu** pour les réglages essentiels de WoW
+(Barres d'action, Options de WoW, Raccourcis clavier, Mode Édition), **vert** pour les autres
+réglages du client (Transmogrification, Titre, Macro, Ensemble d'équipement, Fenêtres de
+discussion, Liste des addons, Talents), **violet** pour les addons, **blanc** pour « Autre » :
 
 1. **Capturer et appliquer en jeu** : Transmogrification, Titre, Macro, Ensemble d'équipement,
    Barres d'action, Options de WoW, Raccourcis clavier, Fenêtres de discussion, Liste des addons,
@@ -307,6 +310,7 @@ other language).*
 
 ## Version
 
+`3.7.0` : couleur par famille de genre (bleu : essentiels de WoW, vert : autres réglages du client, violet : addons, blanc : autre), dans le menu Nouveau et dans la liste des profils, triée par couleur.
 `3.6.0` : Chattynator et Platynator (capture bêta, import), Details! et TalentLoadoutManager (capture et import par leurs fonctions) ; Baganator, Chattynator et Platynator partagent le même code.
 `3.5.0` : mode Édition et talents (bêta) : l'icône ouvre la fenêtre d'import de Blizzard déjà remplie (mode Édition ou fenêtre des talents ouverts par le joueur), « Importer » reste au joueur.
 `3.4.0` : Baganator : « Capturer (bêta) » de ses profils (export recopié de Baganator) et « Coller une chaîne (fiable) ».

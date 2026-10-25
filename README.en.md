@@ -109,8 +109,10 @@ during which your profiles were saved (with their count, "Unknown season" for sa
 ### Creating a profile
 
 The **New** button (bottom of the editor, or right-click on a character of the list) opens the
-menu of types, in three groups (Action bars, WoW options, Key bindings and Edit Mode in dark blue, to
-spot them):
+menu of types, in three groups. In the menu as in the profile list, each type has a color, and
+types are sorted by color: **blue** for WoW's essential settings (Action bars, WoW options, Key
+bindings, Edit Mode), **green** for the other client settings (Transmogrification, Title, Macro,
+Equipment set, Chat windows, Addon list, Talents), **purple** for addons, **white** for "Other":
 
 1. **Capture and apply in game**: Transmogrification, Title, Macro, Equipment set, Action bars,
    WoW options, Key bindings, Chat windows, Addon list, Simple Addon Manager, EllesmereUI, ElvUI,

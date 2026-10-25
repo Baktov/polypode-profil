@@ -636,11 +636,9 @@ local MENU_MAX_SCREEN_RATIO = 0.5 -- hauteur maximale d'un menu, en part de l'é
 local BETA_CAPTURE = { baganator = true, chattynator = true, platynator = true }
 
 -- Genres mis en avant dans le menu « Nouveau » (libellé en bleu foncé).
-local MENU_EMPHASIS_COLOR = "|cff3a6fd8"
-local MENU_EMPHASIS = { actionbars = true, options = true, bindings = true, editmode = true }
-
+-- Libellé d'un genre dans le menu, dans la couleur de sa famille (ns.KIND_FAMILIES).
 local function MenuKindLabel(kind)
-	return MENU_EMPHASIS[kind.key] and (MENU_EMPHASIS_COLOR .. kind.label .. "|r") or kind.label
+	return ns.ColorByKind(kind.key, kind.label)
 end
 
 -- Menu « Nouveau » : une section par groupe de genres (ns.KIND_GROUPS) ; genre capturable =
@@ -1469,7 +1467,8 @@ local function Build()
 			-- Personnage comme dans « Personnages disponibles », précédé du repli, suivi du nombre.
 			return fold .. FormatChar(data.key) .. Gray(" (" .. data.count .. ")")
 		end
-		return Gray(ns.KindLabel(data.profile.kind) .. " · ") .. data.profile.name -- décalé par decorate
+		-- « Genre · nom » dans la couleur de la famille du genre ; décalé par decorate.
+		return ns.ColorByKind(data.profile.kind, ns.KindLabel(data.profile.kind) .. " · " .. data.profile.name)
 	end, nil, {
 		onClick = function(data, button)
 			if data.header then

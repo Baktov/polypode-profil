@@ -38,30 +38,40 @@ ns.KIND_GROUPS = {
 	{ key = "paste", label = L["Coller une chaîne (import / export)"] },
 }
 
--- Genres de profil, dans l'ordre d'affichage (groupe par groupe).
+-- Familles de genres : couleur du libellé (menu « Nouveau », liste des profils) et ordre de tri.
+-- essential = réglages essentiels de WoW (bleu), client = autres réglages du client (vert),
+-- addon = profils d'addons (violet), other = « Autre » (blanc).
+ns.KIND_FAMILIES = {
+	essential = { rank = 1, color = "|cff3a6fd8" },
+	client = { rank = 2, color = "|cff40c040" },
+	addon = { rank = 3, color = "|cffb070ff" },
+	other = { rank = 4, color = "|cffffffff" },
+}
+
+-- Genres de profil, dans l'ordre d'affichage (groupe par groupe, puis famille par famille).
+-- prefix : profil d'un addon, nommé « Addon — nom ».
 ns.KINDS = {
-	{ key = "transmog", label = L["Transmogrification"], group = "apply" },
-	{ key = "title", label = L["Titre"], group = "apply" },
-	{ key = "macro", label = L["Macro"], group = "apply" }, -- Macro.lua
-	{ key = "equipset", label = L["Ensemble d'équipement"], group = "apply" }, -- Equipement.lua
-	{ key = "actionbars", label = L["Barres d'action"], group = "apply" }, -- Barres.lua
-	{ key = "options", label = L["Options de WoW"], group = "apply" }, -- Options.lua
-	{ key = "bindings", label = L["Raccourcis clavier"], group = "apply" }, -- Options.lua
-	{ key = "chat", label = L["Fenêtres de discussion"], group = "apply" }, -- Discussion.lua
-	{ key = "addons", label = L["Liste des addons"], group = "apply" }, -- Addons.lua
-	{ key = "simpleaddonmanager", label = "Simple Addon Manager", group = "apply" }, -- Addons.lua
-	-- prefix : profil d'un addon, nommé « Addon — nom ».
-	{ key = "ellesmereui", label = "EllesmereUI", group = "apply", prefix = true }, -- Interfaces.lua
-	{ key = "elvui", label = "ElvUI", group = "apply", prefix = true }, -- Interfaces.lua
-	{ key = "baganator", label = "Baganator", group = "apply", prefix = true }, -- Interfaces.lua (capture bêta)
-	{ key = "chattynator", label = "Chattynator", group = "apply", prefix = true }, -- Interfaces.lua (capture bêta)
-	{ key = "platynator", label = "Platynator", group = "apply", prefix = true }, -- Interfaces.lua (capture bêta)
-	{ key = "details", label = "Details!", group = "apply", prefix = true }, -- Interfaces.lua
-	{ key = "tlm", label = "TalentLoadoutManager", group = "apply", prefix = true }, -- Interfaces.lua
-	{ key = "editmode", label = L["Mode Édition"], group = "copy" },
-	{ key = "talents", label = L["Talents"], group = "copy" },
-	{ key = "myslots", label = "MySlots", group = "paste", prefix = true },
-	{ key = "other", label = L["Autre"], group = "paste" },
+	{ key = "actionbars", label = L["Barres d'action"], group = "apply", family = "essential" }, -- Barres.lua
+	{ key = "options", label = L["Options de WoW"], group = "apply", family = "essential" }, -- Options.lua
+	{ key = "bindings", label = L["Raccourcis clavier"], group = "apply", family = "essential" }, -- Options.lua
+	{ key = "transmog", label = L["Transmogrification"], group = "apply", family = "client" },
+	{ key = "title", label = L["Titre"], group = "apply", family = "client" },
+	{ key = "macro", label = L["Macro"], group = "apply", family = "client" }, -- Macro.lua
+	{ key = "equipset", label = L["Ensemble d'équipement"], group = "apply", family = "client" }, -- Equipement.lua
+	{ key = "chat", label = L["Fenêtres de discussion"], group = "apply", family = "client" }, -- Discussion.lua
+	{ key = "addons", label = L["Liste des addons"], group = "apply", family = "client" }, -- Addons.lua
+	{ key = "simpleaddonmanager", label = "Simple Addon Manager", group = "apply", family = "addon" }, -- Addons.lua
+	{ key = "ellesmereui", label = "EllesmereUI", group = "apply", family = "addon", prefix = true }, -- Interfaces.lua
+	{ key = "elvui", label = "ElvUI", group = "apply", family = "addon", prefix = true }, -- Interfaces.lua
+	{ key = "baganator", label = "Baganator", group = "apply", family = "addon", prefix = true }, -- Interfaces.lua (capture bêta)
+	{ key = "chattynator", label = "Chattynator", group = "apply", family = "addon", prefix = true }, -- Interfaces.lua (capture bêta)
+	{ key = "platynator", label = "Platynator", group = "apply", family = "addon", prefix = true }, -- Interfaces.lua (capture bêta)
+	{ key = "details", label = "Details!", group = "apply", family = "addon", prefix = true }, -- Interfaces.lua
+	{ key = "tlm", label = "TalentLoadoutManager", group = "apply", family = "addon", prefix = true }, -- Interfaces.lua
+	{ key = "editmode", label = L["Mode Édition"], group = "copy", family = "essential" },
+	{ key = "talents", label = L["Talents"], group = "copy", family = "client" },
+	{ key = "myslots", label = "MySlots", group = "paste", family = "addon", prefix = true },
+	{ key = "other", label = L["Autre"], group = "paste", family = "other" },
 }
 ns.DEFAULT_KIND = "other"
 
@@ -79,8 +89,18 @@ function ns.KindLabel(kind)
 	return ns.KINDS[KIND_INDEX[ns.NormalizeKind(kind)]].label
 end
 
+local function KindFamily(kind)
+	return ns.KIND_FAMILIES[ns.KINDS[KIND_INDEX[ns.NormalizeKind(kind)]].family] or ns.KIND_FAMILIES.other
+end
+
+-- Ordre de tri de la liste : famille (couleur) d'abord, puis ordre de ns.KINDS.
 function ns.KindOrder(kind)
-	return KIND_INDEX[ns.NormalizeKind(kind)]
+	return KindFamily(kind).rank * 100 + KIND_INDEX[ns.NormalizeKind(kind)]
+end
+
+-- Texte dans la couleur de la famille du genre.
+function ns.ColorByKind(kind, text)
+	return KindFamily(kind).color .. text .. "|r"
 end
 
 -- Préfixe du nom d'un profil d'addon (libellé du genre), ou nil.
