@@ -158,14 +158,18 @@ local function Load(id, copy, char)
 	local source = profile or copy or {}
 	nameBox:SetText(source.name or "")
 	nameBox:SetCursorPosition(0)
-	nameBox:SetEnabled(not profile) -- profil enregistré : lecture seule
+	-- Profil enregistré : lecture seule, le nom est un simple texte à la place du champ.
+	nameBox:SetShown(not profile)
+	editor.nameText:SetText(profile and profile.name or "")
+	editor.nameText:SetShown(profile ~= nil)
 	textBox:SetText(source.text or "")
 	SetKind(source.kind or editKind) -- sans genre donné : le genre précédent reste
 	SetChar(source.char or char)
 	if profile then
 		loaded.name, loaded.kind, loaded.text = Trim(profile.name), ns.NormalizeKind(profile.kind), Trim(profile.text)
 	else
-		loaded.name, loaded.kind, loaded.text = "", editKind, ""
+		-- Nom proposé (capture, préfixe d'addon, copie) : pas une modification à lui seul.
+		loaded.name, loaded.kind, loaded.text = Trim(source.name), editKind, ""
 	end
 	UpdateEditorHeader()
 	if ns.Refresh then
@@ -277,13 +281,37 @@ local function Select(id)
 	end)
 end
 
+-- Nom d'un profil à coller (groupe « paste », sauf « Autre ») : préfixé par le nom de l'addon,
+-- « ElvUI — nom » (rien d'autre que le préfixe = le nom de l'addon seul) ; autres genres : inchangé.
+local NAME_SEPARATOR = " — "
+
+local function NamePrefix(kind)
+	if ns.KindGroup(kind) == "paste" and ns.NormalizeKind(kind) ~= ns.DEFAULT_KIND then
+		return ns.KindLabel(kind)
+	end
+end
+
+local function PrefixedName(kind, name)
+	local prefix = NamePrefix(kind)
+	name = Trim(name)
+	if not prefix then
+		return name
+	end
+	if name == "" or name == prefix or name == Trim(prefix .. NAME_SEPARATOR) then
+		return prefix
+	elseif name:sub(1, #prefix):lower() == prefix:lower() then
+		return name
+	end
+	return prefix .. NAME_SEPARATOR .. name
+end
+
 -- Enregistre le nouveau profil de l'éditeur (un profil enregistré, en lecture seule, ne
 -- s'enregistre pas : le dupliquer).
 local function SaveEditor()
 	if selectedID then
 		return
 	end
-	local id, reason = ns.Save(nil, nameBox:GetText(), editKind, EditorText(), editChar)
+	local id, reason = ns.Save(nil, PrefixedName(editKind, nameBox:GetText()), editKind, EditorText(), editChar)
 	if not id then
 		Notify(reason)
 		return
@@ -328,7 +356,12 @@ end
 -- profil ouvert, qui reste tel quel. Confirmation si l'éditeur a une modification non enregistrée.
 local function StartNew(kind, char, text, name)
 	ConfirmDiscard(function()
-		Load(nil, { name = name, kind = kind, text = text }, char)
+		-- Genre à coller d'un addon : nom proposé « ElvUI — », à compléter.
+		local prefix = not name and NamePrefix(kind)
+		Load(nil, { name = prefix and (prefix .. NAME_SEPARATOR) or name, kind = kind, text = text }, char)
+		if prefix then
+			nameBox:SetCursorPosition(#nameBox:GetText())
+		end
 		if text then
 			Notify(L["Chaîne capturée : « Enregistrer » pour la garder."])
 		else
@@ -675,10 +708,16 @@ local ROW_ACTIONS = {
 	transmog = {
 		atlas = "lootroll-toast-icon-transmog",
 		texture = "Interface\\Icons\\INV_Chest_Cloth_17",
-		title = L["Essayer la tenue"],
-		tooltip = L["Ouvre la cabine d'essayage sur cette tenue (comme la chaîne collée dans la discussion). Hors combat."],
-		hint = L["essayer la tenue (cabine d'essayage)"],
+		title = L["Essayer / appliquer la tenue"],
+		tooltip = L["Partout : ouvre la cabine d'essayage sur cette tenue. Chez le transmogrificateur (fenêtre "
+			.. "ouverte) : charge la tenue dans sa fenêtre, par un ensemble personnalisé du nom du profil (créé "
+			.. "s'il n'existe pas) ; « Appliquer » de Blizzard la valide et la paie. Hors combat."],
+		hint = L["essayer la tenue, ou l'appliquer chez le transmogrificateur"],
+		-- Transmogrificateur ouvert : appliquer ; sinon essayer.
 		run = function(profile)
+			if ns.IsAtTransmogrifier() then
+				return ns.ApplyTransmog(profile.text, profile.name)
+			end
 			return ns.TryOnTransmog(profile.text)
 		end,
 	},
@@ -1044,6 +1083,12 @@ local function BuildEditor()
 	if P.SkinEditBox then
 		P.SkinEditBox(nameBox)
 	end
+	editor.nameText = editor:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+	editor.nameText:SetPoint("LEFT", nameLabel, "RIGHT", 12, 0)
+	editor.nameText:SetPoint("RIGHT", -10, 0)
+	editor.nameText:SetJustifyH("LEFT")
+	editor.nameText:SetWordWrap(false)
+	editor.nameText:Hide()
 
 	-- Boutons du bas.
 	local newButton = CreateButton(editor, L["Nouveau"], 80, function(self)

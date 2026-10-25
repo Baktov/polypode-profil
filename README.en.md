@@ -48,7 +48,10 @@ The **Profiles** button (title bar of the Polypode window) or `/poly profil` ope
     version** of the save (for example "Midnight, season 2 (12.1.0)"; "unknown" for saves older
     than 1.9.0) and size.
   - **Transmogrification** profile: a small icon before its name **opens the dressing room** on the
-    outfit (like the string pasted in the chat; out of combat).
+    outfit (like the string pasted in the chat; out of combat). **At the transmogrifier** (window
+    open), the same icon **loads the outfit** into its window: it goes through a custom set named
+    after the profile (reused if it already exists with the same outfit, otherwise created; a free
+    slot is needed), then Blizzard's **Apply** button confirms it and shows its cost.
   - **Title** profile: a small icon before its name makes the current character **wear this
     title** (if known; "No title" removes the title).
   - **Macro** profile: the icon before its name is **the macro's own**; a click **adds it to the
@@ -73,8 +76,8 @@ The **Profiles** button (title bar of the Polypode window) or `/poly profil` ope
   **New** menu (see "Creating a profile"); the character is the one the profile was created
   under, or, for a new profile, the current character (the header's one after a right-click on a
   character of the list). Below: the name and the string itself, in a scrolling box.
-  - A **saved profile opens read-only** ("read-only" in the header): name, type and string cannot
-    be changed (the string stays selectable for Ctrl+C) and **Save** is greyed out. Only a new
+  - A **saved profile opens read-only** ("read-only" in the header): the name shows as plain
+    text, type and string cannot be changed (the string stays selectable for Ctrl+C) and **Save** is greyed out. Only a new
     profile can be saved.
   - **Duplicate** (under the character list, or right-click on the profile) opens a copy of the
     profile for your **current character**, shown at the top right (name followed by "(copy)" if
@@ -95,11 +98,13 @@ menu of types, in three groups:
 1. **Capture and apply in game**: Transmogrification, Title, Macro, Equipment set, Action bars,
    WoW options, Key bindings, Chat windows, Addon list, Simple Addon Manager. The string is read
    in game; in the list, the icon in front of the profile applies it (transmogrification is tried
-   on in the dressing room).
+   on in the dressing room, or applied at the transmogrifier).
 2. **Capture, then copy the string**: Edit Mode, Talents. The string is read in game, then copied
    (Select all, Ctrl+C) into the game's import window.
 3. **Paste a string (import / export)**: EllesmereUI, ElvUI, Baganator, MySlots, Other. The string
-   is pasted from the addon's **Export** button, then copied back into its import.
+   is pasted from the addon's **Export** button, then copied back into its import. The name starts
+   with the addon's ("ElvUI — …", suggested to complete, added on saving if missing), except for
+   "Other".
 
 A type of groups 1 and 2 opens a submenu: its captures (layouts, macros, sets...), then **Paste a
 string** (a string from elsewhere, for example talents found on a website). A type of group 3

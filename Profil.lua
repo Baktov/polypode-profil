@@ -341,22 +341,101 @@ end
 -- discussion (SlashCommandsOverrides.lua de Blizzard : ParseCustomSetSlashCommand puis
 -- DressUpItemTransmogInfoList avec le détail de l'ensemble). Hors combat seulement. Renvoie true,
 -- ou nil et la raison.
-function ns.TryOnTransmog(text)
+-- Liste ItemTransmogInfo d'une chaîne « /customset v1 ... », ou nil et la raison.
+local function ParseCustomSet(text)
 	local args = tostring(text or ""):match("^%s*/customset%s+(.-)%s*$")
 	if not args then
 		return nil, L["Ce profil n'est pas une chaîne « /customset »."]
 	elseif InCombatLockdown() then
 		return nil, L["Impossible en combat."]
-	elseif not (TransmogUtil and TransmogUtil.ParseCustomSetSlashCommand and DressUpItemTransmogInfoList) then
+	elseif not (TransmogUtil and TransmogUtil.ParseCustomSetSlashCommand) then
 		return nil, L["Cabine d'essayage indisponible sur ce client."]
 	end
 	local ok, list = pcall(TransmogUtil.ParseCustomSetSlashCommand, args)
 	if not ok or not list then
 		return nil, L["Chaîne de transmogrification invalide."]
 	end
+	return list
+end
+
+function ns.TryOnTransmog(text)
+	local list, reason = ParseCustomSet(text)
+	if not list then
+		return nil, reason
+	elseif not DressUpItemTransmogInfoList then
+		return nil, L["Cabine d'essayage indisponible sur ce client."]
+	end
 	local showCustomSetDetails = true
 	DressUpItemTransmogInfoList(list, showCustomSetDetails)
 	return true
+end
+
+-- Vrai si la fenêtre du transmogrificateur est ouverte (l'icône applique alors la tenue).
+function ns.IsAtTransmogrifier()
+	return C_Transmog and C_Transmog.IsAtTransmogNPC and C_Transmog.IsAtTransmogNPC() or false
+end
+
+-- Vrai si deux listes ItemTransmogInfo sont identiques (IsEqual du mixin de Blizzard).
+local function SameTransmogList(a, b)
+	if not (a and b) or #a ~= #b then
+		return false
+	end
+	for slot, info in ipairs(a) do
+		if not (info.IsEqual and info:IsEqual(b[slot])) then
+			return false
+		end
+	end
+	return true
+end
+
+-- Applique une tenue chez le transmogrificateur (fenêtre ouverte), comme un clic sur un ensemble
+-- personnalisé dans cette fenêtre (C_TransmogOutfitInfo.SetOutfitToCustomSet, Blizzard_TransmogTemplates) :
+-- la chaîne passe par un ensemble personnalisé du nom du profil (le même s'il existe déjà avec
+-- la même tenue, sinon créé : C_TransmogCollection.NewCustomSet, icône de la première apparence
+-- comme WardrobeCustomSetManager). La tenue est mise en attente ; le bouton « Appliquer » de
+-- Blizzard la valide (et en affiche le coût). Renvoie true et un message, ou nil et la raison.
+function ns.ApplyTransmog(text, name)
+	local list, reason = ParseCustomSet(text)
+	if not list then
+		return nil, reason
+	end
+	local collection, outfit = C_TransmogCollection, C_TransmogOutfitInfo
+	if not (collection and collection.NewCustomSet and collection.GetCustomSetItemTransmogInfoList
+		and outfit and outfit.SetOutfitToCustomSet) then
+		return nil, L["Transmogrification indisponible sur ce client."]
+	end
+	local customSetID
+	for _, set in ipairs(ns.GetCustomSets()) do
+		local ok, setList = pcall(collection.GetCustomSetItemTransmogInfoList, set.id)
+		if set.name == name and ok and SameTransmogList(list, setList) then
+			customSetID = set.id
+			break
+		end
+	end
+	if not customSetID then
+		local max = collection.GetNumMaxCustomSets and collection.GetNumMaxCustomSets()
+		if max and #ns.GetCustomSets() >= max then
+			return nil, L["Plus de place pour un ensemble personnalisé (%d au maximum) : supprimez-en un."]:format(max)
+		end
+		local icon
+		for _, info in ipairs(list) do
+			local source = info.appearanceID and info.appearanceID ~= 0 and collection.GetAppearanceSourceInfo
+				and collection.GetAppearanceSourceInfo(info.appearanceID)
+			if source and source.icon then
+				icon = source.icon
+				break
+			end
+		end
+		local ok, id = pcall(collection.NewCustomSet, name, icon, list)
+		if not (ok and id) then
+			return nil, L["Création de l'ensemble personnalisé refusée par le jeu."]
+		end
+		customSetID = id
+	end
+	if not pcall(outfit.SetOutfitToCustomSet, customSetID) then
+		return nil, L["Le transmogrificateur a refusé la tenue."]
+	end
+	return true, L["Tenue chargée chez le transmogrificateur : « Appliquer » pour la valider."]
 end
 
 -- TITRE : chaîne « /settitle Nom » (commande de Blizzard, sans nom = aucun titre), collable dans

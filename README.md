@@ -50,7 +50,11 @@ Le bouton **Profils** (barre de titre de la fenêtre Polypode) ou `/poly profil`
     **saison et version du jeu** de la sauvegarde (par exemple « Midnight, saison 2 (12.1.0) » ;
     « inconnu » pour les sauvegardes antérieures à la 1.9.0) et taille.
   - Profil de **transmogrification** : une petite icône devant son nom **ouvre la cabine
-    d'essayage** sur la tenue (comme la chaîne collée dans la discussion ; hors combat).
+    d'essayage** sur la tenue (comme la chaîne collée dans la discussion ; hors combat). **Chez le
+    transmogrificateur** (fenêtre ouverte), la même icône **charge la tenue** dans sa fenêtre :
+    elle passe par un ensemble personnalisé du nom du profil (repris s'il existe déjà avec la même
+    tenue, sinon créé ; il en faut une place libre), puis le bouton **Appliquer** de Blizzard la
+    valide et en affiche le coût.
   - Profil de **titre** : une petite icône devant son nom fait **porter ce titre** au
     personnage joué (s'il le connaît ; « Aucun titre » retire le titre).
   - Profil de **macro** : l'icône devant son nom est **celle de la macro** ; un clic l'**ajoute
@@ -77,8 +81,8 @@ Le bouton **Profils** (barre de titre de la fenêtre Polypode) ou `/poly profil`
   profil a été créé, ou, pour un nouveau profil, le personnage joué (celui de l'en-tête après un
   clic droit sur un personnage de la liste). Dessous : le nom et la chaîne elle-même, dans une
   zone qui défile.
-  - Un **profil enregistré s'ouvre en lecture seule** (« lecture seule » dans l'en-tête) : nom,
-    genre et chaîne ne se modifient pas (la chaîne reste sélectionnable pour Ctrl+C) et
+  - Un **profil enregistré s'ouvre en lecture seule** (« lecture seule » dans l'en-tête) : le nom
+    s'affiche en simple texte, genre et chaîne ne se modifient pas (la chaîne reste sélectionnable pour Ctrl+C) et
     **Enregistrer** est grisé. Seul un nouveau profil s'enregistre.
   - **Dupliquer** (sous la liste des personnages, ou clic droit sur le profil) ouvre une copie
     du profil pour votre **personnage actuel**, affiché en haut à droite (nom suivi de
@@ -100,11 +104,14 @@ menu des genres, en trois groupes :
 1. **Capturer et appliquer en jeu** : Transmogrification, Titre, Macro, Ensemble d'équipement,
    Barres d'action, Options de WoW, Raccourcis clavier, Fenêtres de discussion, Liste des addons,
    Simple Addon Manager. La chaîne est relevée en jeu ; dans la liste, l'icône devant le profil
-   l'applique (la transmogrification, elle, s'essaie dans la cabine d'essayage).
+   l'applique (la transmogrification s'essaie dans la cabine d'essayage, ou s'applique chez le
+   transmogrificateur).
 2. **Capturer, puis copier la chaîne** : Mode Édition, Talents. La chaîne est relevée en jeu, puis
    copiée (Tout sélectionner, Ctrl+C) dans la fenêtre d'import du jeu.
 3. **Coller une chaîne (import / export)** : EllesmereUI, ElvUI, Baganator, MySlots, Autre. La
-   chaîne est collée depuis le bouton **Exporter** de l'addon, puis recopiée dans son import.
+   chaîne est collée depuis le bouton **Exporter** de l'addon, puis recopiée dans son import. Le
+   nom commence par celui de l'addon (« ElvUI — … », proposé à compléter, ajouté à
+   l'enregistrement s'il manque), sauf pour « Autre ».
 
 Un genre des groupes 1 et 2 ouvre un sous-menu : ses captures (dispositions, macros,
 ensembles...), puis **Coller une chaîne** (une chaîne venue d'ailleurs, par exemple des talents
@@ -257,6 +264,7 @@ other language).*
 
 ## Version
 
+`3.1.0` : transmogrification appliquée chez le transmogrificateur (même icône, par un ensemble personnalisé, validée par « Appliquer » de Blizzard) ; nom d'un profil enregistré affiché en simple texte ; profils EllesmereUI, ElvUI, Baganator et MySlots nommés « Addon — nom ».
 `3.0.0` : menu **Nouveau** en trois groupes (capturer et appliquer, capturer puis copier, coller une chaîne), avec les captures de chaque genre et « Coller une chaîne » ; liste déroulante du genre et bouton Capturer retirés, genre affiché dans l'en-tête ; clic droit sur un personnage = même menu.
 `2.7.0` : boutons Dupliquer, Supprimer et Supprimer une saison sous la liste des personnages ; fenêtre revenue à 900 par défaut (880 au minimum).
 `2.6.0` : profil enregistré ouvert en lecture seule ; bouton **Dupliquer** (copie pour le personnage actuel, à enregistrer), aussi au clic droit ; fenêtre plus large (1100 par défaut, 1050 au minimum).
