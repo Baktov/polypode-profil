@@ -68,6 +68,8 @@ ns.KINDS = {
 	{ key = "platynator", label = "Platynator", group = "apply", family = "addon", prefix = true }, -- Interfaces.lua (capture bêta)
 	{ key = "details", label = "Details!", group = "apply", family = "addon", prefix = true }, -- Interfaces.lua
 	{ key = "tlm", label = "TalentLoadoutManager", group = "apply", family = "addon", prefix = true }, -- Interfaces.lua
+	-- game : jeu auquel le genre est réservé, affiché « [Forever] » dans l'aide.
+	{ key = "naowhforever", label = "Naowh Forever", group = "apply", family = "addon", prefix = true, game = "Forever" }, -- Interfaces.lua
 	{ key = "editmode", label = L["Mode Édition"], group = "copy", family = "essential" },
 	{ key = "talents", label = L["Talents"], group = "copy", family = "client" },
 	{ key = "myslots", label = "MySlots", group = "paste", family = "addon", prefix = true },

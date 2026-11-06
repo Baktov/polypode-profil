@@ -86,6 +86,12 @@ group by group, with the color codes, how to capture them, the list icon and wha
   - **TalentLoadoutManager** profile: a small icon **adds** the talent loadout to
     TalentLoadoutManager, **without applying it** (you then load it from TLM); Blizzard's talent
     window is not touched, so no risk of blocked actions (unlike the beta talent import).
+  - **Naowh Forever** profile (WoW Forever only, "[Forever]" in the help): a small icon **imports**
+    it as a **new** Naowh Forever **profile** (free name: your profiles are never overwritten),
+    activated for the whole account, after confirmation; then `/reload`. The string holds the
+    module settings and positions, macros, talent builds, BiS lists, saved quest rewards and the
+    appearance; not Naowh's action bar sets (its API does not share them: Profil's "Action bars"
+    kind covers them).
   - **WoW options**, **Key bindings** and **Chat windows** profiles: a small icon before their name
     **applies** them to the current character, after confirmation (they replace the current
     setup); a report is shown.
@@ -120,7 +126,7 @@ icon is greyed out (a click says so):
 
 1. **Capture and apply in game**: Transmogrification, Title, Macro, Equipment set, Action bars,
    WoW options, Key bindings, Chat windows, Addon list, Simple Addon Manager, EllesmereUI, ElvUI,
-   Baganator, Chattynator, Platynator, Details!, TalentLoadoutManager.
+   Baganator, Chattynator, Platynator, Details!, TalentLoadoutManager, Naowh Forever [Forever].
    The string is read
    in game; in the list, the icon in front of the profile applies it (transmogrification is tried
    on in the dressing room, or applied at the transmogrifier).
@@ -140,8 +146,9 @@ copying how their "Export" button works; if an addon update changes that format,
 might no longer import. **Paste a string (reliable)** stays the safe way (the addon's "Export"
 button: profile, categories or style). Either way, the list icon **imports** it.
 
-Details! (its profile export) and TalentLoadoutManager (the loadouts of the current specialization,
-Blizzard talent string) are captured through their own functions.
+Details! (its profile export), TalentLoadoutManager (the loadouts of the current specialization,
+Blizzard talent string) and Naowh Forever (its public API `NaowhForever_API`) are captured through
+their own functions.
 
 The name of an addon profile (EllesmereUI, ElvUI, Baganator, MySlots) starts with the addon's
 ("ElvUI — …", suggested to complete when pasting a string, added on saving if missing).

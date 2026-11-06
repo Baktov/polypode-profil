@@ -559,6 +559,19 @@ local CAPTURES = {
 			Run(done, false, ns.ExportEllesmereUIFull)
 		end)
 	end,
+	naowhforever = function(menu, done)
+		if not ns.HasNaowhForever() then
+			menu:CreateTitle(L["%s n'est pas chargé."]:format("Naowh Forever"))
+			return
+		end
+		local names, active = ns.GetNaowhForeverProfiles()
+		menu:CreateTitle(L["Profils"])
+		for _, name in ipairs(names) do
+			menu:CreateButton(name .. (name == active and Gray(" " .. L["(actif)"]) or ""), function()
+				Run(done, false, ns.ExportNaowhForever, name)
+			end)
+		end
+	end,
 	details = function(menu, done)
 		if not ns.HasDetails() then
 			menu:CreateTitle(L["%s n'est pas chargé."]:format("Details!"))
@@ -978,6 +991,23 @@ local ROW_ACTIONS = {
 			return ns.ImportEllesmereUI(profile.text)
 		end,
 	},
+	naowhforever = {
+		texture = "Interface\\Icons\\INV_Misc_Gear_07", -- repli : l'icône de Naowh Forever (## IconTexture)
+		iconFor = function()
+			return ns.AddonIcon("NaowhForever")
+		end,
+		title = L["Importer dans Naowh Forever"],
+		tooltip = L["Crée un nouveau profil Naowh Forever avec cette chaîne (réglages et positions des modules, "
+			.. "macros, builds, listes BiS...) et l'active pour tout le compte ; vos autres profils ne "
+			.. "changent pas. Puis /reload. Hors combat."],
+		hint = L["importer dans Naowh Forever"],
+		confirm = function(profile)
+			return ns.NaowhForeverConfirm(profile)
+		end,
+		run = function(profile)
+			return ns.ImportNaowhForever(profile)
+		end,
+	},
 	-- Mode Édition et talents (bêta) : fenêtre d'import de Blizzard pré-remplie, le joueur importe.
 	editmode = {
 		texture = "Interface\\Icons\\INV_Misc_Wrench_01",
@@ -1077,6 +1107,9 @@ local KIND_DETAILS = {
 	end,
 	ellesmereui = function(text)
 		return ns.EllesmereUIDetails(text)
+	end,
+	naowhforever = function(text)
+		return ns.NaowhForeverDetails(text)
 	end,
 	baganator = function(text)
 		return ns.PlusmouseDetails("baganator", text)
@@ -1418,6 +1451,11 @@ local function HelpCapture(kind)
 	return L["capture en jeu ou chaîne collée"]
 end
 
+-- Nom d'un genre dans l'aide, suivi du jeu auquel il est réservé (« Naowh Forever [Forever] »).
+local function HelpKindLabel(kind)
+	return kind.game and (kind.label .. " [" .. kind.game .. "]") or kind.label
+end
+
 local function HelpImport(kind)
 	local action = ROW_ACTIONS[kind.key]
 	return action and action.hint or L["copie manuelle (Tout sélectionner, Ctrl+C)"]
@@ -1498,7 +1536,7 @@ local function BuildHelp()
 			return data.text
 		end
 		local kind = data.kind
-		local text = ns.ColorByKind(kind.key, kind.label) .. Gray("  ·  " .. HelpCapture(kind) .. "  ·  " .. HelpImport(kind))
+		local text = ns.ColorByKind(kind.key, HelpKindLabel(kind)) .. Gray("  ·  " .. HelpCapture(kind) .. "  ·  " .. HelpImport(kind))
 		if not data.available then
 			text = text .. "  |cffff5555" .. L["non chargé sur ce personnage"] .. "|r"
 		end
@@ -1510,7 +1548,7 @@ local function BuildHelp()
 			end
 			local kind = data.kind
 			local lines = {
-				ns.ColorByKind(kind.key, kind.label),
+				ns.ColorByKind(kind.key, HelpKindLabel(kind)),
 				L["Capture : %s"]:format(HelpCapture(kind)),
 				L["Icône de la liste : %s"]:format(HelpImport(kind)),
 			}

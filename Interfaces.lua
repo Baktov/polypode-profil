@@ -1,4 +1,4 @@
--- Polypode Profil: Interfaces — profils d'addons (ElvUI, EllesmereUI, Baganator, Chattynator, Platynator, Details!, TalentLoadoutManager)
+-- Polypode Profil: Interfaces — profils d'addons (ElvUI, EllesmereUI, Baganator, Chattynator, Platynator, Details!, TalentLoadoutManager, Naowh Forever)
 
 local P = Polypode
 local _, ns = ...
@@ -37,6 +37,9 @@ local KIND_AVAILABLE = {
 	end,
 	ellesmereui = function()
 		return ns.HasEllesmereUI()
+	end,
+	naowhforever = function()
+		return ns.HasNaowhForever()
 	end,
 	elvui = function()
 		return ns.HasElvUI()
@@ -608,4 +611,137 @@ function ns.ImportEllesmereUI(text)
 		return nil, L["EllesmereUI a refusé l'import : %s"]:format(tostring(reason or "?"))
 	end
 	return true, L["Import ouvert dans EllesmereUI : validez dans sa fenêtre."]
+end
+
+-- NAOWH FOREVER (WoW Forever) ------------------------------------------------------------------
+-- Son API publique NaowhForever_API (Core/Profiles/ProfileShare.lua) : GetProfileKeys,
+-- GetCurrentProfileKey, ExportProfile(clé) (chaîne « NFPROFILE1: » : réglages et positions des
+-- modules, macros, builds de talents, listes BiS, récompenses de quête, apparence ; pas les jeux
+-- de barres d'action), DecodeProfileString (parties), ImportProfile(chaîne, nom) (crée ou remplace
+-- ce profil et l'active pour le compte). Import toujours sous un nom libre : rien n'est écrasé.
+
+local NAOWH_PREFIX = "Naowh Forever — "
+local NAOWH_PARTS = {
+	{ key = "settings", label = L["réglages des modules"] },
+	{ key = "macros", label = L["macros de classe"] },
+	{ key = "library", label = L["bibliothèque de macros"] },
+	{ key = "builds", label = L["builds de talents"] },
+	{ key = "bisLists", label = L["listes BiS"] },
+	{ key = "questRewards", label = L["récompenses de quête"] },
+	{ key = "look", label = L["apparence"] },
+}
+
+local function NaowhAPI()
+	local api = NaowhForever_API
+	if type(api) == "table" and type(api.ExportProfile) == "function"
+		and type(api.ImportProfile) == "function" and type(api.GetProfileKeys) == "function" then
+		return api
+	end
+end
+
+function ns.HasNaowhForever()
+	return NaowhAPI() ~= nil
+end
+
+local function NaowhProfileKeys(api)
+	local ok, keys = pcall(api.GetProfileKeys, api)
+	return ok and type(keys) == "table" and keys or {}
+end
+
+-- Profils Naowh Forever (ordre alphabétique) et profil actif.
+function ns.GetNaowhForeverProfiles()
+	local api = NaowhAPI()
+	local names = {}
+	if not api then
+		return names
+	end
+	for name in pairs(NaowhProfileKeys(api)) do
+		names[#names + 1] = name
+	end
+	table.sort(names)
+	local active
+	if type(api.GetCurrentProfileKey) == "function" then
+		local ok, key = pcall(api.GetCurrentProfileKey, api)
+		active = ok and key or nil
+	end
+	return names, active
+end
+
+-- Chaîne d'un profil Naowh Forever : texte, nom proposé, ou nil, raison.
+function ns.ExportNaowhForever(name)
+	local api = NaowhAPI()
+	if not api then
+		return nil, L["%s n'est pas chargé."]:format("Naowh Forever")
+	end
+	local ok, text = pcall(api.ExportProfile, api, name)
+	if not (ok and type(text) == "string" and text ~= "") then
+		return nil, L["Naowh Forever n'a pas pu exporter ce profil."]
+	end
+	return text, NAOWH_PREFIX .. name
+end
+
+local function DecodeNaowh(text)
+	local api = NaowhAPI()
+	if not (api and type(api.DecodeProfileString) == "function") then
+		return
+	end
+	local ok, parts = pcall(api.DecodeProfileString, api, text)
+	if ok and type(parts) == "table" then
+		return parts
+	end
+end
+
+function ns.NaowhForeverDetails(text)
+	if not ns.HasNaowhForever() then
+		return { L["%s n'est pas chargé."]:format("Naowh Forever") }
+	end
+	local parts = DecodeNaowh(text)
+	if not parts then
+		return { L["Chaîne Naowh Forever illisible."] }
+	end
+	local found = {}
+	for _, part in ipairs(NAOWH_PARTS) do
+		if parts[part.key] ~= nil then
+			found[#found + 1] = part.label
+		end
+	end
+	return { L["Contenu : %s"]:format(#found > 0 and table.concat(found, ", ") or "?") }
+end
+
+-- Nom du profil créé à l'import : celui de la sauvegarde sans le préfixe, rendu libre.
+local function NaowhImportName(profile, api)
+	local name = profile.name or ""
+	if name:sub(1, #NAOWH_PREFIX) == NAOWH_PREFIX then
+		name = name:sub(#NAOWH_PREFIX + 1)
+	end
+	if name == "" or name == "Naowh Forever" then
+		name = "Polypode"
+	end
+	return UniqueName(name, NaowhProfileKeys(api))
+end
+
+function ns.NaowhForeverConfirm(profile)
+	local api = NaowhAPI()
+	if not api then
+		return nil
+	end
+	return L["Nouveau profil Naowh Forever « %s », activé pour tout le compte (vos autres profils ne changent pas). Puis /reload."]
+		:format(NaowhImportName(profile, api))
+end
+
+function ns.ImportNaowhForever(profile)
+	local api = NaowhAPI()
+	if not api then
+		return nil, L["%s n'est pas chargé."]:format("Naowh Forever")
+	elseif InCombatLockdown() then
+		return nil, L["Impossible en combat."]
+	elseif not DecodeNaowh(profile.text) then
+		return nil, L["Chaîne Naowh Forever illisible."]
+	end
+	local name = NaowhImportName(profile, api)
+	local ok, success, landed = pcall(api.ImportProfile, api, profile.text, name)
+	if not (ok and success) then
+		return nil, L["Naowh Forever a refusé l'import : %s"]:format(tostring(ok and landed or success or "?"))
+	end
+	return true, L["Profil Naowh Forever « %s » importé et activé : tapez /reload."]:format(tostring(landed or name))
 end

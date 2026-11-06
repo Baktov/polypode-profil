@@ -92,6 +92,12 @@ de la liste et son action.
     TalentLoadoutManager, **sans l'appliquer** (on la charge ensuite depuis TLM) ; la fenêtre des
     talents de Blizzard n'est pas touchée, donc pas de risque de blocage (contrairement à l'import
     bêta des talents).
+  - Profil **Naowh Forever** (WoW Forever seulement, « [Forever] » dans l'aide) : une petite icône
+    l'**importe** comme **nouveau profil** Naowh Forever (nom libre : vos profils ne sont jamais
+    écrasés), activé pour tout le compte, après confirmation ; puis `/reload`. La chaîne contient
+    les réglages et positions des modules, les macros, les builds de talents, les listes BiS, les
+    récompenses de quête retenues et l'apparence ; pas les jeux de barres d'action de Naowh (son
+    API ne les partage pas : le genre « Barres d'action » de Profil les couvre).
   - Profils d'**options de WoW**, de **raccourcis clavier** et de **fenêtres de discussion** :
     une petite icône devant leur nom les **applique** au personnage joué, après confirmation
     (ils remplacent la configuration actuelle) ; un compte rendu s'affiche.
@@ -130,7 +136,7 @@ l'icône de ses profils est grisée (un clic le signale) :
 1. **Capturer et appliquer en jeu** : Transmogrification, Titre, Macro, Ensemble d'équipement,
    Barres d'action, Options de WoW, Raccourcis clavier, Fenêtres de discussion, Liste des addons,
    Simple Addon Manager, EllesmereUI, ElvUI, Baganator, Chattynator, Platynator, Details!,
-   TalentLoadoutManager. La chaîne est relevée en jeu ; dans la liste, l'icône devant le profil
+   TalentLoadoutManager, Naowh Forever [Forever]. La chaîne est relevée en jeu ; dans la liste, l'icône devant le profil
    l'applique (la transmogrification s'essaie dans la cabine d'essayage, ou s'applique chez le
    transmogrificateur).
 2. **Capturer, puis copier la chaîne** : Mode Édition, Talents. La chaîne est relevée en jeu, puis
@@ -150,8 +156,9 @@ change ce format, la chaîne capturée pourrait ne plus s'importer. **Coller une
 reste le moyen sûr (bouton « Exporter » de l'addon : profil, catégories ou style). Dans les deux
 cas, l'icône de la liste l'**importe**.
 
-Details! (son export de profil) et TalentLoadoutManager (les configurations de la spécialisation en
-cours, chaîne de talents de Blizzard) se capturent par leurs propres fonctions.
+Details! (son export de profil), TalentLoadoutManager (les configurations de la spécialisation en
+cours, chaîne de talents de Blizzard) et Naowh Forever (son API publique `NaowhForever_API`) se
+capturent par leurs propres fonctions.
 
 Le nom d'un profil d'addon (EllesmereUI, ElvUI, Baganator, MySlots) commence par celui de l'addon
 (« ElvUI — … », proposé à compléter quand on colle une chaîne, ajouté à l'enregistrement s'il
@@ -314,6 +321,8 @@ other language).*
 ---
 
 ## Version
+
+`3.10.0` : Naowh Forever (WoW Forever) : capture des profils et import comme nouveau profil, activé pour le compte ; « [Forever] » à droite de son nom dans l'aide.
 
 `3.9.0` : bouton « ? » dans la barre de titre : aide listant tous les genres (codes couleur, capture, icône et action), même ceux dont l'addon n'est pas chargé.
 `3.8.0` : menu Nouveau sans les addons non chargés sur le personnage joué ; icône d'import grisée pour leurs profils.
