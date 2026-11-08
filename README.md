@@ -307,6 +307,12 @@ Cet addon n'a pas d'options.
 
 ---
 
+## Licence
+
+Polypode Profil est un logiciel libre, sous licence **GNU GPL version 3** (fichier
+[`LICENSE`](LICENSE)) : vous pouvez le reprendre, le modifier et le redistribuer, à condition de
+garder cette licence et de citer l'auteur. Copyright (C) 2026 Baktov.
+
 ## Langues (Languages)
 
 Polypode Profil s'affiche dans la langue choisie dans Polypode (option « Langue / Language », `/poly langue`),
@@ -321,6 +327,8 @@ other language).*
 ---
 
 ## Version
+
+`3.10.1` : licence libre **GNU GPL version 3** (fichier `LICENSE`).
 
 `3.10.0` : Naowh Forever (WoW Forever) : capture des profils et import comme nouveau profil, activé pour le compte ; « [Forever] » à droite de son nom dans l'aide.
 
