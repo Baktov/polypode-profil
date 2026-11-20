@@ -257,6 +257,8 @@ the others**. Macros are found by their name, otherwise created from the profile
 left). An unlearned spell, a missing item or a mount not owned leaves the slot empty; the report
 counts them and names a few. Not taken back: pet bar, click casting, cooldown manager.
 
+With Polypode 2.29 and later, the window follows Polypode's **Window placement** option: as a **drawer** (default), it opens against the Polypode window and follows it; with the **magnet**, it sticks to it when dragged against an edge; as a **single window**, it opens in place of the module shown, with the column of modules on the side.
+
 ## Sharing between characters and clients
 
 Profiles are kept in the **account** file (`PolypodeProfilDB`): shared by all characters. They are

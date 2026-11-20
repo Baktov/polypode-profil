@@ -43,7 +43,7 @@ Langues (si présentes) : `P.NewLocale`, `P.AddTranslations` (Polypode 2.8), `P.
 `P.WhisperOnline`, `P.MAX_MESSAGE_LENGTH`, `P.GetTeamToken`, `P.GetCharKey`, `P.GetDisplayName`,
 `P.GetRoster`, `P.GetCharacter`, `P.db.roster`, `P.SortedKeyItems`, `P.FormatCharacter`, `P.CharacterTooltip`,
 `P.IsCharacterConnected`, `P.IsCharacterOnline`,
-`P.CreatePanel`, `P.CreateScrollList`, `P.SetListData`, `P.SkinFrame`, `P.SkinPanel`, `P.ShowTooltip` / `P.ColorClicks` (si présentes, Polypode 0.60.0 : clics en bleu dans les infobulles) (toute infobulle par la locale `ShowTooltip`),
+`P.CreatePanel`, `P.CreateScrollList`, `P.SetListData`, `P.SkinFrame`, `P.RegisterModuleWindow` (si présente, Polypode 2.28 / 2.29 : tiroir, aimant ou fenêtre unique, clé `Polypode_Profil`), `P.SkinPanel`, `P.ShowTooltip` / `P.ColorClicks` (si présentes, Polypode 0.60.0 : clics en bleu dans les infobulles) (toute infobulle par la locale `ShowTooltip`),
 `P.SkinButton`, `P.SkinEditBox`, `P.SkinScrollBar`. Toute évolution de ces fonctions dans
 Polypode doit rester compatible, ou ce fichier doit suivre.
 

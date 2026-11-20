@@ -1765,6 +1765,10 @@ local function Build()
 	P.ui.profilEditor = editor
 
 	P.SkinFrame(frame)
+	-- Tiroir, aimant ou fenêtre unique autour de la fenêtre Polypode (Polypode 2.28 / 2.29).
+	if P.RegisterModuleWindow then
+		P.RegisterModuleWindow(frame, "Polypode_Profil")
+	end
 	P.SkinPanel(listPanel)
 
 	Load(nil)

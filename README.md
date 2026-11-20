@@ -282,6 +282,8 @@ non possédée laisse l'emplacement vide ; le compte rendu les compte et en cite
 Ne sont pas repris : barre du familier, lancement de sorts au clic, gestionnaire de temps de
 recharge.
 
+Avec Polypode 2.29 et suivants, la fenêtre suit l'option **Placement des fenêtres** de Polypode : en **tiroir** (défaut), elle s'ouvre accolée à la fenêtre Polypode et la suit ; **aimantée**, elle s'y accroche quand on la glisse contre un bord ; en **fenêtre unique**, elle s'ouvre à la place du module affiché, avec la colonne des modules sur le côté.
+
 ## Partage entre personnages et clients
 
 Les profils sont gardés dans le fichier de **compte** (`PolypodeProfilDB`) : communs à tous les
@@ -328,6 +330,7 @@ other language).*
 
 ## Version
 
+`3.11.0` : avec Polypode 2.29, la fenêtre s'ouvre en **tiroir** contre la fenêtre Polypode, s'y aimante ou prend la place de la **fenêtre unique**, selon l'option « Placement des fenêtres » de Polypode.
 `3.10.1` : licence libre **GNU GPL version 3** (fichier `LICENSE`).
 
 `3.10.0` : Naowh Forever (WoW Forever) : capture des profils et import comme nouveau profil, activé pour le compte ; « [Forever] » à droite de son nom dans l'aide.
