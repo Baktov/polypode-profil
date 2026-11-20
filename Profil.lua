@@ -249,6 +249,18 @@ function ns.Delete(id)
 	Changed()
 end
 
+-- Range un profil sous un autre personnage (fusion de fiches : nouvelle version, propagée).
+function ns.SetProfileChar(id, char)
+	local profile = store and store[id]
+	if not profile or profile.removed or profile.char == char then
+		return
+	end
+	profile.char = char
+	profile.updated = NextVersion(profile.updated)
+	SendProfile(id)
+	Changed()
+end
+
 -- CAPTURE EN JEU -----------------------------------------------------------------------------
 
 -- Dispositions du mode Édition (préréglages de Blizzard compris), telles que les montre la
@@ -806,6 +818,16 @@ if P.RegisterCharacterData then
 			end
 			for _, id in ipairs(ProfilesOf(key)) do
 				ns.Delete(id)
+			end
+		end,
+		-- Fusion de deux fiches d'un même personnage (Polypode 2.32) : ses profils passent sous
+		-- la fiche gardée.
+		merge = function(from, to)
+			if from == to then
+				return
+			end
+			for _, id in ipairs(ProfilesOf(from)) do
+				ns.SetProfileChar(id, to)
 			end
 		end,
 	})

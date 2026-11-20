@@ -330,6 +330,7 @@ other language).*
 
 ## Version
 
+`3.12.0` : avec Polypode 2.32, la **fusion de deux fiches** d'un même personnage range ses profils sous la fiche gardée (changement propagé aux autres clients).
 `3.11.0` : avec Polypode 2.29, la fenêtre s'ouvre en **tiroir** contre la fenêtre Polypode, s'y aimante ou prend la place de la **fenêtre unique**, selon l'option « Placement des fenêtres » de Polypode.
 `3.10.1` : licence libre **GNU GPL version 3** (fichier `LICENSE`).
 
